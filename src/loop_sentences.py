@@ -13,7 +13,9 @@ class SentenceExtractor(handler.ContentHandler):
         self.sentences = []
         self.sentence_id = None
         self.cur_sentence = ""
+        self.lexelt = None
         self.in_context = False
+        self.head_count = 0
 
     def characters(self, content):
         # print("characters", content)
@@ -22,23 +24,27 @@ class SentenceExtractor(handler.ContentHandler):
 
     def startElement(self, name, attrs):
         if name == "lexelt":
-            lexelt = attrs.get("item")
-            print("LEXELT", lexelt)
+            self.lexelt = attrs.get("item")
 
         if name == "instance":
             self.sentence_id = attrs.get("id")
             self.cur_sentence = ""
+            self.head_count = 0
 
         if name == "context":
             self.in_context = True
 
         if name == "head":
             self.cur_sentence += "<head>"
+            self.head_count += 1
+
 
     def endElement(self, name):
         if name == "context":
             self.in_context = False
-            self.sentences.append(self.cur_sentence)
+            self.sentences.append((self.lexelt,
+                                   self.head_count,
+                                   self.cur_sentence))
 
         if name == "head":
             self.cur_sentence += "</head>"
