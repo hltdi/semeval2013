@@ -55,14 +55,16 @@ def extract(fn):
     parser.setContentHandler(handler)
     parser.parse(fn)
 
-    for sentence in handler.sentences:
-        print("***")
-        print(sentence)
+    return list(handler.sentences)
+
 
 def main():
     fns = sys.argv[1:]
     print("input files:", fns)
     for fn in fns:
-        extract(fn)
+        sentences = extract(fn)
+        for sentence in sentences:
+            print("***")
+            print(sentence)
 
 if __name__ == "__main__": main()
