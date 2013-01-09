@@ -26,12 +26,15 @@ def output_one_best(problem, target, solution):
 
 def main():
     fns = sys.argv[1:]
-    print("input files:", fns)
-    target = "es"
-    for fn in fns:
-        problems = extract_wsd_problems(fn)
-        for problem in problems:
-            answer = solve_one_best(problem, target)
-            print(output_one_best(problem, target, answer))
+    targets = "de es fr it nl".split()
+
+    with open("../eval/output", "w") as outfile:
+        for fn in fns:
+            problems = extract_wsd_problems(fn)
+            for problem in problems:
+                for target in targets:
+                    answer = solve_one_best(problem, target)
+                    print(output_one_best(problem, target, answer),
+                          file=outfile)
 
 if __name__ == "__main__": main()
