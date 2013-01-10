@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import argparse
 
 from parse_corpus import extract_wsd_problems
 
@@ -8,7 +9,7 @@ def solve_one_best(problem, target, solver=None):
     """Return the one best translation in the specified target language.
     Default to using a maxent classifier."""
 
-    return "orilla"
+    return "banco"
 
 def solve_oof(problem, target, solver=None):
     """Return a list of the best translations in the specified target
@@ -25,14 +26,27 @@ def output_one_best(problem, target, solution):
 
 
 def main():
-    fns = sys.argv[1:]
-    targets = "de es fr it nl".split()
+    parser = argparse.ArgumentParser(description='clwsd')
+    parser.add_argument('--sourceword', type=str, nargs=1, required=True)
+    parser.add_argument('--targetlang', type=str, nargs=1, required=False)
+    parser.add_argument('--classifier', type=str, nargs=1, required=False)
+    args = parser.parse_args()
 
-    with open("../eval/output", "w") as outfile:
+    all_target_languages = "de es fr it nl".split()
+    if args.targetlang:
+        assert args.targetlang in all_target_languages
+        targets = args.targetlang
+    else:
+        targets = all_target_languages
+    sourceword = args.sourceword[0]
+
+    fns = ["../trialdata/alltrials/{0}.data".format(sourceword)]
+
+    with open("../eval/{0}.output".format(sourceword), "w") as outfile:
         for fn in fns:
-            problems = extract_wsd_problems(fn)
-            for problem in problems:
-                for target in targets:
+            for target in targets:
+                problems = extract_wsd_problems(fn)
+                for problem in problems:
                     answer = solve_one_best(problem, target)
                     print(output_one_best(problem, target, answer),
                           file=outfile)
