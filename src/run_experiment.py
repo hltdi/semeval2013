@@ -28,16 +28,14 @@ def output_one_best(problem, target, solution):
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)
-    parser.add_argument('--targetlang', type=str, nargs=1, required=False)
+    parser.add_argument('--targetlang', type=str, nargs=1, required=True)
     parser.add_argument('--classifier', type=str, nargs=1, required=False)
     args = parser.parse_args()
 
     all_target_languages = "de es fr it nl".split()
     if args.targetlang:
-        assert args.targetlang in all_target_languages
+        assert args.targetlang[0] in all_target_languages
         targets = args.targetlang
-    else:
-        targets = all_target_languages
     sourceword = args.sourceword[0]
 
     fns = ["../trialdata/alltrials/{0}.data".format(sourceword)]
