@@ -23,7 +23,17 @@ for (text, label) in documents:
     feats = document_features(text.split())
     instances.append( (feats, label) )
 
+print("trying naive bayes...")
 classifier = nltk.classify.naivebayes.NaiveBayesClassifier.train(instances)
+print(classifier.labels())
+feats = document_features("ham butter beef".split())
+dist = classifier.prob_classify(feats)
+for key in dist.samples():
+    print(" ", key, dist.prob(key))
+print(classifier.classify(feats))
+
+print("trying maxent...")
+classifier = nltk.classify.maxent.MaxentClassifier.train(instances, trace=0)
 print(classifier.labels())
 feats = document_features("ham butter beef".split())
 dist = classifier.prob_classify(feats)
