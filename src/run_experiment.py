@@ -24,7 +24,6 @@ def output_one_best(problem, target, solution):
                                         problem.instance_id,
                                         solution)
 
-
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import nltk
+
 class WSDProblem:
     """Class where we'll stash all the information about a given WSD problem."""
 
@@ -10,11 +12,10 @@ class WSDProblem:
         self.context = context
         self.head_count = count
         self.instance_id = instance_id
-        self.features = None
 
-    def extract_features(self):
-        """Extract features from the context."""
-        self.features = set()
+        sentences = nltk.sent_tokenize(context)
+        tokenized = [nltk.word_tokenize(sent) for sent in sentences]
+        self.tokenized = tokenized
 
     def __str__(self):
         return "<<{0}: {1}>>".format(self.source_lex, self.context)
