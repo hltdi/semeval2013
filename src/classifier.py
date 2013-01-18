@@ -2,7 +2,13 @@
 
 """Just making sure we know how to do classifiers in NLTK..."""
 
+from __future__ import print_function
+
 import nltk
+
+from nltk.classify.decisiontree import DecisionTreeClassifier
+from nltk.classify.naivebayes import NaiveBayesClassifier
+from nltk.classify.maxent import MaxentClassifier
 
 # Define a feature detector function.
 def document_features(document):
@@ -17,26 +23,26 @@ documents = [
     ("play sports espn", "sports")
 ]
 
-instances = []
+def main():
+    instances = []
+    for (text, label) in documents:
+        feats = document_features(text.split())
+        instances.append( (feats, label) )
 
-for (text, label) in documents:
-    feats = document_features(text.split())
-    instances.append( (feats, label) )
+    feats = document_features("ham butter beef".split())
+    for klass in [NaiveBayesClassifier,
+                  MaxentClassifier,
+                  DecisionTreeClassifier]:
+        print("trying", klass)
 
-print("trying naive bayes...")
-classifier = nltk.classify.naivebayes.NaiveBayesClassifier.train(instances)
-print(classifier.labels())
-feats = document_features("ham butter beef".split())
-dist = classifier.prob_classify(feats)
-for key in dist.samples():
-    print(" ", key, dist.prob(key))
-print(classifier.classify(feats))
+        classifier = klass.train(instances)
+        print(classifier.labels())
+        try:
+            dist = classifier.prob_classify(feats)
+            for key in dist.samples():
+                print(" ", key, dist.prob(key))
+        except:
+            print("no prob_classify, that's fine.")
+        print(classifier.classify(feats))
 
-print("trying maxent...")
-classifier = nltk.classify.maxent.MaxentClassifier.train(instances, trace=0)
-print(classifier.labels())
-feats = document_features("ham butter beef".split())
-dist = classifier.prob_classify(feats)
-for key in dist.samples():
-    print(" ", key, dist.prob(key))
-print(classifier.classify(feats))
+if __name__ == "__main__": main()
