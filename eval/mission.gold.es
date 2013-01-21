@@ -1,3 +1,4 @@
+mission.n.es 1 :: misión 3;delegación 2;representación 1;embajada 1;
 mission.n.es 2 :: misión 3;acción 2;tarea 1;
 mission.n.es 3 :: misión 3;visita 2;viaje 2;
 mission.n.es 4 :: misión 3;representación 2;delegación 2;

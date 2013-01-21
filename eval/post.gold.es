@@ -1,3 +1,4 @@
+post.n.es 1 :: correo 3;servicio postal 2;buzón 1;correspondencia 1;oficina 1;postal 1;
 post.n.es 2 :: poste 3;señal 3;
 post.n.es 3 :: puesto 3;cargo 3;posición 2;trabajo 1;
 post.n.es 4 :: puesto 3;posición 2;cargo 1;plaza 1;nombramiento 1;sillón 1;

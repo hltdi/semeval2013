@@ -1,3 +1,4 @@
+match.n.es 1 :: correspondencia 3;adecuación 1;igual 1;altura 1;
 match.n.es 2 :: partido 3;juego 2;competición 1;encuentro 1;
 match.n.es 3 :: partido 3;juego 2;encuentro 2;certamen 1;
 match.n.es 4 :: correspondencia 3;reconciliable 2;adecuación 1;igual 1;altura 1;

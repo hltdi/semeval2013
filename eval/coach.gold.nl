@@ -1,3 +1,4 @@
+coach.n.nl 1 :: bus 3;autobus 3;toerbus 1;busvervoer 1;
 coach.n.nl 2 :: bus 3;autobus 3;toerbus 1;touringcar 1;
 coach.n.nl 3 :: trainer 3;coach 3;speler-trainer 1;
 coach.n.nl 4 :: koets 3;

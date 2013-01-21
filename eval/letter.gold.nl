@@ -1,3 +1,4 @@
+letter.n.nl 1 :: brief 3;correspondentie 1;bericht 1;schriftelijk 1;tekst 1;briefvorm 1;schrijven 1;
 letter.n.nl 2 :: strikt 3;letterlijk 3;letter 3;
 letter.n.nl 3 :: brief 3;bericht 1;schriftelijk 1;tekst 1;schrijven 1;verklaring 1;
 letter.n.nl 4 :: letteren 3;schrijver 3;letter 0;

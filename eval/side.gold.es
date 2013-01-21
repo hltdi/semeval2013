@@ -1,3 +1,4 @@
+side.n.es 1 :: parte 2;bilateral 1;interlocutor 1;conjuntamente 1;partido 1;bando 1;grupo 1;lado 1;
 side.n.es 2 :: lado 3;pared 1;lateral 1;
 side.n.es 3 :: ribera 2;lado 2;orilla 2;extremo 1;
 side.n.es 4 :: lado 3;ribera 2;zona 1;parte 1;flanco 1;orilla 1;

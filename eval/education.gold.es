@@ -1,3 +1,4 @@
+education.n.es 1 :: educación 3;información 2;educativo 2;informar 1;
 education.n.es 2 :: educación 3;formación 2;conocimiento 1;escolaridad 1;cultura 1;estudiado 1;
 education.n.es 3 :: formación 3;educación 3;enseñanza 2;aprendizaje 1;
 education.n.es 4 :: formación 3;educación 3;estudio 1;carrera 1;cultura 1;

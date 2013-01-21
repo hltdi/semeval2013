@@ -1,3 +1,4 @@
+coach.n.es 1 :: autocar 3;autobús 3;
 coach.n.es 2 :: autocar 3;autobús 3;diligencia 1;
 coach.n.es 3 :: entrenador 3;
 coach.n.es 4 :: diligencia 3;

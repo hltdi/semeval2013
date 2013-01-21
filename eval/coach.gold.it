@@ -1,3 +1,4 @@
+coach.n.it 1 :: autobus 3;pullman 2;coriera 2;pulmino 1;
 coach.n.it 2 :: autobus 3;pullman 2;corriera 2;autocarro 1;pulmino 1;
 coach.n.it 3 :: allenatore 3;
 coach.n.it 4 :: diligenza 3;vagone 2;vettore 1;

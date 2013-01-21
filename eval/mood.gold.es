@@ -1,3 +1,4 @@
+mood.n.es 1 :: humor 3;estado de ánimo 3;talante 1;sentimiento 1;actitud 1;
 mood.n.es 2 :: voluntad 2;deseo 2;animado 1;humor 1;talante 1;disposición 1;
 mood.n.es 3 :: mente 1;talante 1;mentalidad 1;disposición 1;clima 1;tendencia 1;ambiente 1;sentimiento 1;ánimo 1;
 mood.n.es 4 :: humor 2;estado de ánimo 2;talante 1;disposición 1;voluntad 1;deseo 1;

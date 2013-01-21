@@ -1,3 +1,4 @@
+strain.n.es 1 :: cepa 3;variedad 3;modalidad 1;variante 1;
 strain.n.es 2 :: tensión 3;
 strain.n.es 3 :: cepa 3;variante 2;modalidad 1;variedad 1;
 strain.n.es 4 :: tensión 3;presión 3;agotamiento 2;carga 1;

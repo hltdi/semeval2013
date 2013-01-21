@@ -1,3 +1,4 @@
+post.n.nl 1 :: post 3;postdienst 2;postvak 1;briefverkeer 1;brief 0;
 post.n.nl 2 :: plaatsnaambord 3;bord 1;
 post.n.nl 3 :: aanstelling 2;functie 2;rang 1;benoeming 1;baan 1;positie 1;betrekking 1;
 post.n.nl 4 :: aanstelling 3;functie 2;benoeming 2;positie 1;betrekking 1;

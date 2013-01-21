@@ -1,3 +1,4 @@
+strain.n.nl 1 :: variant 3;stam 2;virusstam 1;soort 1;virus 1;type 1;
 strain.n.nl 2 :: strain 3;RSI 3;
 strain.n.nl 3 :: keten 2;variant 2;stam 2;soort 1;element 1;type 1;
 strain.n.nl 4 :: belasting 3;druk 3;beproeving 1;last 1;spanning 1;

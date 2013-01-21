@@ -1,3 +1,4 @@
+scene.n.es 1 :: lugar 2;lugar de los hechos 2;terreno 1;escena 1;escenario 1;
 scene.n.es 2 :: lugar 3;terreno 2;in situ 2;escenario 1;lugar del desastre 1;
 scene.n.es 3 :: espectáculo 3;escena 3;escándalo 2;imagen 1;
 scene.n.es 4 :: escena 3;episodio 1;situación 1;

@@ -1,3 +1,4 @@
+rest.n.nl 1 :: geruststellen 3;geruststelling 3;gerust 3;
 rest.n.nl 2 :: rest 3;overig 1;resterend 1;
 rest.n.nl 3 :: rest 3;overig 2;ander 1;anderen 1;
 rest.n.nl 4 :: rustdag 3;rust 3;rusten 1;rusttijd 1;

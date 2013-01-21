@@ -1,3 +1,4 @@
+paper.n.nl 1 :: papieren 3;papier 3;
 paper.n.nl 2 :: krant 3;blad 3;dagblad 1;weekblad 1;
 paper.n.nl 3 :: papierindustrie 3;papierfabrikant 2;papier 2;papierproductie 2;
 paper.n.nl 4 :: stembrief 3;stembiljet 3;stembriefje 2;stemlijst 1;brief 0;lijst 0;biljet 0;briefje 0;

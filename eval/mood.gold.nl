@@ -1,3 +1,4 @@
+mood.n.nl 1 :: toon 3;stemming 3;gemoedstoestand 2;sfeer 1;
 mood.n.nl 2 :: bui 2;stemming 2;zin 2;gehumeurd 1;graag 1;bereid 1;
 mood.n.nl 3 :: stemming 2;opinie 2;klimaat 1;geest van de mensen 1;strekking 1;sfeer 1;gevoelens 1;geest 0;
 mood.n.nl 4 :: stemming 2;zin 2;gehumeurd 1;gestemd 1;bui 1;graag 1;bereid 1;

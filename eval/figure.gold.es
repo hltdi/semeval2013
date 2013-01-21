@@ -1,3 +1,4 @@
+figure.n.es 1 :: figura 3;persona 1;personalidad 1;
 figure.n.es 2 :: figura 3;cifra 1;número 1;
 figure.n.es 3 :: estatua 3;figura 2;pieza 2;
 figure.n.es 4 :: cifra 3;monto 1;tasa 1;número 1;

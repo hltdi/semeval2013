@@ -1,3 +1,4 @@
+range.n.es 1 :: categoría 3;alcance 1;margen 1;rango 1;orden 1;
 range.n.es 2 :: diversidad 1;extensión 1;número 1;cantidad 1;vario 1;conjunto 1;rango 1;variedad 1;abanico 1;
 range.n.es 3 :: campera 2;granja 2;corral 2;cadena 1;cordillera 1;
 range.n.es 4 :: clase 2;grupo 2;categoría 1;tramo 1;rango 1;límite 1;

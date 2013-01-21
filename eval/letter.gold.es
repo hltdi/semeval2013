@@ -1,3 +1,4 @@
+letter.n.es 1 :: carta 3;correo 2;correspondencia 1;comunicado 1;escrito 1;acta 1;
 letter.n.es 2 :: literalmente 2;rigurosamente 2;estricto 1;totalidad 1;fielmente 1;escrupulosamente 1;coma 1;
 letter.n.es 3 :: correo 2;nota 2;carta 2;escrito 1;acta 1;mensaje 1;
 letter.n.es 4 :: literato 3;letras 2;letra 0;
