@@ -1,3 +1,4 @@
+pot.n.es 1 :: olla 3;cazuela 2;caldero 2;tarro 1;
 pot.n.es 2 :: olla 3;caldero 3;cazuela 2;
 pot.n.es 3 :: orinal 3;bote 1;tarro 1;
 pot.n.es 4 :: maría 3;

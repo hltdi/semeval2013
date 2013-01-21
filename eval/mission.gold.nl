@@ -1,3 +1,4 @@
+mission.n.nl 1 :: delegatieleider 2;delegatiehoofd 2;missie 1;ambassadeur 1;zending 1;missiehoofd 1;delegatie 1;
 mission.n.nl 2 :: missie 3;operatie 3;interventie 2;strijd 1;
 mission.n.nl 3 :: missie 3;zending 1;taak 1;bezoek 1;dienstreis 1;opdracht 1;reis 0;
 mission.n.nl 4 :: VN-missie 2;missie 1;vertegenwoordiging 1;VN-delegatie 1;team 1;onderzoeksdelegatie 1;onderzoekscommissie 1;delegatie 1;commissie 0;

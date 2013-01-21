@@ -1,3 +1,4 @@
+execution.n.es 1 :: ejecución 3;ajusticiamiento 1;fusilamiento 1;matar 1;ejecutar 1;
 execution.n.es 2 :: ejecución 3;pena de muerte 2;condena a muerte 2;
 execution.n.es 3 :: ejecución 3;ajusticiamiento 1;fusilamiento 1;matar 1;ejecutar 1;
 execution.n.es 4 :: ejecución 3;ajusticiamiento 1;fusilamiento 1;matar 1;ejecutar 1;

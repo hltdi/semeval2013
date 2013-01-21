@@ -1,3 +1,4 @@
+ring.n.nl 1 :: cirkel 2;kring 1;kringetje 1;ruimte 1;
 ring.n.nl 2 :: ring 3;ringweg 3;cirkel 2;
 ring.n.nl 3 :: ondertoon 3;toon 1;spreken 1;
 ring.n.nl 4 :: ring 3;beschermingsring 2;kring 1;cirkel 1;afbakening 1;

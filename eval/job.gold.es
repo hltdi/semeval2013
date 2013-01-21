@@ -1,3 +1,4 @@
+job.n.es 1 :: empleo 3;trabajo 3;puesto de trabajo 2;laboral 1;
 job.n.es 2 :: cargo 2;tarea 2;función 1;actividad 1;ocuparse 1;trabajo 1;cometido 1;
 job.n.es 3 :: empleo 3;trabajo 3;puesto 1;cargo 1;job 1;
 job.n.es 4 :: empleo 3;laboral 3;puesto de trabajo 2;trabajo 1;

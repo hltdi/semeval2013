@@ -1,3 +1,4 @@
+job.n.nl 1 :: werkgelegenheidsmogelijkheid 2;arbeidsplaats 2;werkgelegenheidskans 1;werkgelegenheid 1;werk 1;werkmogelijkheid 1;arbeidsmogelijkheid 1;arbeid 0;
 job.n.nl 2 :: werk 3;taak 2;opdracht 2;vak 1;job 1;
 job.n.nl 3 :: werk 3;baan 3;job 2;betrekking 1;
 job.n.nl 4 :: werkgelegenheidsvooruitzicht 3;werkgelegenheidsperspectief 3;beroepsvooruitzicht 2;werken 1;beroep 0;werkgelegenheid 0;

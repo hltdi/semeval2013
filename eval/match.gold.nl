@@ -1,3 +1,4 @@
+match.n.nl 1 :: match 2;samengaan 1;op elkaar aansluiten 1;aansluiten 0;
 match.n.nl 2 :: wedstrijd 3;match 3;spel 2;
 match.n.nl 3 :: wedstrijd 3;match 3;duel 2;spel 1;
 match.n.nl 4 :: op elkaar aansluiten 2;samengaan 1;evenwicht 1;passen bij 1;verhouding 1;passen 0;aansluiten 0;

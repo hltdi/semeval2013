@@ -1,3 +1,4 @@
+execution.n.nl 1 :: moord 2;executie 2;ter dood brengen 1;doden 1;terechtstelling 1;vermoorden 1;terdoodbrenging 1;
 execution.n.nl 2 :: doodstraf 3;terdoodveroordeling 2;terechtstelling 2;executie 2;
 execution.n.nl 3 :: executie 3;moord 1;liquidatie 1;ter dood brengen 1;executeren 1;terechtstelling 1;terdoodbrenging 1;
 execution.n.nl 4 :: liquidatie 2;executie 2;moord 1;executeren 1;terechtstelling 1;vermoorden 1;terdoodbrenging 1;

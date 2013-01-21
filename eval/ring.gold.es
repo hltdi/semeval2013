@@ -1,3 +1,4 @@
+ring.n.es 1 :: grupo 3;círculo 2;cerco 1;anillo 1;aro 1;
 ring.n.es 2 :: periférico 3;circunvalación 3;círculo 1;anillo 1;
 ring.n.es 3 :: tono 2;sonar 2;tinte 2;muestra 1;coloración 1;connotación 1;
 ring.n.es 4 :: círculo 2;barrera 1;cerco 1;anillo 1;aro 1;circunvalación 1;

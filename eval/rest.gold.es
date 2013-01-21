@@ -1,3 +1,4 @@
+rest.n.es 1 :: tranquilizar 3;apaciguar 2;calmar 2;sacar 1;contentar 1;
 rest.n.es 2 :: resto 2;quedar 1;restante 1;rest 1;durante 1;
 rest.n.es 3 :: resto 3;demás 3;otros 2;todos 1;
 rest.n.es 4 :: descanso 3;libre 2;asueto 2;reposo 1;respiro 1;

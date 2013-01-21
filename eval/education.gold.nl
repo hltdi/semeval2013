@@ -1,3 +1,4 @@
+education.n.nl 1 :: voorlichting 1;milieu-educatie 1;voorlichten 1;voorlichtings 1;bewustmaking 1;milieu-opvoeding 1;preventie 1;opvoeding 0;educatie 0;
 education.n.nl 2 :: opleiding 3;scholing 2;ontwikkeling 1;kennis 1;geschoold 1;vorming 1;
 education.n.nl 3 :: vorming 3;opvoeding 2;ontwikkeling 1;cultuur 1;opleiding 1;scholing 1;
 education.n.nl 4 :: vorming 2;opleiding 2;opvoeding 1;opleiding en cultuur 1;opvoeden 1;scholing 1;studie 1;

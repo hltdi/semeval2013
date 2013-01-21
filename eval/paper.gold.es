@@ -1,3 +1,4 @@
+paper.n.es 1 :: papel 3;papeleo 1;
 paper.n.es 2 :: periódico 3;prensa 3;diario 2;publicación 1;
 paper.n.es 3 :: papel 3;papelera 3;celulosa 1;
 paper.n.es 4 :: papeleta 3;lista 3;voto 2;papel 1;

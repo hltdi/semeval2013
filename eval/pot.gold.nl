@@ -1,3 +1,4 @@
+pot.n.nl 1 :: pot 3;potje 3;jampotje 1;
 pot.n.nl 2 :: pot 3;potje 2;brokken 1;
 pot.n.nl 3 :: po 3;
 pot.n.nl 4 :: hasj 3;blowen 2;

@@ -1,3 +1,4 @@
+figure.n.nl 1 :: figuur 3;persoonlijkheid 2;rol 2;persoon 1;
 figure.n.nl 2 :: afbeelding 3;element 2;nummer 1;
 figure.n.nl 3 :: beeld 3;figuur 1;
 figure.n.nl 4 :: cijfer 3;nummer 1;cijfergegeven 1;percent 1;getal 1;statistiek 1;percentage 1;

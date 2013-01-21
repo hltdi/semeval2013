@@ -1,3 +1,4 @@
+side.n.nl 1 :: partij 3;kamp 3;groepering 1;zijde 1;delegatie 1;
 side.n.nl 2 :: kant 3;zijkant 3;voorkant 1;wand 1;
 side.n.nl 3 :: zijde 2;kant 2;oever 2;noordzijde 1;overzijde 1;gedeelte 1;
 side.n.nl 4 :: zijde 3;kant 3;deel 2;gedeelte 1;
