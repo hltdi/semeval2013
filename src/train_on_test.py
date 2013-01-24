@@ -69,6 +69,7 @@ def main():
     target = args.targetlang[0]
     sourceword = args.sourceword[0]
 
+    gold_answers = get_gold_answers(sourceword, target)
     instances = get_training_data(sourceword, target)
     print("... training ...")
     classifier = MaxentClassifier.train(instances, trace=0, max_iter=20)
@@ -81,6 +82,8 @@ def main():
         featureset = features.extract(problem)
         answer = classifier.classify(featureset)
         print(output_one_best(problem, target, answer))
+        label = gold_answers[problem.instance_id]
+        print("CORRECT" if label == answer else "WRONG")
         print("distribution was...")
         dist = classifier.prob_classify(featureset)
         for key in dist.samples():
