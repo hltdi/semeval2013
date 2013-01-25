@@ -27,11 +27,11 @@ def get_tagger():
     return stanford_tagger
 
 NOUN = ['NN','NNS','NNP'] ## check about all the nouns in WSJ tagset
-def keep_source_sentence(tokenized, tags, sourceword):
+def keep_source_sentence(tagged_sent, sourceword):
     """sentence is a list of tokens; tags is a list of words."""
     ## now check whether we have the source word as a noun...
-    for word,tag in zip(tokenized, tags):
-        print(word, tag)
+    for word,tag in tagged_sent:
+        # print(word, tag)
         if tag in NOUN:
             if wnl.lemmatize(word.lower()) == sourceword:
                 return True
