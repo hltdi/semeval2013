@@ -5,6 +5,8 @@ import nltk
 from nltk.corpus import brown
 from nltk.stem.porter import PorterStemmer
 from nltk.tag.stanfordtagger import StanfordTagger
+from nltk.stem import snowball
+
 
 class FindSent:
     
@@ -44,12 +46,28 @@ class FindSent:
         tokenized = nltk.word_tokenize(sentence)
         tagged_sentence = stanford_tagger.tag(tokenized)
         return tagged_sentence
+
+
+    def get_snowball_stemmer(self,language):
+        """The snowball stemmer that supports other languages. To use, stemmer.stem('word')"""
+        if language == 'french':
+            stemmer = snowball.FrenchStemmer()
+        elif language == 'spanish':
+            stemmer = snowball.SpanishStemmer()
+        elif language == 'german':
+            stemmer = snowball.GermanStemmer()
+        elif language == 'dutch':
+            stemmer = snowball.DutchStemmer()
+        elif language == 'italian':
+            stemmer = snowball.ItalianStemmer()
+        else: 
+            print ('Language not supported!',language)
+
 ##POS tag a sentence.
 ##Use bigram tagger from brown corpos. ??or others.
-
-
 if __name__ == "__main__":
     c = FindSent()
     sentence = c.stanford_pos('I went to the banks')
     result = c.porter_stemmer(sentence)
+    c.get_snowball_stemmer('french')
     print(result)
