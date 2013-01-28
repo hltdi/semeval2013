@@ -11,6 +11,9 @@ import re
 import nltk
 from nltk.tag.stanford import POSTagger
 from nltk.stem import wordnet
+
+import get_possible_senses
+
 wnl = wordnet.WordNetLemmatizer()
 
 ## Given a pair of lines (src,trg) we need to decide whether this is a source
@@ -59,6 +62,7 @@ def main():
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)
     parser.add_argument('--sourcetext', type=str, nargs=1, required=True)
     parser.add_argument('--targettext', type=str, nargs=1, required=True)
+    parser.add_argument('--targetlang', type=str, nargs=1, required=True)
     parser.add_argument('--taggerhome', type=str, nargs=1, required=True)
     args = parser.parse_args()
 
@@ -67,6 +71,9 @@ def main():
     sourceword = args.sourceword[0]
     global taggerhome
     taggerhome = args.taggerhome[0]
+    all_target_languages = "de es fr it nl".split()
+    assert args.targetlang[0] in all_target_languages
+    targetlang = args.targetlang[0]
 
     source_lines, target_lines = load_bitext(sourcefn, targetfn, sourceword)
     print("got source/target lines")
@@ -76,6 +83,8 @@ def main():
     source_tags = tagger.batch_tag(source_tokenized)
     print("tagged.")
 
+    labels = get_possible_senses.senses(sourceword, targetlang)
+
     for tokenized, tags, source, target in zip(source_tokenized,
                                                source_tags,
                                                source_lines,
@@ -83,5 +92,8 @@ def main():
         if keep_source_sentence(tokenized, tags, sourceword):
             print("source:", source)
             print("target:", target)
+            print([label for label in labels
+                         if label in target])
+
 
 if __name__ == "__main__": main()

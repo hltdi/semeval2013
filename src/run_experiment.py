@@ -32,20 +32,18 @@ def main():
     args = parser.parse_args()
 
     all_target_languages = "de es fr it nl".split()
-    if args.targetlang:
-        assert args.targetlang[0] in all_target_languages
-        targets = args.targetlang
+    assert args.targetlang[0] in all_target_languages
+    targetlang = args.targetlang[0]
     sourceword = args.sourceword[0]
 
     fns = ["../trialdata/alltrials/{0}.data".format(sourceword)]
 
     with open("../eval/{0}.output".format(sourceword), "w") as outfile:
         for fn in fns:
-            for target in targets:
-                problems = extract_wsd_problems(fn)
-                for problem in problems:
-                    answer = solve_one_best(problem, target)
-                    print(output_one_best(problem, target, answer),
-                          file=outfile)
+            problems = extract_wsd_problems(fn)
+            for problem in problems:
+                answer = solve_one_best(problem, targetlang)
+                print(output_one_best(problem, targetlang, answer),
+                      file=outfile)
 
 if __name__ == "__main__": main()
