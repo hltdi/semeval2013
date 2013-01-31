@@ -122,17 +122,60 @@ class TreeTagger(TaggerI):
         if encoding in _treetagger_charset:
             self._encoding = encoding
         
-    def tag(self, sentences):
+    def tag(self, sentence):
         """Tags a single sentence: a list of words.
         The tokens should not contain any newline characters.
         """
         encoding = self._encoding
 
-        # Write the actual sentences to the temporary input file
-        if isinstance(sentences, list):
-            _input = '\n'.join((x for x in sentences))
+        # Write the actual sentence to the temporary input file
+        if isinstance(sentence, list):
+            _input = '\n'.join((x for x in sentence))
         else:
-            _input = sentences
+            _input = sentence
+
+        if isinstance(_input, str) and encoding:
+            _input = _input.encode(encoding)
+
+        # Run the tagger and get the output
+        p = Popen([self._treetagger_bin], 
+                    shell=False, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        
+        (stdout, stderr) = p.communicate(_input)
+        assert type(stdout) == bytes
+        treetagger_output = stdout.decode(encoding)
+
+        # Check the return code.
+        if p.returncode != 0:
+            print(stderr)
+            raise OSError('TreeTagger command failed!')
+
+        ## if isinstance(stdout, str) and encoding:
+        ##     treetagger_output = stdout.decode(encoding)
+        ## else:
+        ##     treetagger_output = tUoB(stdout)
+
+        # Output the tagged sentence
+        tagged_sentence = []
+        for tagged_word in treetagger_output.strip().split('\n'):
+            tagged_word_split = tagged_word.split('\t')
+            tagged_sentence.append(tagged_word_split)
+
+        return tagged_sentence
+
+    def batch_tag(self, sentences):
+        """Tags a list of sentences: a list of list of words.
+        The tokens should not contain any newline characters.
+        Will return a list of list of [word,tag,lemma].
+        """
+        encoding = self._encoding
+
+        sentence_chunks = []
+        for sentence in sentences:
+            chunk = '\n'.join((token for token in sentence))
+            chunk += '\n'
+            sentence_chunks.append(chunk)
+        _input = '\n'.join(sentence_chunks)
 
         if isinstance(_input, str) and encoding:
             _input = _input.encode(encoding)
@@ -156,13 +199,18 @@ class TreeTagger(TaggerI):
         ##     treetagger_output = tUoB(stdout)
 
         # Output the tagged sentences
-        tagged_sentences = []
+        all_the_output = []
         for tagged_word in treetagger_output.strip().split('\n'):
             tagged_word_split = tagged_word.split('\t')
-            tagged_sentences.append(tagged_word_split)
+            all_the_output.append(tagged_word_split)
 
+        tagged_sentences = []
+        cur_pos = 0
+        for sent in sentences:
+            sent_len = len(sent)
+            tagged_sentences.append(all_the_output[cur_pos:cur_pos+sent_len])
+            cur_pos += sent_len
         return tagged_sentences
-
 
 if __name__ == "__main__":
     import doctest

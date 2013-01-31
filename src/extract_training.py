@@ -51,7 +51,6 @@ def load_bitext(sourcefn, targetfn, sourceword):
             if re.match(pat, source):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
-                ## return out_source, out_target
     return out_source, out_target
 
 def tokenize_sentences(sentences):
@@ -68,6 +67,16 @@ def lemmatize_sentence(sentence, language, tt_home=None):
     tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
     output = tt.tag(sentence)
     return [lemma for word,tag,lemma in output]
+
+def batch_lemmatize_sentences(sentences, language, tt_home=None):
+    """For a list of tokenized sentences in the given language, call TreeTagger
+    on them to get a list of lemmas."""
+    codes_to_names = {"en":"english", "de":"german", "it":"italian",
+                      "es":"spanish", "fr":"french", "nl":"dutch"}
+    tt_lang = codes_to_names[language]
+    tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
+    output = tt.batch_tag(sentences)
+    return [[lemma for word,tag,lemma in sent] for sent in output]
 
 def list_has_sublist(biglist, sublist):
     size = len(sublist)
@@ -109,26 +118,30 @@ def main():
 
     labels = get_possible_senses.senses(sourceword, targetlang)
 
-    for tokenized, tagged, source, target in zip(source_tokenized,
-                                                 source_tagged,
-                                                 source_lines,
-                                                 target_lines):
-        if keep_source_sentence(tagged, sourceword):
-            print("source:", source)
-            print("target:", target)
-            target_tokenized = nltk.word_tokenize(target)
-            target_lemmatized = lemmatize_sentence(target_tokenized,
-                                                   targetlang,
-                                                   tt_home)
-            lowered = [tok.lower() for tok in target_lemmatized]
-            labels_for_sentence = []
-            for label in labels:
-                if list_has_sublist(lowered, label.split()):
-                    labels_for_sentence.append(label)
-            thelabels = ",".join(labels_for_sentence)
-            print("labels:", thelabels)
-            with open(out_fn, "a") as outfile:
-                print(source, file=outfile)
-                print(thelabels, file=outfile)
+    make_into_training_data = []
+    candidates = zip(source_tokenized,source_tagged,source_lines,target_lines)
+    make_into_training_data = list(filter(lambda TUP:
+                                     keep_source_sentence(TUP[1],sourceword),
+                                     candidates))
+    target_tokenized_sentences = \
+        tokenize_sentences([target for a,b,c,target in make_into_training_data])
+
+    target_lemmatized_sentences = \
+        batch_lemmatize_sentences(target_tokenized_sentences,
+                                  targetlang,
+                                  tt_home)
+    for source, target_lemmatized in zip((source for a,b,source,d
+                                          in make_into_training_data),
+                                          target_lemmatized_sentences):
+        lowered = [tok.lower() for tok in target_lemmatized]
+        labels_for_sentence = []
+        for label in labels:
+            if list_has_sublist(lowered, label.split()):
+                labels_for_sentence.append(label)
+        thelabels = ",".join(labels_for_sentence)
+        print("labels:", thelabels)
+        with open(out_fn, "a") as outfile:
+            print(source, file=outfile)
+            print(thelabels, file=outfile)
 
 if __name__ == "__main__": main()
