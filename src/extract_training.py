@@ -29,12 +29,12 @@ def get_tagger():
     stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
     return stanford_tagger
 
-NOUN = ['NN','NNS','NNP'] ## check about all the nouns in WSJ tagset
-def keep_source_sentence(tagged_sent, sourceword):
-    """sentence is a list of tokens; tags is a list of words."""
+## check about all the nouns in WSJ tagset
+NOUN = ['NN','NNS','NNP']
+def keep_source_sentence(tagged_sentence, sourceword):
+    """tagged_sentence is a list of word,tag pairs."""
     ## now check whether we have the source word as a noun...
-    for word,tag in tagged_sent:
-        # print(word, tag)
+    for word,tag in tagged_sentence:
         if tag in NOUN:
             if wnl.lemmatize(word.lower()) == sourceword:
                 return True
@@ -80,20 +80,18 @@ def main():
     source_tokenized = tokenize_sentences(source_lines)
     print("tokenized.")
     tagger = get_tagger()
-    source_tags = tagger.batch_tag(source_tokenized)
+    source_tagged = tagger.batch_tag(source_tokenized)
     print("tagged.")
 
     labels = get_possible_senses.senses(sourceword, targetlang)
 
-    for tokenized, tags, source, target in zip(source_tokenized,
-                                               source_tags,
-                                               source_lines,
-                                               target_lines):
-        if keep_source_sentence(tokenized, tags, sourceword):
+    for tokenized, tagged, source, target in zip(source_tokenized,
+                                                 source_tagged,
+                                                 source_lines,
+                                                 target_lines):
+        if keep_source_sentence(tagged, sourceword):
             print("source:", source)
             print("target:", target)
-            print([label for label in labels
-                         if label in target])
-
+            print([label for label in labels if label in target])
 
 if __name__ == "__main__": main()
