@@ -1,0 +1,7 @@
+This is the directory where the extracted training data for the classifiers will
+live. It is produced by extract_training.py from the parallel corpora, and it
+looks like bank.de.train (for example).
+
+The format is like:
+English language text goes here.
+comma,separated,list,of,target labels,maybewithspaces
