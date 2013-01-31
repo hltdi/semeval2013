@@ -12,9 +12,6 @@ from parse_corpus import extract_wsd_problems
 from run_experiment import output_one_best
 import features
 
-def solve_one_best(problem, target):
-    return "banco"
-
 def get_training_problems(sourceword):
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
     problems = extract_wsd_problems(fn)
