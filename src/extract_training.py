@@ -13,6 +13,7 @@ from nltk.tag.stanford import POSTagger
 from nltk.stem import wordnet
 
 import get_possible_senses
+import treetagger
 
 wnl = wordnet.WordNetLemmatizer()
 
@@ -50,12 +51,31 @@ def load_bitext(sourcefn, targetfn, sourceword):
             if re.match(pat, source):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
+                ## return out_source, out_target
     return out_source, out_target
 
 def tokenize_sentences(sentences):
     """Given a list of strings, tokenize each string and return a list of
     lists."""
     return [nltk.word_tokenize(sent) for sent in sentences]
+
+def lemmatize_sentence(sentence, language, tt_home=None):
+    """For a tokenized sentence in the given language, call TreeTagger on it to
+    get a list of lemmas."""
+    codes_to_names = {"en":"english", "de":"german", "it":"italian",
+                      "es":"spanish", "fr":"french", "nl":"dutch"}
+    tt_lang = codes_to_names[language]
+    tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
+    output = tt.tag(sentence)
+    return [lemma for word,tag,lemma in output]
+
+def list_has_sublist(biglist, sublist):
+    size = len(sublist)
+    for pos in range(len(biglist) - len(sublist) + 1):
+        maybe = biglist[pos:pos+size]
+        if maybe == sublist:
+            return True
+    return False
 
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
@@ -64,6 +84,7 @@ def main():
     parser.add_argument('--targettext', type=str, nargs=1, required=True)
     parser.add_argument('--targetlang', type=str, nargs=1, required=True)
     parser.add_argument('--taggerhome', type=str, nargs=1, required=True)
+    parser.add_argument('--treetaggerhome', type=str, nargs=1, required=True)
     args = parser.parse_args()
 
     sourcefn = args.sourcetext[0]
@@ -74,6 +95,9 @@ def main():
     all_target_languages = "de es fr it nl".split()
     assert args.targetlang[0] in all_target_languages
     targetlang = args.targetlang[0]
+    tt_home = args.treetaggerhome[0]
+
+    out_fn = "../trainingdata/{0}.{1}.train".format(sourceword, targetlang)
 
     source_lines, target_lines = load_bitext(sourcefn, targetfn, sourceword)
     print("got source/target lines")
@@ -92,6 +116,19 @@ def main():
         if keep_source_sentence(tagged, sourceword):
             print("source:", source)
             print("target:", target)
-            print([label for label in labels if label in target])
+            target_tokenized = nltk.word_tokenize(target)
+            target_lemmatized = lemmatize_sentence(target_tokenized,
+                                                   targetlang,
+                                                   tt_home)
+            lowered = [tok.lower() for tok in target_lemmatized]
+            labels_for_sentence = []
+            for label in labels:
+                if list_has_sublist(lowered, label.split()):
+                    labels_for_sentence.append(label)
+            thelabels = ",".join(labels_for_sentence)
+            print("labels:", thelabels)
+            with open(out_fn, "a") as outfile:
+                print(source, file=outfile)
+                print(thelabels, file=outfile)
 
 if __name__ == "__main__": main()
