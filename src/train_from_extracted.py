@@ -12,7 +12,6 @@ from nltk.classify.maxent import MaxentClassifier
 
 from wsd_problem import WSDProblem
 from parse_corpus import extract_wsd_problems
-from run_experiment import output_one_best
 from train_on_test import get_gold_answers
 import features
 
@@ -51,6 +50,14 @@ def get_training_data_from_extracted(sourceword, targetlang):
         out.append((featureset, label))
     return out
 
+def get_maxent_classifier(sourceword, target):
+    instances = get_training_data_from_extracted(sourceword, target)
+    print("got {0} training instances!!".format(len(instances)))
+    print("... training ...")
+    classifier = MaxentClassifier.train(instances, trace=0, max_iter=20)
+    print("LABELS", classifier.labels())
+    return classifier
+
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)
@@ -62,14 +69,8 @@ def main():
     assert args.targetlang[0] in all_target_languages
     target = args.targetlang[0]
     sourceword = args.sourceword[0]
+    classifier = get_maxent_classifier(sourceword, target)
 
-    instances = get_training_data_from_extracted(sourceword, target)
-    print("got {0} training instances!!".format(len(instances)))
-    print("... training ...")
-    classifier = MaxentClassifier.train(instances, trace=0, max_iter=20)
-    print("LABELS", classifier.labels())
-
-    ## with open("../eval/{0}.output".format(sourceword), "w") as outfile:
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
     problems = extract_wsd_problems(fn)
     gold_answers = get_gold_answers(sourceword, target)
@@ -77,7 +78,7 @@ def main():
         featureset = features.extract(problem)
         answer = classifier.classify(featureset)
         print(problem.context)
-        print(output_one_best(problem, target, answer))
+        print(answer)
         label = gold_answers[problem.instance_id]
         print("CORRECT" if label == answer else "WRONG", end=" ")
         print("should be:", label)
