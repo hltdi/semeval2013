@@ -5,6 +5,7 @@ import argparse
 
 from parse_corpus import extract_wsd_problems
 from train_from_extracted import get_maxent_classifier
+import features
 
 def solve_one_best(problem, target, solver=None):
     """Return the one best translation in the specified target language.
@@ -29,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)
     parser.add_argument('--targetlang', type=str, nargs=1, required=True)
-    parser.add_argument('--classifier', type=str, nargs=1, required=False)
+    ## parser.add_argument('--classifier', type=str, nargs=1, required=False)
     args = parser.parse_args()
 
     all_target_languages = "de es fr it nl".split()
@@ -37,17 +38,14 @@ def main():
     targetlang = args.targetlang[0]
     sourceword = args.sourceword[0]
 
-    fns = ["../trialdata/alltrials/{0}.data".format(sourceword)]
+    fn = "../trialdata/alltrials/{0}.data".format(sourceword)
 
-    classifier = get_maxent_classifier(sourceword, target)
-
+    classifier = get_maxent_classifier(sourceword, targetlang)
     with open("../eval/{0}.output".format(sourceword), "w") as outfile:
-        for fn in fns:
-            problems = extract_wsd_problems(fn)
-            for problem in problems:
-                featureset = features.extract(problem)
-                answer = classifier.classify(featureset)
-                print(output_one_best(problem, targetlang, answer),
-                      file=outfile)
+        problems = extract_wsd_problems(fn)
+        for problem in problems:
+            featureset = features.extract(problem)
+            answer = classifier.classify(featureset)
+            print(output_one_best(problem, targetlang, answer), file=outfile)
 
 if __name__ == "__main__": main()

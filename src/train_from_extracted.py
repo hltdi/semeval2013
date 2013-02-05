@@ -12,7 +12,7 @@ from nltk.classify.maxent import MaxentClassifier
 
 from wsd_problem import WSDProblem
 from parse_corpus import extract_wsd_problems
-from train_on_test import get_gold_answers
+import read_gold
 import features
 
 def get_training_problems(sourceword):
@@ -73,7 +73,7 @@ def main():
 
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
     problems = extract_wsd_problems(fn)
-    gold_answers = get_gold_answers(sourceword, target)
+    gold_answers = read_gold.get_gold_answers(sourceword, target)
     for problem in problems:
         featureset = features.extract(problem)
         answer = classifier.classify(featureset)
