@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import nltk
+from nltk.stem import wordnet
+wnl = wordnet.WordNetLemmatizer()
 
 START = "QQQSTARTHEADQQQ"
 END = "QQQENDHEADQQQ"
@@ -28,7 +30,10 @@ class WSDProblem:
                     assert word.endswith(END)
                     sent[word_index] = word.replace(START,"").replace(END,"")
                     self.head_indices.append((sent_index,word_index))
+
         self.tokenized = tokenized
+        self.lemmatized = [[wnl.lemmatize(token.lower()) for token in sent]
+                           for sent in self.tokenized]
 
     def __str__(self):
         return "<<{0}: {1}>>".format(self.source_lex, self.context)
