@@ -93,7 +93,8 @@ def main():
     parser.add_argument('--targettext', type=str, nargs=1, required=True)
     parser.add_argument('--targetlang', type=str, nargs=1, required=True)
     parser.add_argument('--taggerhome', type=str, nargs=1, required=True)
-    parser.add_argument('--treetaggerhome', type=str, nargs=1, required=True)
+    parser.add_argument('--treetaggerhome', type=str, nargs=1, required=False,
+                        default="../TreeTagger/cmd")
     args = parser.parse_args()
 
     sourcefn = args.sourcetext[0]
