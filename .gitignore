@@ -28,3 +28,6 @@ pip-log.txt
 
 # generated training data
 *.train
+
+## output of Berkeley Aligner
+Berkeley/berkeleyaligner/output/*
