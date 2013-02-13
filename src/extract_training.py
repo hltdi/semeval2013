@@ -53,11 +53,6 @@ def load_bitext(sourcefn, targetfn, sourceword):
                 out_target.append(target.strip())
     return out_source, out_target
 
-def tokenize_sentences(sentences):
-    """Given a list of strings, tokenize each string and return a list of
-    lists."""
-    return [nltk.word_tokenize(sent) for sent in sentences]
-
 def lemmatize_sentence(sentence, language, tt_home=None):
     """For a tokenized sentence in the given language, call TreeTagger on it to
     get a list of lemmas."""
@@ -111,8 +106,7 @@ def main():
 
     source_lines, target_lines = load_bitext(sourcefn, targetfn, sourceword)
     print("got source/target lines")
-    source_tokenized = tokenize_sentences(source_lines)
-    print("tokenized.")
+    source_tokenized = [line.strip().split() for line in source_lines]
     tagger = get_tagger()
     source_tagged = tagger.batch_tag(source_tokenized)
     print("tagged.")
