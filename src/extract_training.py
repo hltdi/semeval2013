@@ -57,6 +57,7 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
+                break
     return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
@@ -75,8 +76,26 @@ def batch_lemmatize_sentences(sentences, language, tt_home=None):
     codes_to_names = {"en":"english", "de":"german", "it":"italian",
                       "es":"spanish", "fr":"french", "nl":"dutch"}
     tt_lang = codes_to_names[language]
-    tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
+
+    if tt_lang == 'english':
+        tt = treetagger.TreeTagger(tt_home=tt_home,
+                                   language=tt_lang,
+                                   encoding='latin-1')
+    else:
+        tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
     output = tt.batch_tag(sentences)
+    ## out = []
+    ## for sent in output:
+    ##     thissent = []
+    ##     try:
+    ##         for (word,tag,lemma) in sent:
+    ##             thissent.append(lemma)
+    ##         out.append(thissent)
+    ##     except:
+    ##         for thing in sent:
+    ##             print(thing, len(thing))
+    ##         return out
+    ## return out
     return [[lemma for word,tag,lemma in sent] for sent in output]
 
 def list_has_sublist(biglist, sublist):
@@ -121,7 +140,6 @@ def main():
         load_bitext(sourcefn, targetfn, alignmentfn, sourceword)
     print("got source/target lines")
 
-
     ## split on spaces and tag.
     source_tokenized = [line.strip().split() for line in source_lines]
     tagger = get_tagger()
@@ -149,11 +167,15 @@ def main():
                                   targetlang,
                                   tt_home)
     source_tokenized = [tup[0] for tup in make_into_training_data]
+    source_lemmatized_sentences = \
+        batch_lemmatize_sentences(source_tokenized, "en", tt_home)
     alignments = [tup[4] for tup in make_into_training_data]
 
-    for source, target_lemmatized, alignment in zip(source_tokenized,
-                                                    target_lemmatized_sentences,
-                                                    alignments):
+    for source, source_lemmatized, target_lemmatized, alignment in \
+            zip(source_tokenized,
+                source_lemmatized_sentences,
+                target_lemmatized_sentences,
+                alignments):
         lowered = [tok.lower() for tok in target_lemmatized]
         labels_for_sentence = []
         for label in labels:

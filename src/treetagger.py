@@ -172,6 +172,8 @@ class TreeTagger(TaggerI):
 
         sentence_chunks = []
         for sentence in sentences:
+            for token in sentence:
+                assert '\t' not in token
             chunk = '\n'.join((token for token in sentence))
             chunk += '\n'
             sentence_chunks.append(chunk)
@@ -201,6 +203,9 @@ class TreeTagger(TaggerI):
         # Output the tagged sentences
         all_the_output = []
         for tagged_word in treetagger_output.strip().split('\n'):
+            if '\t\t' in tagged_word:
+                print("wtf:", str(tagged_word))
+                tagged_word = tagged_word.replace('\t\t', '\t')
             tagged_word_split = tagged_word.split('\t')
             all_the_output.append(tagged_word_split)
 
