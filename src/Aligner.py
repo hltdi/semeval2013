@@ -59,6 +59,6 @@ if __name__ =="__main__":
     en = "madam president , on a point of order .".split()
     de = "frau präsidentin , zur geschäftsordung .".split()
     import random
-    alignment = "0-0 1-1 2-2 3-3 4-7 5-8".split()
+    alignment = "0-0 5-8 4-7 3-6 3-3 2-2 1-1".split()
     random.shuffle(alignment)
     print(target_words_for_each_source_word(en, de, alignment))

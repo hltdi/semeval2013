@@ -14,6 +14,7 @@ from nltk.stem import wordnet
 
 import get_possible_senses
 import treetagger
+from Aligner import target_words_for_each_source_word
 
 wnl = wordnet.WordNetLemmatizer()
 
@@ -30,7 +31,7 @@ def get_tagger():
     stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
     return stanford_tagger
 
-## check about all the nouns in WSJ tagset
+## TODO(alexr): check about all the nouns in WSJ tagset
 NOUN = ['NN','NNS','NNP']
 def keep_source_sentence(tagged_sentence, sourceword):
     """tagged_sentence is a list of word,tag pairs."""
@@ -41,17 +42,22 @@ def keep_source_sentence(tagged_sentence, sourceword):
                 return True
     return False
 
-def load_bitext(sourcefn, targetfn, sourceword):
-    """Return a list of (source,target) sentence pairs."""
+def load_bitext(sourcefn, targetfn, alignfn, sourceword):
+    """Return three lists of sentence-like things. First source, then
+    target, then alignment."""
     pat = re.compile(r".*"+sourceword+".*", flags=re.IGNORECASE)
     out_source = []
     out_target = []
-    with open(sourcefn) as infile_s, open(targetfn) as infile_t:
-        for source, target in zip(infile_s, infile_t):
+    out_align = []
+    with open(sourcefn) as infile_s, \
+         open(targetfn) as infile_t, \
+         open(alignfn) as infile_align:
+        for source, target, alignment in zip(infile_s, infile_t, infile_align):
             if re.match(pat, source):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
-    return out_source, out_target
+                out_align.append(alignment.strip())
+    return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
     """For a tokenized sentence in the given language, call TreeTagger on it to
@@ -81,31 +87,42 @@ def list_has_sublist(biglist, sublist):
             return True
     return False
 
-def main():
+def get_parser():
     parser = argparse.ArgumentParser(description='clwsd')
-    parser.add_argument('--sourceword', type=str, nargs=1, required=True)
-    parser.add_argument('--sourcetext', type=str, nargs=1, required=True)
-    parser.add_argument('--targettext', type=str, nargs=1, required=True)
-    parser.add_argument('--targetlang', type=str, nargs=1, required=True)
-    parser.add_argument('--taggerhome', type=str, nargs=1, required=True)
-    parser.add_argument('--treetaggerhome', type=str, nargs=1, required=False,
+    parser.add_argument('--sourceword', type=str, required=True)
+    parser.add_argument('--targetlang', type=str, required=True)
+    parser.add_argument('--sourcetext', type=str, required=True)
+    parser.add_argument('--targettext', type=str, required=True)
+    parser.add_argument('--taggerhome', type=str, required=True)
+    parser.add_argument('--alignments', type=str, required=True)
+    parser.add_argument('--treetaggerhome', type=str, required=False,
                         default="../TreeTagger/cmd")
+    return parser
+
+def main():
+    parser = get_parser()
     args = parser.parse_args()
 
-    sourcefn = args.sourcetext[0]
-    targetfn = args.targettext[0]
-    sourceword = args.sourceword[0]
+    sourcefn = args.sourcetext
+    targetfn = args.targettext
+    alignmentfn = args.alignments
+    sourceword = args.sourceword
     global taggerhome
-    taggerhome = args.taggerhome[0]
+    taggerhome = args.taggerhome
     all_target_languages = "de es fr it nl".split()
-    assert args.targetlang[0] in all_target_languages
-    targetlang = args.targetlang[0]
-    tt_home = args.treetaggerhome[0]
+    assert args.targetlang in all_target_languages
+    targetlang = args.targetlang
+    tt_home = args.treetaggerhome
 
     out_fn = "../trainingdata/{0}.{1}.train".format(sourceword, targetlang)
 
-    source_lines, target_lines = load_bitext(sourcefn, targetfn, sourceword)
+    ## load up all the preprocessed and aligned data.
+    source_lines, target_lines, alignment_lines = \
+        load_bitext(sourcefn, targetfn, alignmentfn, sourceword)
     print("got source/target lines")
+
+
+    ## split on spaces and tag.
     source_tokenized = [line.strip().split() for line in source_lines]
     tagger = get_tagger()
     source_tagged = tagger.batch_tag(source_tokenized)
@@ -114,20 +131,29 @@ def main():
     labels = get_possible_senses.senses(sourceword, targetlang)
 
     make_into_training_data = []
-    candidates = zip(source_tokenized,source_tagged,source_lines,target_lines)
-    make_into_training_data = list(filter(lambda TUP:
-                                     keep_source_sentence(TUP[1],sourceword),
-                                     candidates))
-    target_tokenized_sentences = \
-        tokenize_sentences([target for a,b,c,target in make_into_training_data])
+    candidates = zip(source_tokenized, source_tagged, source_lines,
+                     target_lines, alignment_lines)
 
+    ## having listed the candidates, filter them down.
+    make_into_training_data = []
+    for candidate in candidates:
+        s_tagged = candidate[1]
+        if keep_source_sentence(s_tagged, sourceword):
+            make_into_training_data.append(candidate)
+
+    ## tokenize & lemmatize remaining target-language sentences.
+    target_tokenized_sentences = [target.split()
+                                  for a,b,c,target,e in make_into_training_data]
     target_lemmatized_sentences = \
         batch_lemmatize_sentences(target_tokenized_sentences,
                                   targetlang,
                                   tt_home)
-    for source, target_lemmatized in zip((source for a,b,source,d
-                                          in make_into_training_data),
-                                          target_lemmatized_sentences):
+    source_tokenized = [tup[0] for tup in make_into_training_data]
+    alignments = [tup[4] for tup in make_into_training_data]
+
+    for source, target_lemmatized, alignment in zip(source_tokenized,
+                                                    target_lemmatized_sentences,
+                                                    alignments):
         lowered = [tok.lower() for tok in target_lemmatized]
         labels_for_sentence = []
         for label in labels:
@@ -135,8 +161,14 @@ def main():
                 labels_for_sentence.append(label)
         thelabels = ",".join(labels_for_sentence)
         print("labels:", thelabels)
-        with open(out_fn, "a") as outfile:
-            print(source, file=outfile)
+        ## TODO(alexr): only include labels that are aligned with the source
+        ## word.
+        tws = target_words_for_each_source_word(source,
+                                                target_lemmatized,
+                                                alignment.split())
+        print(list(zip(source, tws)))
+        with open(out_fn, "w") as outfile:
+            print(" ".join(source), file=outfile)
             print(thelabels, file=outfile)
 
 if __name__ == "__main__": main()
