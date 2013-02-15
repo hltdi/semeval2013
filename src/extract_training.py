@@ -32,7 +32,7 @@ def get_tagger():
     return stanford_tagger
 
 ## TODO(alexr): check about all the nouns in WSJ tagset
-NOUN = ['NN','NNS','NNP']
+NOUN = {'NN','NNS','NNP','NP','NNPS','NPS'}
 def keep_source_sentence(tagged_sentence, sourceword):
     """tagged_sentence is a list of word,tag pairs."""
     ## now check whether we have the source word as a noun...
@@ -57,7 +57,6 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
-                break
     return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
@@ -169,28 +168,25 @@ def main():
     source_tokenized = [tup[0] for tup in make_into_training_data]
     source_lemmatized_sentences = \
         batch_lemmatize_sentences(source_tokenized, "en", tt_home)
-    alignments = [tup[4] for tup in make_into_training_data]
 
-    for source, source_lemmatized, target_lemmatized, alignment in \
-            zip(source_tokenized,
-                source_lemmatized_sentences,
-                target_lemmatized_sentences,
-                alignments):
-        lowered = [tok.lower() for tok in target_lemmatized]
-        labels_for_sentence = []
-        for label in labels:
-            if list_has_sublist(lowered, label.split()):
-                labels_for_sentence.append(label)
-        thelabels = ",".join(labels_for_sentence)
-        print("labels:", thelabels)
-        ## TODO(alexr): only include labels that are aligned with the source
-        ## word.
-        tws = target_words_for_each_source_word(source,
-                                                target_lemmatized,
-                                                alignment.split())
-        print(list(zip(source, tws)))
-        with open(out_fn, "w") as outfile:
-            print(" ".join(source), file=outfile)
-            print(thelabels, file=outfile)
+    with open(out_fn, "w") as outfile:
+        for tup, source_lemmas, target_lemmas in \
+                zip(make_into_training_data,
+                    source_lemmatized_sentences,
+                    target_lemmatized_sentences):
+            labels_for_sentence = []
+            lowered = [tok.lower() for tok in source_lemmas]
+            source_tagged = tup[1]
+            tags = [tag for (word,tag) in source_tagged]
+            alignment = tup[4].split()
+            tws = target_words_for_each_source_word(source_lemmas,
+                                                    target_lemmas,
+                                                    alignment)
+            for i in range(len(tags)):
+                if source_lemmas[i] == sourceword and tags[i] in NOUN:
+                    withtags = ["{0}/{1}".format(word,tag)
+                                for word,tag in source_tagged]
+                    print(" ".join(withtags), file=outfile)
+                    print(" ".join(tws[i]).lower(), file=outfile)
 
 if __name__ == "__main__": main()
