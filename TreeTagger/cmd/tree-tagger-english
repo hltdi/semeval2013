@@ -21,4 +21,4 @@ grep -v '^$' |
 perl $CMD/lookup.perl $LEXFILE |
 # tagging
 $TAGGER $OPTIONS $PARFILE | 
-perl -pe 's/\tV[BDHV]/\tVB/;s/IN\/that/\tIN/;'
+perl -pe 's/\tV[BDHV]/\tVB/;s/\tIN\/that/\tIN/;'
