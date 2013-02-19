@@ -9,14 +9,11 @@ Good idea? We'll find out!
 from functools import lru_cache
 from operator import itemgetter
 
-
 ## TUNABLE PARAMETERS (tune it up) ##
 TOTAL_MSG_PENALTY = 100
 NSTEPS = 2
 
 ## this might be a good thing to do with Cython.
-
-## need to come up with some good data structures for this.
 
 ## two kinds of potentials: unary potentials and binary potentials. we want to
 ## minimize the potentials over the whole graph.
@@ -30,7 +27,7 @@ class Node:
         nodes[name] = self
 
 @lru_cache(maxsize=100)
-def unary_potential(name, value):
+def get_node_penalty(name, value):
     return nodes[name].potentials[value]
 
 @lru_cache(maxsize=100)
@@ -50,7 +47,10 @@ class Edge:
 @lru_cache(maxsize=100)
 def get_edge_penalty(v1, v1_val, v2, v2_val):
     edge = get_edge(v1, v2)
-    return edge.potentials[(v1_val, v2_val)]
+    if v1 < v2:
+        return edge.potentials[(v1_val, v2_val)]
+    else:
+        return edge.potentials[(v2_val, v1_val)]
 
 @lru_cache(maxsize=100)
 def get_edge(v1, v2):
@@ -60,40 +60,41 @@ def get_edge(v1, v2):
 
 INFINITY = float('inf')
 
-def bp_step(messages):
+def bp_step(prev_messages):
     ## for every node, calculate that node's outgoing messages. There should be
     ## n-1 of them, for a graph with n nodes.
+    messages = {}
+    nodeset = set(nodes.keys())
+    for fromnode in nodeset:
+        for tonode in nodeset - set([fromnode]):
+            msg = {}
+            sum_penalties = 0
+            for yourval in possible_values(tonode):
+                lowest_penalty = INFINITY
+                for myval in possible_values(fromnode):
+                    penalty = get_node_penalty(fromnode, myval)
+                    penalty += get_edge_penalty(fromnode,myval,tonode,yourval)
+                    for neighbor in nodeset - set([fromnode,tonode]):
+                        penalty += prev_messages[(neighbor, fromnode)][myval]
+                    lowest_penalty = min(penalty, lowest_penalty)
+                if (lowest_penalty == INFINITY):
+                    print("INFINITE PENALTY")
+                msg[yourval] = lowest_penalty
+                sum_penalties += lowest_penalty
+            ## now normalize. we want to say that we have a total outgoing
+            ## penalty.
+            Z = sum_penalties / TOTAL_MSG_PENALTY
+            for yourval in possible_values(tonode):
+                msg[yourval] /= Z
+            messages[(fromnode,tonode)] = msg
     return messages
-
-    ## for each node:
-    ##     for each neighbor:
-    ##         sum_penalties = 0
-    ##         ## for your value...
-    ##         for yourval in your possible values:
-    ##             lowest_penalty = INFINITY;
-    ##             for myval in my possible values:
-    ##                 unary_cost = my unary cost for this value
-    ##                 penalty = unary_cost
-    ##                 penalty += V(d, your_d)
-    ##                 for each neighbor other than the :
-    ##                     penalty += previous message from that neighbor to me
-    ##                 lowest_penalty = min(penalty, lowest_penalty)
-    ##             if (lowest_penalty == INFINITY):
-    ##                 print("INFINITE PENALTY")
-    ##             output message from me to you[your value] = lowest_penalty
-    ##             sum_penalties += lowest_penalty;
-    ##         ## now normalize. we want to say that we have a total outgoing
-    ##         ## penalty.
-    ##         Z = sum_penalties / TOTAL_MSG_PENALTY
-    ##         for every element of the message from me to you:
-    ##             divide that element by Z
-
 
 def initialize_messages(nodes):
     """Produce an initial setting for the messages."""
     messages = {}
-    for fromnode in nodes.keys():
-        for tonode in nodes.keys():
+    nodeset = set(nodes.keys())
+    for fromnode in nodeset:
+        for tonode in nodeset - set([fromnode]):
             msg = {}
             for val in possible_values(tonode):
                 msg[val] = 1 / TOTAL_MSG_PENALTY
@@ -107,25 +108,29 @@ def initialize_messages(nodes):
 def beliefprop():
     previous_messages = {}
     current_messages = None
-
     previous_messages = initialize_messages(nodes)
 
     for step in range(NSTEPS):
-        print("beliefprop timestep:", step)
+        ## print("beliefprop timestep:", step)
         current_messages = bp_step(previous_messages)
         ## double buffering!!
         previous_messages = current_messages
 
     ## OK, now let's get the actual best answers.
-    ## for each node:
-    ##     for each possible value for that node:
-    ##         unary_cost = unary cost for that node for that value
-    ##         penalty = unary_cost;
-    ##         for each neighbor:
-    ##             penalty += that neighbors message to this node[value]
-    ##         if (penalty < lowest_penalty):
-    ##           lowest_penalty = penalty;
-    ##           best_value = value
+    best_values = {}
+    nodeset = set(nodes.keys())
+    for node in nodeset:
+        best_value = None
+        lowest_penalty = INFINITY
+        for myval in possible_values(node):
+            penalty = get_node_penalty(node, myval)
+            for neighbor in nodeset - set([node]):
+                penalty += current_messages[(neighbor, node)][myval]
+            if (penalty < lowest_penalty):
+              lowest_penalty = penalty
+              best_value = myval
+        best_values[node] = best_value
+    return best_values
 
 def main():
     a = Node('a', {'a1': 10, 'a2': 5})
@@ -133,16 +138,11 @@ def main():
 
     edgepotentials = {('a1','b1'):2,
                       ('a1','b2'):10,
-                      ('a2','b1'):10,
-                      ('a2','b1'):10,
+                      ('a2','b1'):2,
+                      ('a2','b2'):10,
                      }
     e1 = Edge('a', 'b', edgepotentials)
-
-    e2 = get_edge('b', 'a')
-    print(e1, e2, e1 == e2)
-    print(get_edge_penalty('a', 'a1', 'b', 'b2'))
-
-
-    print(initialize_messages(nodes))
+    best_values = beliefprop()
+    print(best_values)
 
 if __name__ == "__main__": main()
