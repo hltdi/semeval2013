@@ -1,0 +1,25 @@
+maceta
+cantidad
+fondo
+olla
+saco
+cazuela
+crisol
+cocer
+ayuda
+tarro
+maría
+orinal
+melting pot
+cesta
+lote
+quemarropa
+variopinto
+beneficio
+cúmulo
+popurrí
+arca
+caldero
+Pot
+bote
+viga

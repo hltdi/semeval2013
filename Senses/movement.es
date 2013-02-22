@@ -1,0 +1,37 @@
+tránsito
+facción
+evolución
+tráfico
+migración
+mover
+flujo
+movilización
+progreso
+moverse
+movimiento
+desplazamiento
+fuerza
+corriente
+circular
+circulación
+frente
+partido
+coyuntura
+iniciativa
+novedad
+paso
+transacción
+variación
+grupo
+avance
+libre circulación
+movilidad
+transporte
+fluctuación
+acción
+cambio
+dinamismo
+viajar
+tendencia
+traslado
+operación de pago

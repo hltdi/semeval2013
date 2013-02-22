@@ -1,0 +1,16 @@
+cofinanciación
+combate
+reconciliable
+competir
+cerilla
+correspondencia
+juego
+encuentro
+financiación
+igual
+partido
+adecuación
+medir
+competición
+certamen
+altura

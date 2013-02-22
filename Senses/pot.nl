@@ -1,0 +1,29 @@
+hoop
+potpourri
+ontmoetingsplaats
+bedrag
+fonds
+kroes
+mengsel
+hutspot
+blowen
+jampot
+smeltkroes
+pot
+hasj
+make-uppotje
+make-up potje
+geheel
+jampotje
+verpotten
+versmelten
+bloempot
+onder vuur nemen
+kas
+aardig
+Pot
+ketel
+po
+potpourri-achtig
+potje
+brokken
