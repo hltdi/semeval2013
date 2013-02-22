@@ -1,0 +1,35 @@
+sector
+beroepsactiviteit
+professionele activiteit
+gebruikmaking
+beroepswerkzaamheid
+beslag
+beroepsleven
+zeevaartberoep
+functie
+gebruikname
+onderdrukking
+vak
+bezet houden
+gebruik
+bezettingsjaar
+frequentiebeslag
+baan
+bezet zijn
+bezetting
+bezighouden
+gebiedsbezetting
+belegering
+beroep
+bezetten
+beroepsgroep
+bezigheid
+vissersberoep
+beroepsuitoefening
+occupatie
+werkgelegenheid
+beroepsbezigheid
+zeemans§bestaan
+werk
+ruimtebeslag
+activiteit

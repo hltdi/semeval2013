@@ -1,0 +1,9 @@
+territorio
+terreno
+suelo
+terruño
+país
+base
+tierra
+región
+edáfico

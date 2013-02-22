@@ -1,0 +1,29 @@
+tensión
+influir
+esfuerzo
+agotar
+presionar
+cepa
+intento
+agotamiento
+tipo
+gravoso
+gravar
+carga
+variedad
+barrera
+sobrecarga
+tensiòn
+variante
+resistencia
+repercución
+modalidad
+presión
+aguantar
+cansancio
+aliviar la tensión
+aliviar
+dificultar
+timón del barco
+exigencia
+dificultad

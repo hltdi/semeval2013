@@ -1,0 +1,46 @@
+toestemming om te reizen
+resolutie
+deel
+gang
+loop
+doorkomen
+binnenkomen
+enig
+aannemen
+verstrijken
+goedkeuren
+weg
+overtocht
+totstandkoming
+passage
+verschuiving
+verlopen
+grensoverschrijding
+stuk
+doorlaten
+doorvoer
+verloop
+plaats
+stap
+doorgangsroute
+fragment
+aanneming
+omzetten
+worden aangenomen
+passus
+proces
+doorvaart
+bepaling
+procesgang
+doorgang
+behandeling
+overgang
+afhandeling
+behandelen
+doortocht
+doorreizen
+deel van de tekst
+afglijden
+verkeer
+procedure
+gedeelte
