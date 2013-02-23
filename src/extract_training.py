@@ -19,10 +19,6 @@ from Aligner import sort_alignment
 
 wnl = wordnet.WordNetLemmatizer()
 
-## Given a pair of lines (src,trg) we need to decide whether this is a source
-## line we're interested in, and then we need to decide what the target word
-## sense is.
-
 taggerhome = None
 @functools.lru_cache(maxsize=20)
 def get_tagger():
@@ -32,7 +28,7 @@ def get_tagger():
     stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
     return stanford_tagger
 
-## TODO(alexr): check about all the nouns in WSJ tagset
+## These are all the kinds of nouns present in WSJ tagsets.
 NOUN = {'NN','NNS','NNP','NP','NNPS','NPS'}
 def keep_candidate(candidate, sourceword):
     """Decide whether to keep a candidate based on its tagged source
@@ -89,24 +85,15 @@ def batch_lemmatize_sentences(sentences, language, tt_home=None):
     return [[lemma for word,tag,lemma in sent] for sent in output]
 
 def list_has_sublist(biglist, sublist):
+    """We could use this to look for known target-language senses in the target
+    text. Possibly fall back to this if we can't find a good target-language
+    sense with the alignments?"""
     size = len(sublist)
     for pos in range(len(biglist) - len(sublist) + 1):
         maybe = biglist[pos:pos+size]
         if maybe == sublist:
             return True
     return False
-
-def get_parser():
-    parser = argparse.ArgumentParser(description='clwsd')
-    parser.add_argument('--sourceword', type=str, required=True)
-    parser.add_argument('--targetlang', type=str, required=True)
-    parser.add_argument('--sourcetext', type=str, required=True)
-    parser.add_argument('--targettext', type=str, required=True)
-    parser.add_argument('--taggerhome', type=str, required=True)
-    parser.add_argument('--alignments', type=str, required=True)
-    parser.add_argument('--treetaggerhome', type=str, required=False,
-                        default="../TreeTagger/cmd")
-    return parser
 
 class TrainingCandidate:
     def __init__(self, source_line, target_line, alignment_line):
@@ -146,6 +133,19 @@ def batch_source_tag(candidates):
     for candidate,tagged_sent in zip(candidates, tagged_sents):
         candidate.source_tagged = tagged_sent
     print("tagged.")
+
+def get_argparser():
+    """Build the argument parser for main."""
+    parser = argparse.ArgumentParser(description='clwsd')
+    parser.add_argument('--sourceword', type=str, required=True)
+    parser.add_argument('--targetlang', type=str, required=True)
+    parser.add_argument('--sourcetext', type=str, required=True)
+    parser.add_argument('--targettext', type=str, required=True)
+    parser.add_argument('--taggerhome', type=str, required=True)
+    parser.add_argument('--alignments', type=str, required=True)
+    parser.add_argument('--treetaggerhome', type=str, required=False,
+                        default="../TreeTagger/cmd")
+    return parser
 
 def main():
     parser = get_parser()
