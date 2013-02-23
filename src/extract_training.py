@@ -15,6 +15,7 @@ from nltk.stem import wordnet
 import get_possible_senses
 import treetagger
 from Aligner import target_words_for_each_source_word
+from Aligner import sort_alignment
 
 wnl = wordnet.WordNetLemmatizer()
 
@@ -33,10 +34,11 @@ def get_tagger():
 
 ## TODO(alexr): check about all the nouns in WSJ tagset
 NOUN = {'NN','NNS','NNP','NP','NNPS','NPS'}
-def keep_source_sentence(tagged_sentence, sourceword):
-    """tagged_sentence is a list of word,tag pairs."""
+def keep_candidate(candidate, sourceword):
+    """Decide whether to keep a candidate based on its tagged source
+    sentence."""
     ## now check whether we have the source word as a noun...
-    for word,tag in tagged_sentence:
+    for word,tag in candidate.source_tagged:
         if tag in NOUN:
             if wnl.lemmatize(word.lower()) == sourceword:
                 return True
@@ -57,6 +59,7 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
+                if len(out_source) == 200: break
     return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
@@ -83,18 +86,6 @@ def batch_lemmatize_sentences(sentences, language, tt_home=None):
     else:
         tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
     output = tt.batch_tag(sentences)
-    ## out = []
-    ## for sent in output:
-    ##     thissent = []
-    ##     try:
-    ##         for (word,tag,lemma) in sent:
-    ##             thissent.append(lemma)
-    ##         out.append(thissent)
-    ##     except:
-    ##         for thing in sent:
-    ##             print(thing, len(thing))
-    ##         return out
-    ## return out
     return [[lemma for word,tag,lemma in sent] for sent in output]
 
 def list_has_sublist(biglist, sublist):
@@ -116,6 +107,45 @@ def get_parser():
     parser.add_argument('--treetaggerhome', type=str, required=False,
                         default="../TreeTagger/cmd")
     return parser
+
+class TrainingCandidate:
+    def __init__(self, source_line, target_line, alignment_line):
+        self.source_line = source_line.strip()
+        self.target_line = target_line.strip()
+        self.alignment_line = alignment_line.strip()
+
+        self.target_tokenized = self.target_line.split()
+        self.source_tokenized = self.source_line.split()
+
+        # fill in later
+        self.source_tagged = None
+        self.target_lemmatized = None
+        self.source_lemmatized = None
+
+def batch_lemmatize(candidates, targetlang, tt_home):
+    """For each candidate, lemmatize the sentences and stick that information on
+    the candidate objects."""
+    ## target language
+    sents = [candidate.target_tokenized for candidate in candidates]
+    lemmatized_sentences = batch_lemmatize_sentences(sents, targetlang, tt_home)
+    assert len(lemmatized_sentences) == len(sents)
+    for candidate,lemmas in zip(candidates, lemmatized_sentences):
+        candidate.target_lemmatized = lemmas
+
+    ## source language
+    sents = [candidate.source_tokenized for candidate in candidates]
+    lemmatized_sentences = batch_lemmatize_sentences(sents, "en", tt_home)
+    assert len(lemmatized_sentences) == len(sents)
+    for candidate,lemmas in zip(candidates, lemmatized_sentences):
+        candidate.source_lemmatized = lemmas
+
+def batch_source_tag(candidates):
+    sents = [candidate.source_tokenized for candidate in candidates]
+    tagger = get_tagger()
+    tagged_sents = tagger.batch_tag(sents)
+    for candidate,tagged_sent in zip(candidates, tagged_sents):
+        candidate.source_tagged = tagged_sent
+    print("tagged.")
 
 def main():
     parser = get_parser()
@@ -139,53 +169,40 @@ def main():
         load_bitext(sourcefn, targetfn, alignmentfn, sourceword)
     print("got source/target lines")
 
-    ## split on spaces and tag.
-    source_tokenized = [line.strip().split() for line in source_lines]
-    tagger = get_tagger()
-    source_tagged = tagger.batch_tag(source_tokenized)
-    print("tagged.")
+    ## labels = get_possible_senses.senses(sourceword, targetlang)
+    assert(len(source_lines) == len(target_lines) == len(alignment_lines) )
 
-    labels = get_possible_senses.senses(sourceword, targetlang)
+    candidates = []
+    for sl, tl, al in zip(source_lines, target_lines, alignment_lines):
+        candidates.append(TrainingCandidate(sl,tl,al))
 
-    make_into_training_data = []
-    candidates = zip(source_tokenized, source_tagged, source_lines,
-                     target_lines, alignment_lines)
+    ## tag it up.
+    batch_source_tag(candidates)
 
     ## having listed the candidates, filter them down.
     make_into_training_data = []
     for candidate in candidates:
-        s_tagged = candidate[1]
-        if keep_source_sentence(s_tagged, sourceword):
+        if keep_candidate(candidate, sourceword):
             make_into_training_data.append(candidate)
 
-    ## tokenize & lemmatize remaining target-language sentences.
-    target_tokenized_sentences = [target.split()
-                                  for a,b,c,target,e in make_into_training_data]
-    target_lemmatized_sentences = \
-        batch_lemmatize_sentences(target_tokenized_sentences,
-                                  targetlang,
-                                  tt_home)
-    source_tokenized = [tup[0] for tup in make_into_training_data]
-    source_lemmatized_sentences = \
-        batch_lemmatize_sentences(source_tokenized, "en", tt_home)
+    ## lemmatize remaining candidates for both languages.
+    batch_lemmatize(make_into_training_data, targetlang, tt_home)
 
     with open(out_fn, "w") as outfile:
-        for tup, source_lemmas, target_lemmas in \
-                zip(make_into_training_data,
-                    source_lemmatized_sentences,
-                    target_lemmatized_sentences):
+        for candidate in make_into_training_data:
             labels_for_sentence = []
-            lowered = [tok.lower() for tok in source_lemmas]
-            source_tagged = tup[1]
-            tags = [tag for (word,tag) in source_tagged]
-            alignment = tup[4].split()
-            tws = target_words_for_each_source_word(source_lemmas,
-                                                    target_lemmas,
+            lowered = [tok.lower() for tok in candidate.source_lemmatized]
+            tags = [tag for (word,tag) in candidate.source_tagged]
+            alignment = sort_alignment(candidate.alignment_line).split()
+            tws = target_words_for_each_source_word(candidate.source_lemmatized,
+                                                    candidate.target_lemmatized,
                                                     alignment)
+            source_lemmas = candidate.source_lemmatized
+            target_lemmas = candidate.target_lemmatized
             for i in range(len(tags)):
                 if source_lemmas[i] == sourceword and tags[i] in NOUN:
                     withtags = ["{0}/{1}".format(word,tag)
-                                for word,tag in source_tagged]
+                                for word,tag in candidate.source_tagged]
                     print(" ".join(withtags), file=outfile)
                     print(" ".join(tws[i]).lower(), file=outfile)
 
