@@ -12,7 +12,7 @@ MWL=${CMD}/mwl-lookup-greek-utf8.perl
 TAGGER=${BIN}/tree-tagger
 PARFILE=${LIB}/greek-utf8.par
 
-$TOKENIZER $* |
+## $TOKENIZER $* |
 # recognition of MWLs
 $MWL |
 # tagging

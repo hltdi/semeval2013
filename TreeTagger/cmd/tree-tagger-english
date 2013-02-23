@@ -14,7 +14,7 @@ ABBR_LIST=${LIB}/english-abbreviations
 PARFILE=${LIB}/english.par
 LEXFILE=${LIB}/english-lexicon.txt
 
-$TOKENIZER -e -a $ABBR_LIST $* |
+## $TOKENIZER -e -a $ABBR_LIST $* |
 # remove empty lines
 grep -v '^$' |
 # external lexicon lookup

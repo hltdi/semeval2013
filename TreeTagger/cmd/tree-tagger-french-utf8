@@ -13,5 +13,5 @@ TAGGER=${BIN}/tree-tagger
 ABBR_LIST=${LIB}/french-abbreviations-utf8
 PARFILE=${LIB}/french-utf8.par
 
-$TOKENIZER -f -a $ABBR_LIST $* |
+## $TOKENIZER -f -a $ABBR_LIST $* |
 $TAGGER $OPTIONS $PARFILE

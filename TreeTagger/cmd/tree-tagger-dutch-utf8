@@ -13,5 +13,5 @@ TOKENIZER=${CMD}/utf8-tokenize.perl
 ABBR_LIST=${LIB}/dutch-abbreviations
 PARFILE=${LIB}/dutch-utf8.par
 
-$TOKENIZER -a $ABBR_LIST $* |
+## $TOKENIZER -a $ABBR_LIST $* |
 $TAGGER $OPTIONS $PARFILE
