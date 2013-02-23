@@ -171,8 +171,9 @@ class TreeTagger(TaggerI):
         encoding = self._encoding
 
         sentence_chunks = []
+        sentence_lengths = list(map(len, sentences))
         for sentence in sentences:
-            for token in sentence:
+            for i,token in enumerate(sentence):
                 assert '\t' not in token
             chunk = '\n'.join((token for token in sentence))
             chunk += '\n'
@@ -209,12 +210,24 @@ class TreeTagger(TaggerI):
             tagged_word_split = tagged_word.split('\t')
             all_the_output.append(tagged_word_split)
 
+        total_token_count = 0
+        for sentlen in sentence_lengths:
+            total_token_count += sentlen
+        ## print(len(all_the_output), total_token_count)
+
         tagged_sentences = []
         cur_pos = 0
         for sent in sentences:
             sent_len = len(sent)
             tagged_sentences.append(all_the_output[cur_pos:cur_pos+sent_len])
             cur_pos += sent_len
+
+        output_lengths = list(map(len, tagged_sentences))
+        ## for sent,out in zip(sentences, tagged_sentences):
+        ##     print("sent:", sent)
+        ##     print("out lemmas:", [tup[2] for tup in out])
+        assert len(all_the_output) == total_token_count
+        assert sentence_lengths == output_lengths
         return tagged_sentences
 
 if __name__ == "__main__":
