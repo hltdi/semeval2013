@@ -51,6 +51,13 @@ def target_words_for_each_source_word(ss, ts, alignment):
         out[si].append(ts[ti])
     return out
 
+def sort_alignment(alignment):
+    """Take a string, return a string."""
+    alignment = alignment.split()
+    alignment = [tuple(map(int, pair.split('-'))) for pair in alignment]
+    alignment.sort(key=itemgetter(1))
+    return " ".join(["{0}-{1}".format(tup[0],tup[1]) for tup in alignment])
+
 if __name__ =="__main__":
     a = Aligner("")
     a.align_pair("speech FROM THE THRONE".split(),
