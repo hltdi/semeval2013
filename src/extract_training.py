@@ -59,7 +59,7 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
-                if len(out_source) == 200: break
+                ## if len(out_source) == 200: break
     return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
