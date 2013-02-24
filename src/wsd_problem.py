@@ -10,6 +10,12 @@ END = "QQQENDHEADQQQ"
 class WSDProblem:
     """Class where we'll stash all the information about a given WSD problem."""
 
+    ## TODO(alexr): this needs to be reworked so we can sensibly build them from
+    ## training data...
+    ## Probably we'll pass a flag to say whether we're building from the test
+    ## set or the training set. If it's the training set, we'll pass an index
+    ## for the head word, and otherwise, the constructor will look for the head
+    ## tags. Passing 'count' is probably not a good idea.
     def __init__(self, source_lex, count, context, instance_id):
         """Given the source lexical item (ie, uninflected version of the source
         word) and the context, build a WSD problem that we can solve later."""

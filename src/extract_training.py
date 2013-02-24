@@ -148,7 +148,7 @@ def get_argparser():
     return parser
 
 def main():
-    parser = get_parser()
+    parser = get_argparser()
     args = parser.parse_args()
 
     sourcefn = args.sourcetext
@@ -200,10 +200,13 @@ def main():
             source_lemmas = candidate.source_lemmatized
             target_lemmas = candidate.target_lemmatized
             for i in range(len(tags)):
-                if source_lemmas[i] == sourceword and tags[i] in NOUN:
+                if (source_lemmas[i] == sourceword and
+                    tags[i] in NOUN and
+                    tws[i]):
                     withtags = ["{0}/{1}".format(word,tag)
                                 for word,tag in candidate.source_tagged]
                     print(" ".join(withtags), file=outfile)
+                    print(i, file=outfile) ## index of source word
                     print(" ".join(tws[i]).lower(), file=outfile)
 
 if __name__ == "__main__": main()

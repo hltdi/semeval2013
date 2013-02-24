@@ -29,16 +29,17 @@ def get_training_data_from_extracted(sourceword, targetlang):
     with open(fn) as infile:
         lines = infile.readlines()
         lines = [line.strip() for line in lines]
-        labelss = [line.split(",") for line in lines[1::2]]
-        contexts = [line for line in lines[0::2]]
-        assert len(contexts) == len(labelss)
+        contexts = [line for line in lines[0::3]]
+        indices = [int(line) for line in lines[1::3]]
+        labelss = [line.split(",") for line in lines[2::3]]
+        assert len(contexts) == len(labelss) == len(indices)
 
     problemid = 0
     answers = {}
-    for context, labels in zip(contexts, labelss):
+    for context, index, labels in zip(contexts, indices, labelss):
         for label in labels:
             if label == '': continue
-            problem = WSDProblem(sourceword, 0, context, problemid)
+            problem = WSDProblem(sourceword, index, context, problemid)
             problems.append(problem)
             answers[problemid] = label
             problemid += 1
