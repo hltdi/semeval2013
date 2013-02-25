@@ -4,6 +4,8 @@ import nltk
 from nltk.stem import wordnet
 wnl = wordnet.WordNetLemmatizer()
 
+import stanford
+
 START = "QQQSTARTHEADQQQ"
 END = "QQQENDHEADQQQ"
 
@@ -15,14 +17,28 @@ class WSDProblem:
     ## Probably we'll pass a flag to say whether we're building from the test
     ## set or the training set. If it's the training set, we'll pass an index
     ## for the head word, and otherwise, the constructor will look for the head
-    ## tags. Passing 'count' is probably not a good idea.
-    def __init__(self, source_lex, count, context, instance_id):
+    ## tags.
+    ## TODO(alexr): let's flatten out the representation. Let's just store a
+    ## one-level list, then indices make more sense.
+    def __init__(self, source_lex, context,
+                 testset=False, instance_id=None, head_index=None):
         """Given the source lexical item (ie, uninflected version of the source
         word) and the context, build a WSD problem that we can solve later."""
         self.source_lex = source_lex
-        self.context = context
-        self.head_count = count
         self.instance_id = instance_id
+
+        if testset:
+            self.init_testset(context)
+        else:
+            self.init_trainingset(context, head_index)
+
+        self.lemmatized = [wnl.lemmatize(token.lower())
+                           for token in nltk.tag.untag(self.tagged)]
+
+    def init_testset(self, context):
+        """If we're coming from the test set, we haven't tagged yet. Probably
+        tag now. Also we're probably not tokenized."""
+        assert type(context) is str
         self.head_indices = []
 
         context = context.replace("<head>", START)
@@ -30,16 +46,32 @@ class WSDProblem:
 
         sentences = nltk.sent_tokenize(context)
         tokenized = [nltk.word_tokenize(sent) for sent in sentences]
+
+        index = 0
         for sent_index,sent in enumerate(tokenized):
             for word_index,word in enumerate(sent):
                 if word.startswith(START):
                     assert word.endswith(END)
                     sent[word_index] = word.replace(START,"").replace(END,"")
-                    self.head_indices.append((sent_index,word_index))
+                    self.head_indices.append(index)
+                    print("HEAD INDEX AT", index)
+                index += 1
 
-        self.tokenized = tokenized
-        self.lemmatized = [[wnl.lemmatize(token.lower()) for token in sent]
-                           for sent in self.tokenized]
+        tagger = stanford.get_tagger()
+        tagged_sents = tagger.batch_tag(tokenized)
+        self.tagged = []
+        for ts in tagged_sents:
+            self.tagged += ts
+
+    def init_trainingset(self, context, head_index):
+        """In this case, we should get context as a tagged string, out of the
+        training data files. Also a particular head_index. We still need to
+        lemmatize."""
+        assert type(context) is str
+        assert type(head_index) is int
+        split = context.split()
+        self.tagged = [nltk.tag.str2tuple(tok) for tok in split]
+        self.head_indices = [head_index]
 
     def __str__(self):
-        return "<<{0}: {1}>>".format(self.source_lex, self.context)
+        return "<<{0}: {1}>>".format(self.source_lex, self.tagged)

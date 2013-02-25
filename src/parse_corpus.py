@@ -6,9 +6,11 @@ that are specified on the command line.
 """
 
 import sys
+import argparse
 from xml.sax import handler, make_parser
 
 from wsd_problem import WSDProblem
+import stanford
 
 class SentenceExtractor(handler.ContentHandler):
     def __init__(self):
@@ -59,17 +61,24 @@ def extract_wsd_problems(fn):
     parser.parse(fn)
 
     out = []
-    for (lexelt, head_count, context, instance_id) in list(handler.sentences):
-        problem = WSDProblem(lexelt, head_count, context, instance_id)
+    for (lexelt, head_count, context, inst) in list(handler.sentences):
+        problem = WSDProblem(lexelt, context, instance_id=inst, testset=True)
         out.append(problem)
     return out
 
 def main():
-    fns = sys.argv[1:]
-    for fn in fns:
-        sentences = extract_wsd_problems(fn)
-        for sentence in sentences:
-            print("***")
-            print(sentence)
+    parser = argparse.ArgumentParser(description='clwsd')
+    parser.add_argument('--taggerhome', type=str, required=True)
+    parser.add_argument('--problems', type=str, required=True)
+    args = parser.parse_args()
+
+    stanford.taggerhome = args.taggerhome
+    fn = args.problems
+
+    problems = extract_wsd_problems(fn)
+    for problem in problems:
+        print("***")
+        print(problem.tagged)
+
 
 if __name__ == "__main__": main()

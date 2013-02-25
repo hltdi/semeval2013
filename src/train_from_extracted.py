@@ -34,20 +34,20 @@ def get_training_data_from_extracted(sourceword, targetlang):
         labelss = [line.split(",") for line in lines[2::3]]
         assert len(contexts) == len(labelss) == len(indices)
 
-    problemid = 0
-    answers = {}
+    answers = []
     for context, index, labels in zip(contexts, indices, labelss):
+        print(index)
+        problem = WSDProblem(sourceword, context,
+                             testset=False, head_index=index)
         for label in labels:
             if label == '': continue
-            problem = WSDProblem(sourceword, index, context, problemid)
             problems.append(problem)
-            answers[problemid] = label
-            problemid += 1
+            answers.append(label)
 
-    for problem in problems:
-        theid = problem.instance_id
+    for problem,answer in zip(problems, answers):
         featureset = features.extract(problem)
-        label = answers[theid]
+        label = answer
+        assert(type(label) is str)
         out.append((featureset, label))
     return out
 

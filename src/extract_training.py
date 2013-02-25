@@ -9,24 +9,15 @@ import functools
 import re
 
 import nltk
-from nltk.tag.stanford import POSTagger
 from nltk.stem import wordnet
 
 import get_possible_senses
 import treetagger
 from Aligner import target_words_for_each_source_word
 from Aligner import sort_alignment
+import stanford
 
 wnl = wordnet.WordNetLemmatizer()
-
-taggerhome = None
-@functools.lru_cache(maxsize=20)
-def get_tagger():
-    ## these need to be environment variables or commandline arguments.
-    tagger = taggerhome + '/models/wsj-0-18-bidirectional-distsim.tagger'
-    jar = taggerhome + '/stanford-postagger.jar'
-    stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
-    return stanford_tagger
 
 ## These are all the kinds of nouns present in WSJ tagsets.
 NOUN = {'NN','NNS','NNP','NP','NNPS','NPS'}
@@ -128,7 +119,7 @@ def batch_lemmatize(candidates, targetlang, tt_home):
 
 def batch_source_tag(candidates):
     sents = [candidate.source_tokenized for candidate in candidates]
-    tagger = get_tagger()
+    tagger = stanford.get_tagger()
     tagged_sents = tagger.batch_tag(sents)
     for candidate,tagged_sent in zip(candidates, tagged_sents):
         candidate.source_tagged = tagged_sent
@@ -155,8 +146,7 @@ def main():
     targetfn = args.targettext
     alignmentfn = args.alignments
     sourceword = args.sourceword
-    global taggerhome
-    taggerhome = args.taggerhome
+    stanford.taggerhome = args.taggerhome
     all_target_languages = "de es fr it nl".split()
     assert args.targetlang in all_target_languages
     targetlang = args.targetlang
