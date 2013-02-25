@@ -25,7 +25,8 @@ def get_tagger():
     ## these need to be environment variables or commandline arguments.
     tagger = taggerhome + '/models/wsj-0-18-bidirectional-distsim.tagger'
     jar = taggerhome + '/stanford-postagger.jar'
-    stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
+    stanford_tagger = POSTagger(tagger, jar, encoding='utf8',java_options = '-mx5000m')
+    ##   path_to_model, path_to_jar=None, encoding=None, verbose=False, java_options='-mx1000m'
     return stanford_tagger
 
 ## These are all the kinds of nouns present in WSJ tagsets.
@@ -213,10 +214,10 @@ def main(sourcefn,targetfn,alignmentfn,sourceword,taggerhome_pa,targetlang):
 
 def generate_all():
     #main(sourcefn,targetfn,alignmentfn,sourceword,taggerhome,targetlang)
-    all_target_languages = "de es fr it nl".split()
+    all_target_languages = "nl de es fr it".split()
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    #all_words = ['bank']
-    #all_target_languages = ['fr']
+    all_words = "rest ring scene side soil strain test".split()#['ring']
+    all_target_languages = ['it']
     sourcefn="/space/Europarl_Intersection_preprocessed/intersection.en.txt.ascii"
     #targetfn="/space/Europarl_Intersection_preprocessed/intersection."+targetlang+".txt"
     #alignmentfn="/space/output_en_"+targetlang+"/training.align"

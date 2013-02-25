@@ -29,10 +29,6 @@ def senses(sourceword, target):
                 out.add(word)
     return out
 
-#def write_data(labels,sourceword,target):
-#    """Write things to a file."""
-#    for 
-
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, nargs=1, required=True)
@@ -62,20 +58,3 @@ def generate_all():
             fileOUT.close()		
 
 if __name__ == "__main__": generate_all()#main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
