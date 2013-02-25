@@ -29,9 +29,9 @@ def senses(sourceword, target):
                 out.add(word)
     return out
 
-def write_data(labels,sourceword,target):
-    """Write things to a file."""
-    for 
+#def write_data(labels,sourceword,target):
+#    """Write things to a file."""
+#    for 
 
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
@@ -54,12 +54,12 @@ def generate_all():
     all_target_languages = "de es fr it nl".split()
     all_words = []
     for target in all_target_languages:
-	for sourceword in all_words:
+        for sourceword in all_words:
             fileOUT = open(path + sourceword +"."+sourceword,'w')
             labels = senses(sourceword, target)
             for label in labels:
-		fileOUT.write(label + "\n")
-	    fileOUT.close()		
+                fileOUT.write(label + "\n")
+            fileOUT.close()		
 
 if __name__ == "__main__": generate_all()#main()
 
