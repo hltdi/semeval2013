@@ -24,6 +24,7 @@ documents = [
 ]
 
 def main():
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     instances = []
     for (text, label) in documents:
         feats = document_features(text.split())
@@ -35,7 +36,10 @@ def main():
                   DecisionTreeClassifier]:
         print("trying", klass)
 
-        classifier = klass.train(instances)
+        if klass is MaxentClassifier:
+            classifier = klass.train(instances, algorithm='megam')
+        else:
+            classifier = klass.train(instances)
         print(classifier.labels())
         try:
             dist = classifier.prob_classify(feats)
