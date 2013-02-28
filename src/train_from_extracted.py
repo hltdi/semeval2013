@@ -55,7 +55,10 @@ def get_maxent_classifier(sourceword, target):
     instances = get_training_data_from_extracted(sourceword, target)
     print("got {0} training instances!!".format(len(instances)))
     print("... training ...")
-    classifier = MaxentClassifier.train(instances, trace=0, max_iter=20)
+    classifier = MaxentClassifier.train(instances,
+                                        trace=0,
+                                        max_iter=20,
+                                        algorithm='megam')
     print("LABELS", classifier.labels())
     return classifier
 
