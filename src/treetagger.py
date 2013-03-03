@@ -17,8 +17,8 @@ from nltk.tag.api import TaggerI
 _treetagger_url = 'http://www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger'
 
 _treetagger_languages = {
-'latin-1':['bulgarian', 'dutch', 'english', 'estonian', 'french', 'german', 'greek', 'italian', 'latin', 'russian', 'spanish', 'swahili'],
-'utf8' : ['french', 'german', 'greek', 'italian', 'spanish']}
+'latin-1':['bulgarian', 'english', 'estonian', 'french', 'german', 'greek', 'italian', 'latin', 'russian', 'spanish', 'swahili'],
+'utf8' : ['french', 'german', 'greek', 'italian', 'spanish', 'dutch']}
 
 """The default encoding used by TreeTagger: utf8. '' means latin-1; ISO-8859-1"""
 _treetagger_charset = ['utf8', 'latin-1']
