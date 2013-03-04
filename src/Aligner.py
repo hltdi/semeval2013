@@ -51,6 +51,29 @@ def target_words_for_each_source_word(ss, ts, alignment):
         out[si].append(ts[ti])
     return out
 
+def source_words_for_each_target_word(ss, ts, alignment):
+    """Given a list of tokens in source language, a list of tokens in target
+    language, and a list of Berkeley-style alignments of the form target-source,
+    for each target word, return the list of corresponding source words."""
+    alignment = [tuple(map(int, pair.split('-'))) for pair in alignment]
+    out = [list() for i in range(len(ts))]
+    alignment.sort(key=itemgetter(0))
+    for (ti,si) in alignment:
+        out[ti].append(ss[si])
+    return out
+
+def source_indices_for_each_target_word(ss, ts, alignment):
+    """Given a list of tokens in source language, a list of tokens in target
+    language, and a list of Berkeley-style alignments of the form target-source,
+    for each target word, return the list of indices of corresponding source
+    words."""
+    alignment = [tuple(map(int, pair.split('-'))) for pair in alignment]
+    out = [list() for i in range(len(ts))]
+    alignment.sort(key=itemgetter(0))
+    for (ti,si) in alignment:
+        out[ti].append(si)
+    return out
+
 def sort_alignment(alignment):
     """Take a string, return a string."""
     alignment = alignment.split()

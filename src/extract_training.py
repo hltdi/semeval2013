@@ -14,6 +14,8 @@ from nltk.stem import wordnet
 import get_possible_senses
 import treetagger
 from Aligner import target_words_for_each_source_word
+from Aligner import source_words_for_each_target_word
+from Aligner import source_indices_for_each_target_word
 from Aligner import sort_alignment
 import stanford
 
@@ -60,7 +62,7 @@ def lemmatize_sentence(sentence, language, tt_home=None):
     tt_lang = codes_to_names[language]
     tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
     output = tt.tag(sentence)
-    return [lemma for word,tag,lemma in output]
+    return [lemma.lower() for word,tag,lemma in output]
 
 def batch_lemmatize_sentences(sentences, language, tt_home=None):
     """For a list of tokenized sentences in the given language, call TreeTagger
@@ -81,12 +83,13 @@ def batch_lemmatize_sentences(sentences, language, tt_home=None):
 def list_has_sublist(biglist, sublist):
     """We could use this to look for known target-language senses in the target
     text. Possibly fall back to this if we can't find a good target-language
-    sense with the alignments?"""
+    sense with the alignments? Return the index of the sublist, if it's present,
+    otherwise False."""
     size = len(sublist)
     for pos in range(len(biglist) - len(sublist) + 1):
         maybe = biglist[pos:pos+size]
         if maybe == sublist:
-            return True
+            return pos
     return False
 
 class TrainingCandidate:
@@ -179,6 +182,9 @@ def main():
     assert(len(source_lines) == len(target_lines) == len(alignment_lines) )
 
     gold_labels = get_possible_senses.senses(sourceword, targetlang)
+    labelwords_by_len = sorted([label.split() for label in gold_labels],
+                               key=len,
+                               reverse=True)
     lemmatized_labels = set()
     unlemmatized_labels = set()
 
@@ -200,7 +206,7 @@ def main():
 
     with open(out_fn, "w") as outfile:
         for candidate in make_into_training_data:
-            labels_for_sentence = []
+            found = False
             tags = [tag for (word,tag) in candidate.source_tagged]
             alignment = sort_alignment(candidate.alignment_line).split()
             tws = target_words_for_each_source_word(candidate.source_lemmatized,
@@ -211,6 +217,43 @@ def main():
                                                      alignment)
             source_lemmas = candidate.source_lemmatized
             target_lemmas = candidate.target_lemmatized
+
+            ## look for the known gold labels.
+            target_lower = [tok.lower() for tok in candidate.target_tokenized]
+            for labelwords in labelwords_by_len:
+                found_in_lemmatized = False
+                start = list_has_sublist(target_lemmas, labelwords)
+                if start: found_in_lemmatized = True
+                if not start:
+                    start = list_has_sublist(target_lower, labelwords)
+                if not start: continue
+                sws = source_words_for_each_target_word(
+                    candidate.source_lemmatized, target_lemmas, alignment)
+                source_indices = source_indices_for_each_target_word(
+                    candidate.source_lemmatized, target_lemmas, alignment)
+                for i in range(start, start+len(labelwords)):
+                    if sourceword in sws[i]:
+                        subindex = sws[i].index(sourceword)
+                        source_index = source_indices[i][subindex]
+                        ## print("SUBINDEX", subindex)
+                        ## print(source_indices[i])
+                        ## print("FOUND IT:", sourceword, "->", labelwords)
+                        found = True
+                        label = " ".join(labelwords)
+                        if found_in_lemmatized:
+                            lemmatized_labels.add(label)
+                        else:
+                            unlemmatized_labels.add(label)
+                        print_candidate_to_file(candidate, source_index, label,
+                                                outfile)
+                if found: break
+
+            ## if we found a gold label for this candidate, go to next
+            ## candidate! XXX(alexr): good idea? Or maybe we should allow
+            ## several training examples to be extracted?
+            if found: continue
+
+            ## scan using the alignments.
             for i in range(len(tags)):
                 has_alignment = bool(tws[i])
                 if not has_alignment: continue
