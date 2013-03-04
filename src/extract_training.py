@@ -21,6 +21,7 @@ wnl = wordnet.WordNetLemmatizer()
 
 ## These are all the kinds of nouns present in WSJ tagsets.
 NOUN = {'NN','NNS','NNP','NP','NNPS','NPS'}
+LIKELY_NP = {'JJ','JJR','JJS','POS','DT','NN','NNS','NNP','NP','NNPS','NPS'}
 def keep_candidate(candidate, sourceword):
     """Decide whether to keep a candidate based on its tagged source
     sentence."""
@@ -38,6 +39,7 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
     out_source = []
     out_target = []
     out_align = []
+    count = 0
     with open(sourcefn) as infile_s, \
          open(targetfn) as infile_t, \
          open(alignfn) as infile_align:
@@ -46,7 +48,8 @@ def load_bitext(sourcefn, targetfn, alignfn, sourceword):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
-                ## if len(out_source) == 200: break
+                count += 1
+                ## if count == 200: break
     return out_source, out_target, out_align
 
 def lemmatize_sentence(sentence, language, tt_home=None):
@@ -61,7 +64,7 @@ def lemmatize_sentence(sentence, language, tt_home=None):
 
 def batch_lemmatize_sentences(sentences, language, tt_home=None):
     """For a list of tokenized sentences in the given language, call TreeTagger
-    on them to get a list of lemmas."""
+    on them to get a list of lemmas; lowercase them all."""
     codes_to_names = {"en":"english", "de":"german", "it":"italian",
                       "es":"spanish", "fr":"french", "nl":"dutch"}
     tt_lang = codes_to_names[language]
@@ -73,7 +76,7 @@ def batch_lemmatize_sentences(sentences, language, tt_home=None):
     else:
         tt = treetagger.TreeTagger(tt_home=tt_home, language=tt_lang)
     output = tt.batch_tag(sentences)
-    return [[lemma for word,tag,lemma in sent] for sent in output]
+    return [[lemma.lower() for word,tag,lemma in sent] for sent in output]
 
 def list_has_sublist(biglist, sublist):
     """We could use this to look for known target-language senses in the target
@@ -125,6 +128,21 @@ def batch_source_tag(candidates):
         candidate.source_tagged = tagged_sent
     print("tagged.")
 
+def print_candidate_to_file(candidate, index, label, outfile):
+    """Given a candidate object, the index of the head word in the source
+    language, and the label we want to mark it with, print it into the
+    outfile."""
+    withtags = map(nltk.tag.tuple2str, candidate.source_tagged)
+    withtags = list(withtags)
+    tagged = " ".join(withtags)
+    ## print the tagged source context.
+    print(tagged, file=outfile)
+    ## print the index of the head word.
+    print(index, file=outfile) ## index of source word
+    ## print the label
+    assert "<unknown>" not in label
+    print(label, file=outfile)
+
 def get_argparser():
     """Build the argument parser for main."""
     parser = argparse.ArgumentParser(description='clwsd')
@@ -158,9 +176,11 @@ def main():
     source_lines, target_lines, alignment_lines = \
         load_bitext(sourcefn, targetfn, alignmentfn, sourceword)
     print("got source/target lines")
-
-    ## labels = get_possible_senses.senses(sourceword, targetlang)
     assert(len(source_lines) == len(target_lines) == len(alignment_lines) )
+
+    gold_labels = get_possible_senses.senses(sourceword, targetlang)
+    lemmatized_labels = set()
+    unlemmatized_labels = set()
 
     candidates = []
     for sl, tl, al in zip(source_lines, target_lines, alignment_lines):
@@ -181,22 +201,65 @@ def main():
     with open(out_fn, "w") as outfile:
         for candidate in make_into_training_data:
             labels_for_sentence = []
-            lowered = [tok.lower() for tok in candidate.source_lemmatized]
             tags = [tag for (word,tag) in candidate.source_tagged]
             alignment = sort_alignment(candidate.alignment_line).split()
             tws = target_words_for_each_source_word(candidate.source_lemmatized,
                                                     candidate.target_lemmatized,
                                                     alignment)
+            tws2 = target_words_for_each_source_word(candidate.source_lemmatized,
+                                                     candidate.target_tokenized,
+                                                     alignment)
             source_lemmas = candidate.source_lemmatized
             target_lemmas = candidate.target_lemmatized
             for i in range(len(tags)):
-                if (source_lemmas[i] == sourceword and
-                    tags[i] in NOUN and
-                    tws[i]):
-                    withtags = ["{0}/{1}".format(word,tag)
-                                for word,tag in candidate.source_tagged]
-                    print(" ".join(withtags), file=outfile)
-                    print(i, file=outfile) ## index of source word
-                    print(" ".join(tws[i]).lower(), file=outfile)
+                has_alignment = bool(tws[i])
+                if not has_alignment: continue
+                l_label = " ".join(tws[i]).lower()
+                u_label = " ".join(tws2[i]).lower()
+
+                ## Case where we found the right word.
+                if (source_lemmas[i] == sourceword and tags[i] in NOUN):
+                    lemmatized_labels.add(l_label)
+                    unlemmatized_labels.add(u_label)
+                    if "<unknown>" not in l_label:
+                        print_candidate_to_file(candidate, i, l_label, outfile)
+                    else:
+                        print_candidate_to_file(candidate, i, u_label, outfile)
+                ## But maybe we are in the right noun phrase and the word 
+                ## word aligned to us is one of the known senses:
+                ## include that too.
+                if tags[i] in LIKELY_NP:
+                    found_source = False
+                    offset = 0
+                    for off in [-2, -1, 1, 2]:
+                        if (i + off) in range(len(tags)):
+                            if (source_lemmas[i+off] == sourceword and
+                                tags[i+off] in NOUN):
+                                offset = off
+                                found_source = True
+                                break
+                    if found_source:
+                        if l_label in gold_labels:
+                            lemmatized_labels.add(l_label)
+                            print_candidate_to_file(candidate,
+                                                    i+offset,
+                                                    l_label,
+                                                    outfile)
+                        elif u_label in gold_labels:
+                            unlemmatized_labels.add(u_label)
+                            print_candidate_to_file(candidate,
+                                                    i+offset,
+                                                    u_label,
+                                                    outfile)
+
+    all_seen_labels = lemmatized_labels.union(unlemmatized_labels)
+    unseen_labels = gold_labels - all_seen_labels
+    nonstandard_labels = all_seen_labels - gold_labels
+    print("*" * 80)
+    print("observed labels", sorted(list(all_seen_labels)))
+    print("*" * 80)
+    print("nonstandard labels", sorted(list(nonstandard_labels)))
+    print("*" * 80)
+    print("unseen gold labels", sorted(list(unseen_labels)))
 
 if __name__ == "__main__": main()
