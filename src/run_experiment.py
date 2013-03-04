@@ -9,18 +9,6 @@ from train_from_extracted import get_maxent_classifier
 import features
 import stanford
 
-def solve_one_best(problem, target, solver=None):
-    """Return the one best translation in the specified target language.
-    Default to using a maxent classifier."""
-
-    return "banco"
-
-def solve_oof(problem, target, solver=None):
-    """Return a list of the best translations in the specified target
-    language. Default to using a maxent classifier."""
-    return "orilla banco".split()
-
-
 def output_one_best(problem, target, solution):
     """Return output for a solution for the one-best."""
     return "{0}.{1} {2} :: {3};".format(problem.source_lex,
