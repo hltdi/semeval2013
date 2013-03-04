@@ -5,6 +5,7 @@ This file gets the co-occurrence table for languages.
 3. co-occurrence distri and classifier output on the same scale.
 """
 import math
+import pickle
 import sys
 from collections import defaultdict
 ### import the alignment file.
@@ -13,8 +14,6 @@ SMOOTH = 0.2
 class Occurrence:
 
 	def __init__(self,sourceword,lan1,lan2):
-
-		#lan1,lan2 = sorted(languages.split('-'))  ##The pair by alphabetic order. 
 		self.sent_pairs = []
 		self.cooccur = defaultdict(  lambda: defaultdict (lambda:0))
 		self.lan1_labels = self.get_labels(sourceword,lan1)
@@ -22,7 +21,12 @@ class Occurrence:
 		self.lan1_tags_train = set()
 		self.lan2_tags_train = set()
 		self.unary_counts1 = defaultdict(lambda:0)
-		self.unary_counts2 = defaultdict(lambda:0) 
+		self.unary_counts2 = defaultdict(lambda:0)
+		self.sent_pairs = []
+		self.counts = {} 
+		#cls = Occurrence(word,lan1,lan2)
+		self.get_common_sents(word,lan1,lan2)
+		self.get_count()
 
 
 	def get_labels(self,sourceword,lan):
@@ -38,14 +42,8 @@ class Occurrence:
 		fileO.close()
 		return labels
 	
-
-	def get_aligned(self,sourceword,lan1,lan2):
-                
-		self.sent_pairs = [] ### TO
-
 	def get_common_sents(self,sourceword,lan1,lan2):
 		path = "../trainingdata/"
-		#path ="../"
 		lan1FN = path+sourceword +"."+ lan1 + ".train"
 		lan2FN = path+sourceword +"."+ lan2 + ".train"
 		
@@ -96,32 +94,58 @@ class Occurrence:
 				self.lan2_tags_train.add(pair[1])
 				self.unary_counts1[pair[0]] +=1
 				self.unary_counts2[pair[1]] +=1
+				#if pair[0] == '<unknown>' or pair[1] == '<unknown>': continue
 				sent_pairs.append(pair)
 				total += dic2[key]
 				count +=1
 		print("Total overlapped sents:",total,count)
-		return sent_pairs
+		#return sent_pairs
+		self.sent_pairs = sent_pairs
 
-
-	def get_count(self,sent_pairs):
+	def get_count(self):
+		sent_pairs = self.sent_pairs
 		print("Counting from....:",len(sent_pairs))
 		temp_dict = defaultdict(lambda:  defaultdict(lambda:0))
 		ll = sent_pairs
-		print('ll',ll)
+		#print('ll',ll)
 		for lan1_w,lan2_w in ll:
-			print(lan1_w,lan2_w)
+			#print(lan1_w,lan2_w)
 			temp_dict[lan1_w][lan2_w] +=1
 		
 		self.cooccur = temp_dict
+		"""
 		for i in temp_dict:
-			print ("===========\n")
+			#print ("===========\n")
 			for key in temp_dict[i]:
 				print(i,key,temp_dict[i][key])
 			#print(temp_dict)
-		return temp_dict
+		"""
+		#return temp_dict
+		self.counts = temp_dict
 
-	def get_distribution(self,counts):
+	def get_joint(self):
+		counts = self.counts
+		##Extend the label set.
+		SMOOTH = 0.0001
+		lan1_tags = self.lan1_tags_train.union(set(self.lan1_labels.keys()))
+		lan2_tags = self.lan2_tags_train.union(set(self.lan2_labels.keys()))
+		total = sum( [ sum( list(counts[w1].values()  ) ) for w1 in counts ] )
+		##joint probability.
+		joint = {}
+		check = 0
+		for lan1_word in lan1_tags:
+			for lan2_word in lan2_tags:
+				joint_p = 1.0* (  SMOOTH + counts[lan1_word][lan2_word]  ) / (total + SMOOTH*len(lan1_tags)*len(lan2_tags))
+				joint[(lan1_word +"&&"+lan2_word)] = joint_p
+				joint[(lan2_word +"&&"+lan1_word)] = joint_p
+				check += joint_p
 
+		print (check)
+		return joint
+
+
+	def get_conditional(self):
+		counts = self.counts
 		##Extend the labels.
 		lan1_tags = self.lan1_tags_train.union(set(self.lan1_labels.keys()))
 		lan2_tags = self.lan2_tags_train.union(set(self.lan2_labels.keys()))
@@ -131,28 +155,28 @@ class Occurrence:
 		"""Change the counts into a distribution."""
 		templist = []#defaultdict(  lambda: defaultdict(lambda:0))
 		tempdict = {}
-		#for lan1_label in self.lan1_labels:
-		#	for lan2_label in self.lan2_labels:
-	#			templist.append((lan1_label,lan2_label,counts[lan1_label][lan2_label]))
-	#	for l1,l2,count in templist:	
-	#		tempdict[(l1,l2)] = count
-
-		conditionals1 = defaultdict(lambda:  defaultdict(lambda:0))
-		conditionals2 = defaultdict(lambda:  defaultdict(lambda:0))
+		
+		conditionals1 =defaultdict(lambda:  defaultdict(lambda:0))
+		conditionals2 =defaultdict(lambda:  defaultdict(lambda:0))
 
 		##Should do the sanity check...
 		for lan1_word in lan1_tags:
 			##sanity check.
 			check = 0
+			on_lan1 = {}
 			##if haven't seen this p(any|this word) = very very small number.
 			for lan2_word in lan2_tags:
 				if self.unary_counts1[lan1_word] ==0:
 					conditionals1[lan1_word][lan2_word] = math.exp(-100) ####which value to assign???
+					#on_lan1[lan2_word] = math.exp(-100) 
 				else:
+					#on_lan1[lan2_word] = 1.0*(counts[lan1_word][lan2_word] + SMOOTH)\
+                                        #                                        /(self.unary_counts1[lan1_word] + size2*SMOOTH)
 					conditionals1[lan1_word][lan2_word] = 1.0*(counts[lan1_word][lan2_word] + SMOOTH)\
-										/(self.unary_counts1[lan1_word] + size2*SMOOTH)
+											/(self.unary_counts1[lan1_word] + size2*SMOOTH)
 					check += 1.0*(counts[lan1_word][lan2_word] + SMOOTH)\
                                                                                 /(self.unary_counts1[lan1_word] + size2*SMOOTH)
+			#conditionals1[lan1_word] = on_lan1
 			print("Sanity check:::",lan1_word,check)
 		##Repeat the thing for language two.
 		
@@ -161,15 +185,14 @@ class Occurrence:
                         ##if haven't seen this p(any|this word) = very very small number.
 			for lan1_word in lan1_tags:
                                 if self.unary_counts2[lan2_word] ==0:
+
                                         conditionals2[lan2_word][lan1_word] = math.exp(-100) ####which value to assign???
                                 else:
 
-
-
-					conditionals2[lan2_word][lan1_word] = \
-						1.0*(counts[lan1_word][lan2_word] + SMOOTH)/\
-						(self.unary_counts2[lan2_word] + size1*SMOOTH)
-					check += 1.0*(counts[lan1_word][lan2_word] + SMOOTH)\
+                                        conditionals2[lan2_word][lan1_word] = 1.0*(counts[lan1_word][lan2_word] + SMOOTH)/\
+					(self.unary_counts2[lan2_word] + size1*SMOOTH)
+					
+                                        check += 1.0*(counts[lan1_word][lan2_word] + SMOOTH)\
                                                                                 /(self.unary_counts2[lan2_word] + size1*SMOOTH)
 
 
@@ -179,7 +202,7 @@ class Occurrence:
 		
 		#return conditionals1
 		return conditionals1,conditionals2
-	def write_data(self,conditional1,lan1,conditional2,lan2,sourceword):
+	def write_to_file(self,conditional1,lan1,conditional2,lan2,sourceword):
 
 		cond1OUT = open(sourceword + "." + lan2 + ".on." + lan1,'w') ### TODO
 		cond2OUT = open(sourceword + "." + lan1 + ".on." + lan2,'w')
@@ -194,26 +217,46 @@ class Occurrence:
 		cond1OUT.close()
 		cond2OUT.close()
 
+	def pickle_data(self,cond1,cond2,joint,lan1,lan2):
+		cond1pname = lan2 + ".on." + lan1 + ".pickle"
+		cond2pname = lan1 + ".on." + lan2 + ".pickle"
+		jointpname = lan1 +"_"+ lan2 + ".joint"
+		pickle.dump({1:2,3:4},open("try.p",'wb'))
+		#pickle.dump(cond1,open(cond1pname,'wb'))
+		pickle.dump(cond2,open(cond2pname,'wb'))
+		pickle.dump(joint,open(jointpname,'wb'))
+
+def main():
+	##generate the conditionals and joint for all languages, all words.
+	all_words = "bank".split()
+	all_languages = sorted("it fr de".split())
+	done = {}
+	for word in all_words:
+		for lan1 in all_languages:
+			for lan2 in all_languages:
+				if lan1 == lan2 or (lan1,lan2) in done or (lan2,lan1) in done:
+					 continue
+				else:
+					print(lan1,lan2)
+					cls = Occurrence(word,lan1,lan2)
+					sents = cls.get_common_sents(word,lan1,lan2)
+					counts = cls.get_count(sents)
+					cond1,cond2 = cls.get_conditional(counts)
+					joint = cls.get_joint(counts)
+        				#cls.write_data(cond1,'de',cond2,'it','bank')
+					#cls.pickle_data(cond1,cond2,joint,lan1,lan2)
+					del cls
+					done[(lan1,lan2)] = 1
+	
 if __name__ == "__main__":  
-	cls = Occurrence('bank','de','it')
-	sents = cls.get_common_sents('bank','de','it')
-	counts = cls.get_count(sents)
-	cond1,cond2 = cls.get_distribution(counts)
-	cls.write_data(cond1,'de',cond2,'it','bank')
-	"""
-	#print(occur)
-	for key in occur:
-		#print("================\n\n")
-		ddd = occur[key]
-		#for keykey in ddd:
-		#if ddd >0:
-		#	print (key,ddd)
-		#print(keykey,ddd[keykey])
-		#for w2 in occur:
-		#	print(key,w2,occur[key][	
-
-	"""
+	#main()
+	word = 'bank'
+	lan1 = 'de'
+	lan2 = 'fr'
+	cls = Occurrence(word,lan1,lan2)
+	cond1,cond2 = cls.get_conditional()
+	joint = cls.get_joint()
+	
 
 
-
-			
+		
