@@ -221,6 +221,7 @@ def main():
             ## look for the known gold labels.
             target_lower = [tok.lower() for tok in candidate.target_tokenized]
             for labelwords in labelwords_by_len:
+                label = " ".join(labelwords)
                 found_in_lemmatized = False
                 start = list_has_sublist(target_lemmas, labelwords)
                 if start: found_in_lemmatized = True
@@ -235,11 +236,7 @@ def main():
                     if sourceword in sws[i]:
                         subindex = sws[i].index(sourceword)
                         source_index = source_indices[i][subindex]
-                        ## print("SUBINDEX", subindex)
-                        ## print(source_indices[i])
-                        ## print("FOUND IT:", sourceword, "->", labelwords)
                         found = True
-                        label = " ".join(labelwords)
                         if found_in_lemmatized:
                             lemmatized_labels.add(label)
                         else:
@@ -247,6 +244,19 @@ def main():
                         print_candidate_to_file(candidate, source_index, label,
                                                 outfile)
                 if found: break
+
+                ## the target sense is here in the target language, but
+                ## there's nothing aligned to the source word, we'll take a
+                ## guess. (good idea? maybe?)
+                for i in range(len(tags)):
+                    if (source_lemmas[i] == sourceword and
+                        tags[i] in NOUN and
+                        not tws[i]):
+                        print_candidate_to_file(candidate, i, label, outfile)
+                        if found_in_lemmatized:
+                            lemmatized_labels.add(label)
+                        else:
+                            unlemmatized_labels.add(label)
 
             ## if we found a gold label for this candidate, go to next
             ## candidate! XXX(alexr): good idea? Or maybe we should allow
