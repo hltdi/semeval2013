@@ -4,6 +4,8 @@
 the sweet, sweet instances out of it. And then train on them and produce a
 maxent classifier for a given target language and source word."""
 
+import nltk
+import pickle
 import sys
 import argparse
 from operator import itemgetter
@@ -87,4 +89,23 @@ def main():
         print("CORRECT" if label == answer else "WRONG", end=" ")
         print("should be:", label)
 
-if __name__ == "__main__": main()
+def get_all_classifier():
+
+    all_target_languages = "nl de es fr it".split()
+    all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
+    all_languages = ['es']
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
+    for sourceword in all_words:
+        for target in all_languages:
+            classifier = get_maxent_classifier(sourceword, target)
+            picklename = sourceword +"." + target + ".level1.pickle"
+            pickle.dump(classifier,open(picklename,'wb'))
+            trytry = pickle.load( open( picklename, "rb" ) )
+            print("Loading successful!!!")
+           
+
+
+
+
+
+if __name__ == "__main__": get_all_classifier()
