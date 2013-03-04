@@ -11,7 +11,6 @@ from operator import itemgetter
 
 ## TUNABLE PARAMETERS (tune it up) ##
 TOTAL_MSG_PENALTY = 100
-NSTEPS = 2
 
 ## this might be a good thing to do with Cython.
 
@@ -105,7 +104,7 @@ def initialize_messages(nodes):
 ## looks like {'value': penalty, ...}
 ## current_messages is a map like: {(from, to): message, ...}
 
-def beliefprop():
+def beliefprop(NSTEPS):
     previous_messages = {}
     current_messages = None
     previous_messages = initialize_messages(nodes)
