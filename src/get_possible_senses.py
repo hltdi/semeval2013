@@ -55,6 +55,6 @@ def generate_all():
             labels = senses(sourceword, target)
             for label in labels:
                 fileOUT.write(label + "\n")
-            fileOUT.close()		
+            fileOUT.close()
 
 if __name__ == "__main__": generate_all()#main()

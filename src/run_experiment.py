@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import nltk
 
 from parse_corpus import extract_wsd_problems
 from train_from_extracted import get_maxent_classifier
@@ -43,6 +44,7 @@ def main():
 
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
 
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     classifier = get_maxent_classifier(sourceword, targetlang)
     with open("../eval/{0}.output".format(sourceword), "w") as outfile:
         problems = extract_wsd_problems(fn)

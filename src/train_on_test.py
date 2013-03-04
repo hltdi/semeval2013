@@ -6,12 +6,14 @@ import sys
 import argparse
 from operator import itemgetter
 
+import nltk
 from nltk.classify.maxent import MaxentClassifier
 
 from parse_corpus import extract_wsd_problems
 from run_experiment import output_one_best
 import features
 import read_gold
+import stanford
 
 def get_training_problems(sourceword):
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
@@ -35,20 +37,22 @@ def get_training_data(sourceword, target):
 
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
-    parser.add_argument('--sourceword', type=str, nargs=1, required=True)
-    parser.add_argument('--targetlang', type=str, nargs=1, required=True)
-    parser.add_argument('--classifier', type=str, nargs=1, required=False)
+    parser.add_argument('--sourceword', type=str, required=True)
+    parser.add_argument('--targetlang', type=str, required=True)
+    parser.add_argument('--taggerhome', type=str, required=True)
     args = parser.parse_args()
 
     all_target_languages = "de es fr it nl".split()
-    assert args.targetlang[0] in all_target_languages
-    target = args.targetlang[0]
-    sourceword = args.sourceword[0]
+    assert args.targetlang in all_target_languages
+    target = args.targetlang
+    sourceword = args.sourceword
+    stanford.taggerhome = args.taggerhome
 
-    gold_answers = get_gold_answers(sourceword, target)
+    gold_answers = read_gold.get_gold_answers(sourceword, target)
     instances = get_training_data(sourceword, target)
     print("... training ...")
-    classifier = MaxentClassifier.train(instances, trace=0, max_iter=20)
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
+    classifier = MaxentClassifier.train(instances, trace=0, algorithm='megam')
     print("LABELS", classifier.labels())
 
     ## with open("../eval/{0}.output".format(sourceword), "w") as outfile:
