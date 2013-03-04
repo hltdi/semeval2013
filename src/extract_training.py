@@ -4,6 +4,7 @@
 data files."""
 
 import sys
+import os
 import argparse
 import functools
 import re
@@ -17,7 +18,6 @@ from Aligner import target_words_for_each_source_word
 from Aligner import source_words_for_each_target_word
 from Aligner import source_indices_for_each_target_word
 from Aligner import sort_alignment
-import stanford
 
 wnl = wordnet.WordNetLemmatizer()
 
@@ -35,24 +35,29 @@ def keep_candidate(candidate, sourceword):
     return False
 
 def load_bitext(sourcefn, targetfn, alignfn, sourceword):
-    """Return three lists of sentence-like things. First source, then
-    target, then alignment."""
+    """Return four lists of sentence-like things. First source, then
+    target, then alignment, then tagged source."""
+    pretaggedfn = sourcefn + ".pretagged"
     pat = re.compile(r".*"+sourceword+".*", flags=re.IGNORECASE)
     out_source = []
     out_target = []
     out_align = []
+    out_st = []
     count = 0
     with open(sourcefn) as infile_s, \
          open(targetfn) as infile_t, \
-         open(alignfn) as infile_align:
-        for source, target, alignment in zip(infile_s, infile_t, infile_align):
+         open(alignfn) as infile_align, \
+         open(pretaggedfn) as infile_st:
+        for source, target, alignment, st in \
+            zip(infile_s, infile_t, infile_align, infile_st):
             if re.match(pat, source):
                 out_source.append(source.strip())
                 out_target.append(target.strip())
                 out_align.append(alignment.strip())
+                out_st.append(st.strip())
                 count += 1
                 ## if count == 200: break
-    return out_source, out_target, out_align
+    return out_source, out_target, out_align, out_st
 
 def lemmatize_sentence(sentence, language, tt_home=None):
     """For a tokenized sentence in the given language, call TreeTagger on it to
@@ -123,14 +128,6 @@ def batch_lemmatize(candidates, targetlang, tt_home):
     for candidate,lemmas in zip(candidates, lemmatized_sentences):
         candidate.source_lemmatized = lemmas
 
-def batch_source_tag(candidates):
-    sents = [candidate.source_tokenized for candidate in candidates]
-    tagger = stanford.get_tagger()
-    tagged_sents = tagger.batch_tag(sents)
-    for candidate,tagged_sent in zip(candidates, tagged_sents):
-        candidate.source_tagged = tagged_sent
-    print("tagged.")
-
 def print_candidate_to_file(candidate, index, label, outfile):
     """Given a candidate object, the index of the head word in the source
     language, and the label we want to mark it with, print it into the
@@ -153,7 +150,6 @@ def get_argparser():
     parser.add_argument('--targetlang', type=str, required=True)
     parser.add_argument('--sourcetext', type=str, required=True)
     parser.add_argument('--targettext', type=str, required=True)
-    parser.add_argument('--taggerhome', type=str, required=True)
     parser.add_argument('--alignments', type=str, required=True)
     parser.add_argument('--treetaggerhome', type=str, required=False,
                         default="../TreeTagger/cmd")
@@ -167,7 +163,6 @@ def main():
     targetfn = args.targettext
     alignmentfn = args.alignments
     sourceword = args.sourceword
-    stanford.taggerhome = args.taggerhome
     all_target_languages = "de es fr it nl".split()
     assert args.targetlang in all_target_languages
     targetlang = args.targetlang
@@ -176,10 +171,11 @@ def main():
     out_fn = "../trainingdata/{0}.{1}.train".format(sourceword, targetlang)
 
     ## load up all the preprocessed and aligned data.
-    source_lines, target_lines, alignment_lines = \
+    source_lines, target_lines, alignment_lines, sourcetag_lines = \
         load_bitext(sourcefn, targetfn, alignmentfn, sourceword)
     print("got source/target lines")
-    assert(len(source_lines) == len(target_lines) == len(alignment_lines) )
+    assert(len(set([len(source_lines), len(target_lines), len(alignment_lines),
+                   len(sourcetag_lines)])) == 1)
 
     gold_labels = get_possible_senses.senses(sourceword, targetlang)
     labelwords_by_len = sorted([label.split() for label in gold_labels],
@@ -193,7 +189,9 @@ def main():
         candidates.append(TrainingCandidate(sl,tl,al))
 
     ## tag it up.
-    batch_source_tag(candidates)
+    for candidate,st in zip(candidates, sourcetag_lines):
+        tagged_sent = list(map(nltk.tag.str2tuple, st.split()))
+        candidate.source_tagged = tagged_sent
 
     ## having listed the candidates, filter them down.
     make_into_training_data = []

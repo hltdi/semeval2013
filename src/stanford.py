@@ -11,5 +11,6 @@ def get_tagger():
     ## these need to be environment variables or commandline arguments.
     tagger = taggerhome + '/models/wsj-0-18-bidirectional-distsim.tagger'
     jar = taggerhome + '/stanford-postagger.jar'
-    stanford_tagger = POSTagger(tagger, jar, encoding='utf8')
+    stanford_tagger = POSTagger(tagger, jar, encoding='utf8',
+                                java_options='-mx8192m')
     return stanford_tagger

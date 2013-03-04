@@ -19,7 +19,6 @@ for LANG in $LANGUAGES; do
     --sourcetext=/space/Europarl_Intersection_preprocessed/intersection.en.txt.ascii \
     --targettext=/space/Europarl_Intersection_preprocessed/intersection."$LANG".txt \
     --alignments=/space/output_en_"$LANG"/training.align \
-    --taggerhome=/home/liucan/stanford-postagger-2012-11-11
 
   done
 done
