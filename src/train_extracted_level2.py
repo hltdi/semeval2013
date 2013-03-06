@@ -16,6 +16,7 @@ from wsd_problem import WSDProblem
 from parse_corpus import extract_wsd_problems
 import read_gold
 import features
+import stanford
 from co_occur import Occurrence
 
 def get_training_problems(sourceword):
@@ -93,53 +94,75 @@ def get_maxent_classifier(sourceword, target):
     print("LABELS", classifier.labels())
     return classifier
 
-def main():
-    parser = argparse.ArgumentParser(description='clwsd')
-    parser.add_argument('--sourceword', type=str, nargs=1, required=True)
-    parser.add_argument('--targetlang', type=str, nargs=1, required=True)
-    parser.add_argument('--classifier', type=str, nargs=1, required=False)
-    args = parser.parse_args()
+def get_level1_answers(classifier_frd1,classifier_frd2,classifier_frd3,classifier_frd4,featureset):
+    frd1,frd2,frd3,frd4 = sorted(list(get_four_friends(target)))
+    answer_frd1 = classifier.classify()
 
-    all_target_languages = "de es fr it nl".split()
-    assert args.targetlang[0] in all_target_languages
-    target = args.targetlang[0]
-    sourceword = args.sourceword[0]
-    classifier = get_maxent_classifier(sourceword, target)
+def get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword):
+    path = "../L1pickle/"
+    pickle_frd1  = sourceword +"."+frd1 + ".level1.pickle"
+    pickle_frd2  = sourceword +"."+frd2 + ".level1.pickle"
+    pickle_frd3  = sourceword +"."+frd3 + ".level1.pickle"
+    pickle_frd4  = sourceword +"."+frd4 + ".level1.pickle" 
+
+    classifier_frd1 = pickle.load(open(path+pickle_frd1,'rb'))
+    classifier_frd2 = pickle.load(open(path+pickle_frd2,'rb'))
+    classifier_frd3 = pickle.load(open(path+pickle_frd3,'rb'))
+    classifier_frd4 = pickle.load(open(path+pickle_frd4,'rb'))
+
+    return classifier_frd1,classifier_frd2,classifier_frd3,classifier_frd4
+
+
+def train_l2_classifiers():
+    path = "../L2pickle"
+    all_target_languages = "nl de es fr it".split()
+    all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
+    all_languages = ['es']
+    all_words = ['bank']
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
+    for sourceword in all_words:
+        for target in all_languages:
+            level2_classifier = get_maxent_classifier(sourceword, target)
+            pickle.dump( level2_classifier,open( "{}/{}.{}.level2.pickle".format(path,sourceword,target),'wb')  )
+            #answer = level2_classifier.classifiy( {"cw(deposit)":True,"cw(money)":True,"cw(finacial)":True}  )
+            #print("the answer::::",answer)
+            ###pickle the level2 classifiers...        
+            test_level2(sourceword,target,level2_classifier)
+
+
+                        
+def test_level2(sourceword,target,level2_classifier):
+    path = "../L2pickle"
+    #level2_classifier = pickle.load( open("{}/{}.{}.level2.pickle".format(path,sourceword,target,'rb')) )
+    level2_classifier = pickle.load( 
+                           open( "{}/{}.{}.level2.pickle".format(path,sourceword,target)  ,'rb') 
+                                      )
+    frd1,frd2,frd3,frd4 = sorted(list(get_four_friends(target)))   ##Need 4 more features from level1.
+    classfrd1,classfrd2,classfrd3,classfrd4 = get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword)
 
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
     problems = extract_wsd_problems(fn)
     gold_answers = read_gold.get_gold_answers(sourceword, target)
     for problem in problems:
-        featureset = features.extract(problem)
-        answer = classifier.classify(featureset)
-        print(problem.context)
-        print(answer)
+        level1_features = features.extract(problem)
+        answer_frd1 = classfrd1.classify(level1_features)
+        answer_frd2 = classfrd2.classify(level1_features)
+        answer_frd3 = classfrd3.classify(level1_features)
+        answer_frd4 = classfrd4.classify(level1_features)
+        level2_features = extend_features(level1_features,(answer_frd1,answer_frd2,answer_frd3,answer_frd4),frd1,frd2,frd3,frd4)
+        level2_answer = level2_classifier.classify(level2_features)
+        print(level2_answer)
         label = gold_answers[problem.instance_id]
-        print("CORRECT" if label == answer else "WRONG", end=" ")
+        print("CORRECT" if label == level2_answer else "WRONG", end=" ")
         print("should be:", label)
-
-def get_all_classifier():
-
-    all_target_languages = "nl de es fr it".split()
-    all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_languages = ['es']
-    all_words = ['job']
-    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
-    for sourceword in all_words:
-        for target in all_languages:
-            classifier = get_maxent_classifier(sourceword, target)
-            picklename = sourceword +"." + target + ".level1.pickle"
-            pickle.dump(classifier,open(picklename,'wb'))
-            trytry = pickle.load( open( picklename, "rb" ) )
-            print("Loading successful!!!")
-           
-
-
+    
 
 
 
 if __name__ == "__main__": 
-    get_all_classifier()
-    #lan = sys.argv[1]
+    stanford.taggerhome = '/home/liucan/stanford-postagger-2012-11-11'
+    train_l2_classifiers()
+    #test_level2('bank','es')
+    #lan  sys.argv[1]
     #get_four_friends(lan)
     #get_training_data_from_extracted('bank','de')

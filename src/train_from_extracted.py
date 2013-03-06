@@ -51,6 +51,8 @@ def get_training_data_from_extracted(sourceword, targetlang):
         label = answer
         assert(type(label) is str)
         out.append((featureset, label))
+        #print("###the features are: \n{}".format(featureset))
+        #input()
     return out
 
 def get_maxent_classifier(sourceword, target):
@@ -93,14 +95,14 @@ def get_all_classifier():
 
     all_target_languages = "nl de es fr it".split()
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_languages = ['es']
+    all_languages = ['nl']
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     for sourceword in all_words:
         for target in all_languages:
             classifier = get_maxent_classifier(sourceword, target)
             picklename = sourceword +"." + target + ".level1.pickle"
             pickle.dump(classifier,open(picklename,'wb'))
-            trytry = pickle.load( open( picklename, "rb" ) )
+            #trytry = pickle.load( open( picklename, "rb" ) )
             print("Loading successful!!!")
            
 

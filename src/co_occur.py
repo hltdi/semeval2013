@@ -25,7 +25,7 @@ class Occurrence:
 		self.sent_pairs = []
 		self.counts = {} 
 		#cls = Occurrence(word,lan1,lan2)
-		self.get_common_sents(word,lan1,lan2)
+		self.get_common_sents(sourceword,lan1,lan2,False)
 		self.get_count()
 
 
@@ -41,8 +41,32 @@ class Occurrence:
 		
 		fileO.close()
 		return labels
+
+	def get_common_four_sents(self,word,lan1,lan2,lan3,lan4):
+		lan1_lan2 = self.get_common_sents(word,lan1,lan2,True)
+		lan3_lan4 = self.get_common_sents(word,lan3,lan4,True)
+		
+		intersection = {}  ##this returns mappings of the form, (sentence) --> (l1,l2,l3,l4). Useful later on. 
+		for sentence in lan1_lan2:
+			if sentence in lan3_lan4:
+				##if this sentence in contained in both, then put (sentence) --> (l1,l2,l3,l4)
+				pair12 = lan1_lan2[sentence]
+				pair34 = lan3_lan4[sentence]
+				quadruple = (pair12[0],pair12[1],pair34[0],pair34[1])
+				#intersection.append(quadruple)
+				intersection[sentence] = quadruple
+
+
+		print("##### 1 and 2",len(lan1_lan2))
+		print("##### 3 and 4",len(lan3_lan4))
+		print("##### all intersect:",len(intersection))		
+		for key in intersection:
+			print("{}#####\n####{}".format(key,intersection[key]))
+		print(lan1,lan2,lan3,lan4)
 	
-	def get_common_sents(self,sourceword,lan1,lan2):
+		return intersection
+
+	def get_common_sents(self,sourceword,lan1,lan2,level2Mode):
 		path = "../trainingdata/"
 		lan1FN = path+sourceword +"."+ lan1 + ".train"
 		lan2FN = path+sourceword +"."+ lan2 + ".train"
@@ -86,6 +110,7 @@ class Occurrence:
 		total = 0
 		count = 0
 		sent_pairs = []
+		sents_for_level2 = {}
 		for key in dic1:
 			if key in dic2:
 				#print("\nOverlap:::",dic1[key],dic2[key],"\n",key)
@@ -95,12 +120,15 @@ class Occurrence:
 				self.unary_counts1[pair[0]] +=1
 				self.unary_counts2[pair[1]] +=1
 				#if pair[0] == '<unknown>' or pair[1] == '<unknown>': continue
+				if level2Mode:
+					sents_for_level2[key] = (pair[0],pair[1])  ##The sentence, with lan1,lan2 word.
 				sent_pairs.append(pair)
 				total += dic2[key]
 				count +=1
 		print("Total overlapped sents:",total,count)
 		#return sent_pairs
 		self.sent_pairs = sent_pairs
+		if level2Mode: return sents_for_level2
 
 	def get_count(self):
 		sent_pairs = self.sent_pairs
@@ -239,7 +267,7 @@ def main():
 				else:
 					print(lan1,lan2)
 					cls = Occurrence(word,lan1,lan2)
-					sents = cls.get_common_sents(word,lan1,lan2)
+					sents = cls.get_common_sents(word,lan1,lan2,False)
 					counts = cls.get_count(sents)
 					cond1,cond2 = cls.get_conditional(counts)
 					joint = cls.get_joint(counts)
@@ -250,13 +278,19 @@ def main():
 	
 if __name__ == "__main__":  
 	#main()
-	word = 'bank'
+	#word = 'rest'
+	word = sys.argv[1]
 	lan1 = 'de'
 	lan2 = 'fr'
+	lan3 = 'es'
+	lan4 = 'it'
 	cls = Occurrence(word,lan1,lan2)
 	cond1,cond2 = cls.get_conditional()
 	joint = cls.get_joint()
-	
+	sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
+	#for key in sent_l2:
+		#print(key,"   :::  ",sent_l2[key],"\n")
+	cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
 
 
 		
