@@ -43,6 +43,8 @@ class Occurrence:
 		return labels
 
 	def get_common_four_sents(self,word,lan1,lan2,lan3,lan4):
+
+		###NOTE:  this functions returns a list of each sentence. Because of the duplicates. Also duplicate the training in				stances in these cases.
 		lan1_lan2 = self.get_common_sents(word,lan1,lan2,True)
 		lan3_lan4 = self.get_common_sents(word,lan3,lan4,True)
 		
@@ -50,11 +52,11 @@ class Occurrence:
 		for sentence in lan1_lan2:
 			if sentence in lan3_lan4:
 				##if this sentence in contained in both, then put (sentence) --> (l1,l2,l3,l4)
-				pair12 = lan1_lan2[sentence]
-				pair34 = lan3_lan4[sentence]
-				quadruple = (pair12[0],pair12[1],pair34[0],pair34[1])
-				#intersection.append(quadruple)
-				intersection[sentence] = quadruple
+				pairs12 = lan1_lan2[sentence]
+				pairs34 = lan3_lan4[sentence]
+				#quadruple = (pair12[0],pair12[1],pair34[0],pair34[1])
+				quadruples = self.duplicate_quadruple(pairs12,pairs34)
+				intersection[sentence] = quadruples
 
 
 		print("##### 1 and 2",len(lan1_lan2))
@@ -65,6 +67,29 @@ class Occurrence:
 		print(lan1,lan2,lan3,lan4)
 	
 		return intersection
+	def duplicate_pair(self,left,right):
+		##left is a list of items, and right is a list of item. Return the Cardian Product of left and right.
+		result = []
+		for item_l in left:
+			for item_r in right:
+				result.append((item_l,item_r))
+
+		return list(set(result))
+
+	def duplicate_quadruple(self,left_pairs,right_pairs):
+		pairs1 = [x[0] for x in left_pairs]
+		pairs2 = [x[1] for x in left_pairs]
+		pairs3 = [x[0] for x in right_pairs]
+		pairs4 = [x[1] for x in right_pairs]
+
+		quadruples = []
+		for item1 in pairs1:
+			for item2 in pairs2:
+				for item3 in pairs3:
+					for item4 in pairs4:
+						quadruples.append( (item1,item2,item3,item4)   )
+
+		return list(set(quadruples))
 
 	def get_common_sents(self,sourceword,lan1,lan2,level2Mode):
 		path = "../trainingdata/"
@@ -78,6 +103,8 @@ class Occurrence:
 		line2 = IN2.readline()
 		dic1 = defaultdict(lambda:0)
 		dic2 = defaultdict(lambda:0)
+		duplicates1 = defaultdict(lambda: [])
+		duplicates2 = defaultdict(lambda: [])
 		count = 1
 		triple = []
 		mappings1 = {}
@@ -85,10 +112,16 @@ class Occurrence:
 		while line1:
 			
 			triple.append(line1.strip())
-			if count %3 ==1:  ##add this sentence to 
-				dic1[line1.strip()] +=1
-			if count%3==0:
-				mappings1[triple[0]] = (triple[2])
+			if count %3 ==1: pass ##add this sentence to 
+				#dic1[line1.strip()] +=1
+			if count%3==0:  ##It is the end of a sentence
+				##mappings1[triple[0]] = (triple[2])
+				##the old key is just sentence. Since sentences are not unique, 
+				##we should use sentence_index as the unique key, hopefully sentence_index don't have
+				##too many repeats.
+				mappings1["{}####{}".format(triple[0],triple[1])] = (triple[2])
+				duplicates1["{}####{}".format(triple[0],triple[1])].append(triple[2])
+				dic1["{}####{}".format(triple[0],triple[1])] +=1
 				triple = []
 			count+=1
 			line1 = IN1.readline()
@@ -98,10 +131,13 @@ class Occurrence:
 		while line2:
 			
 			triple.append(line2.strip())
-			if count %3 ==1:  ##add this sentence to s
-				dic2[line2.strip()] +=1
+			if count %3 ==1: pass ##add this sentence to s
+				#dic2[line2.strip()] +=1
 			if count%3==0:	
-				mappings2[triple[0]] = (triple[2])
+				#mappings2[triple[0]] = (triple[2])
+				mappings2["{}####{}".format(triple[0],triple[1])] = (triple[2])
+				duplicates2["{}####{}".format(triple[0],triple[1])].append(triple[2])
+				dic2["{}####{}".format(triple[0],triple[1])] +=1
 				triple = []
 			count +=1
 			line2 = IN2.readline()
@@ -113,22 +149,37 @@ class Occurrence:
 		sents_for_level2 = {}
 		for key in dic1:
 			if key in dic2:
-				#print("\nOverlap:::",dic1[key],dic2[key],"\n",key)
-				pair = (mappings1[key],mappings2[key])
-				self.lan1_tags_train.add(pair[0])
-				self.lan2_tags_train.add(pair[1])
-				self.unary_counts1[pair[0]] +=1
-				self.unary_counts2[pair[1]] +=1
-				#if pair[0] == '<unknown>' or pair[1] == '<unknown>': continue
-				if level2Mode:
-					sents_for_level2[key] = (pair[0],pair[1])  ##The sentence, with lan1,lan2 word.
-				sent_pairs.append(pair)
+				
+				if dic1[key] == dic2[key] == 1: ###the simple case, where we can just append the mappings.
+					pair = (mappings1[key],mappings2[key])
+					self.collect_data([pair])
+					sent_pairs.append(pair)
+					if level2Mode:  sents_for_level2[key] = [pair]
+				else:  ##we need to duplicate data: either lan1 or lan2 have unsure alignments. 
+					##First get the actual alignments for each language, and make the product
+					duplicate_items1 = duplicates1[key]
+					duplicate_items2 = duplicates2[key]
+					pairs = self.duplicate_pair(duplicate_items1,duplicate_items2)
+					self.collect_data(pairs)
+					sent_pairs.extend(pairs)	
+					if level2Mode: sents_for_level2[key] = pairs  ##The sentence, with lan1,lan2 word.
+					##need to change the function in level2.				
+
 				total += dic2[key]
 				count +=1
+
 		print("Total overlapped sents:",total,count)
-		#return sent_pairs
 		self.sent_pairs = sent_pairs
+		for key in dic2:
+			if dic2[key]>1: print("It is duplicated!!!",key,duplicates2[key])
 		if level2Mode: return sents_for_level2
+
+	def collect_data(self,pairs):
+		for pair in pairs:
+			self.lan1_tags_train.add(pair[0])
+			self.lan2_tags_train.add(pair[1])
+			self.unary_counts1[pair[0]] +=1
+			self.unary_counts2[pair[1]] +=1
 
 	def get_count(self):
 		sent_pairs = self.sent_pairs
@@ -285,12 +336,14 @@ if __name__ == "__main__":
 	lan3 = 'es'
 	lan4 = 'it'
 	cls = Occurrence(word,lan1,lan2)
+	print(cls.duplicate_pair(['a','f'],['b','c','e']))
 	cond1,cond2 = cls.get_conditional()
 	joint = cls.get_joint()
-	sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
+	#sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
 	#for key in sent_l2:
 		#print(key,"   :::  ",sent_l2[key],"\n")
 	cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
+
 
 
 		
