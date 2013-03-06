@@ -38,7 +38,6 @@ def get_training_data_from_extracted(sourceword, targetlang):
 
     answers = []
     for context, index, labels in zip(contexts, indices, labelss):
-        print(index)
         problem = WSDProblem(sourceword, context,
                              testset=False, head_index=index)
         for label in labels:

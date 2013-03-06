@@ -8,31 +8,27 @@ import nltk
 from parse_corpus import extract_wsd_problems
 import stanford
 
-def extract(problem):
-    """Given a WSDProblem, return the features for the sentence."""
-    out = {}
+DEBUG=False
 
-    targetword = problem.source_lex
-    if problem.source_lex.endswith(".n"):
-        targetword = problem.source_lex[:-2]
-
+## make a bunch of functions from problems to features.
+def bagofwords(problem):
+    """Bag of words features."""
     tokenized = nltk.tag.untag(problem.tagged)
+    return dict([('cw(%s)' % w, True) for w in tokenized])
 
-    ## 'cw' for 'contains word'. bag of word features
-    wordfeatures = dict([('cw(%s)' % w, True) for w in tokenized])
-    out.update(wordfeatures)
-
+def bagoflemmas(problem):
+    """Bag of lemma features."""
     ## 'cl' for 'contains lemma'. bag of lemma features
-    lemmafeatures = dict([('cl(%s)' % w, True) for w in problem.lemmatized])
-    out.update(wordfeatures)
+    return dict([('cl(%s)' % w, True) for w in problem.lemmatized])
 
-    ## 'w' for 'window'. surrounding words. This could be better; we should
-    ## use alignments and tags here.
-    WIDTH=3
-    ## TODO(alexr): use the stored indices of the head word.
+WIDTH=3
+def window(problem):
+    """Immediate surrounding context features."""
+    tokenized = nltk.tag.untag(problem.tagged)
+    out = {}
     for index in problem.head_indices:
         ## window of WIDTH before
-        lowerbound = min(0, index-WIDTH)
+        lowerbound = max(0, index-WIDTH)
         windowfeatures = dict([('w(%s)' % w, True)
                               for w in tokenized[lowerbound:index]])
         out.update(windowfeatures)
@@ -41,6 +37,81 @@ def extract(problem):
         windowfeatures = dict([('w(%s)' % w, True)
                               for w in tokenized[index+1:upperbound+1]])
         out.update(windowfeatures)
+    return out
+
+def window_justtags(problem):
+    """Immediate surrounding tags."""
+    tags = [tag for (word,tag) in problem.tagged]
+    out = {}
+    for index in problem.head_indices:
+        ## window of WIDTH before
+        lowerbound = max(0, index-WIDTH)
+        windowfeatures = dict([('wt(%s)' % w, True)
+                              for w in tags[lowerbound:index]])
+        out.update(windowfeatures)
+        ## and WIDTH after
+        upperbound = index+WIDTH
+        windowfeatures = dict([('wt(%s)' % w, True)
+                              for w in tags[index+1:upperbound+1]])
+        out.update(windowfeatures)
+    return out
+
+def window_withtags(problem):
+    """Immediate surrounding tagged words."""
+    tagged = [nltk.tag.tuple2str(tup) for tup in problem.tagged]
+    out = {}
+    for index in problem.head_indices:
+        ## window of WIDTH before
+        lowerbound = max(0, index-WIDTH)
+        windowfeatures = dict([('wtagged(%s)' % w, True)
+                              for w in tagged[lowerbound:index]])
+        out.update(windowfeatures)
+        ## and WIDTH after
+        upperbound = index+WIDTH
+        windowfeatures = dict([('wtagged(%s)' % w, True)
+                              for w in tagged[index+1:upperbound+1]])
+        out.update(windowfeatures)
+    return out
+
+def window_left(problem):
+    """Immediate surrounding context features: just the left."""
+    tokenized = nltk.tag.untag(problem.tagged)
+    out = {}
+    for index in problem.head_indices:
+        ## window of WIDTH before
+        lowerbound = max(0, index-WIDTH)
+        windowfeatures = dict([('wl(%s)' % w, True)
+                              for w in tokenized[lowerbound:index]])
+        out.update(windowfeatures)
+    return out
+
+def window_right(problem):
+    """Immediate surrounding context features: just the left."""
+    tokenized = nltk.tag.untag(problem.tagged)
+    out = {}
+    for index in problem.head_indices:
+        upperbound = index+WIDTH
+        windowfeatures = dict([('wr(%s)' % w, True)
+                              for w in tokenized[index+1:upperbound+1]])
+        out.update(windowfeatures)
+    return out
+
+def extract(problem):
+    """Given a WSDProblem, return the features for the sentence."""
+    out = {}
+    allfeatures = [
+        bagofwords,
+        bagoflemmas,
+        window,
+        window_justtags,
+        window_withtags,
+        window_left,
+        window_right,
+    ]
+    for funk in allfeatures:
+        extracted = funk(problem)
+        if DEBUG: print(funk.__doc__.strip()); print(extracted)
+        out.update(extracted)
     return out
 
 def main():
@@ -58,8 +129,9 @@ def main():
         problems = extract_wsd_problems(fn)
         for problem in problems:
             print("**** PROBLEM ****")
-            print(problem.tagged)
+            tokenized = nltk.tag.untag(problem.tagged)
+            print(" ".join(tokenized))
+            print(problem.head_indices)
             features = extract(problem)
-            print(features)
 
 if __name__ == "__main__": main()
