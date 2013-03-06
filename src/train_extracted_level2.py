@@ -19,11 +19,6 @@ import features
 import stanford
 from co_occur import Occurrence
 
-def get_training_problems(sourceword):
-    fn = "../trialdata/alltrials/{0}.data".format(sourceword)
-    problems = extract_wsd_problems(fn)
-    return problems
-
 def get_four_friends(target):
     all_languages = set(['es','fr','nl','de','it'])
     four_friends = all_languages - set([target])
