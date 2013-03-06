@@ -85,23 +85,4 @@ def main():
         print("CORRECT" if label == answer else "WRONG", end=" ")
         print("should be:", label)
 
-def get_all_classifier():
-
-    all_target_languages = "nl de es fr it".split()
-    all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_languages = ['nl']
-    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
-    for sourceword in all_words:
-        for target in all_languages:
-            classifier = get_maxent_classifier(sourceword, target)
-            picklename = sourceword +"." + target + ".level1.pickle"
-            pickle.dump(classifier,open(picklename,'wb'))
-            #trytry = pickle.load( open( picklename, "rb" ) )
-            print("Loading successful!!!")
-           
-
-
-
-
-
-if __name__ == "__main__": get_all_classifier()
+if __name__ == "__main__": main()
