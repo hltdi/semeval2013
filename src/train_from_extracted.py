@@ -17,11 +17,6 @@ from parse_corpus import extract_wsd_problems
 import read_gold
 import features
 
-def get_training_problems(sourceword):
-    fn = "../trialdata/alltrials/{0}.data".format(sourceword)
-    problems = extract_wsd_problems(fn)
-    return problems
-
 def get_training_data_from_extracted(sourceword, targetlang):
     """Return a list of (featureset, label) for training."""
     out = []

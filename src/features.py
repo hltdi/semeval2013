@@ -21,6 +21,20 @@ def bagoflemmas(problem):
     ## 'cl' for 'contains lemma'. bag of lemma features
     return dict([('cl(%s)' % w, True) for w in problem.lemmatized])
 
+def wordform_and_tag_and_lemma(problem):
+    """Literal form, tag, and lemma of the head word."""
+    out = {}
+    for index in problem.head_indices:
+        wordform,wordtag = problem.tagged[index]
+        wordlemma = problem.lemmatized[index]
+        features = {
+            ('wordform(%s)' % wordform): True,
+            ('wordtag(%s)' % wordtag): True,
+            ('wordlemma(%s)' % wordlemma): True,
+        }
+        out.update(features)
+    return out
+
 WIDTH=3
 def window(problem):
     """Immediate surrounding context features."""
@@ -36,6 +50,23 @@ def window(problem):
         upperbound = index+WIDTH
         windowfeatures = dict([('w(%s)' % w, True)
                               for w in tokenized[index+1:upperbound+1]])
+        out.update(windowfeatures)
+    return out
+
+def window_lemmas(problem):
+    """Immediate surrounding context lemmas."""
+    out = {}
+    for index in problem.head_indices:
+        ## window of WIDTH before
+        lowerbound = max(0, index-WIDTH)
+        windowfeatures = dict([('wl(%s)' % w, True)
+                              for w in problem.lemmatized[lowerbound:index]])
+        out.update(windowfeatures)
+        ## and WIDTH after
+        upperbound = index+WIDTH
+        windowfeatures = \
+            dict([('wl(%s)' % w, True)
+                  for w in problem.lemmatized[index+1:upperbound+1]])
         out.update(windowfeatures)
     return out
 
@@ -100,9 +131,11 @@ def extract(problem):
     """Given a WSDProblem, return the features for the sentence."""
     out = {}
     allfeatures = [
-        bagofwords,
-        bagoflemmas,
+        ## bagofwords,
+        ## bagoflemmas,
+        wordform_and_tag_and_lemma,
         window,
+        window_lemmas,
         window_justtags,
         window_withtags,
         window_left,
