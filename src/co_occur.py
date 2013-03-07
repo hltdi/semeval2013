@@ -9,7 +9,7 @@ import pickle
 import sys
 from collections import defaultdict
 ### import the alignment file.
-SMOOTH = 0.2
+SMOOTH = 0.002
 
 class Occurrence:
 
@@ -27,6 +27,8 @@ class Occurrence:
 		#cls = Occurrence(word,lan1,lan2)
 		self.get_common_sents(sourceword,lan1,lan2,False)
 		self.get_count()
+		self.lan1 = lan1
+		self.lan2 = lan2
 
 
 	def get_labels(self,sourceword,lan):
@@ -216,8 +218,8 @@ class Occurrence:
 		for lan1_word in lan1_tags:
 			for lan2_word in lan2_tags:
 				joint_p = 1.0* (  SMOOTH + counts[lan1_word][lan2_word]  ) / (total + SMOOTH*len(lan1_tags)*len(lan2_tags))
-				joint[(lan1_word +"&&"+lan2_word)] = joint_p
-				joint[(lan2_word +"&&"+lan1_word)] = joint_p
+				joint[(lan1_word +"_"+self.lan1+"&&"+lan2_word+"_"+self.lan2)] = joint_p
+				#joint[(lan2_word +"&&"+lan1_word)] = joint_p
 				check += joint_p
 
 		print (check)
@@ -306,6 +308,10 @@ class Occurrence:
 		pickle.dump(cond2,open(cond2pname,'wb'))
 		pickle.dump(joint,open(jointpname,'wb'))
 
+	def lookup_joint(self,lan1,word_lan1,lan2,word_lan2,dic):
+		key = "{}_{}&&{}_{}".format(word_lan1,lan1,word_lan2,lan2)
+		return dic[key]
+
 def main():
 	##generate the conditionals and joint for all languages, all words.
 	all_words = "bank".split()
@@ -332,18 +338,19 @@ if __name__ == "__main__":
 	#main()
 	#word = 'rest'
 	word = sys.argv[1]
-	lan1 = 'de'
-	lan2 = 'fr'
-	lan3 = 'es'
-	lan4 = 'it'
+	lan1 = 'it'
+	lan2 = 'es'
+	lan3 = 'fr'
+	lan4 = 'nl'
 	cls = Occurrence(word,lan1,lan2)
-	print(cls.duplicate_pair(['a','f'],['b','c','e']))
+	#print(cls.duplicate_pair(['a','f'],['b','c','e']))
 	cond1,cond2 = cls.get_conditional()
 	joint = cls.get_joint()
+	print(cls.lookup_joint('it','banca','es','banco',joint))
 	#sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
-	#for key in sent_l2:
-		#print(key,"   :::  ",sent_l2[key],"\n")
-	kkk = cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
+	#for key in joint:
+	#	print(key,"   :::  ",joint[key],"\n")
+	#kkk = cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
 
 
 		
