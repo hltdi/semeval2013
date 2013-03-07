@@ -54,7 +54,7 @@ class WSDProblem:
                     assert word.endswith(END)
                     sent[word_index] = word.replace(START,"").replace(END,"")
                     self.head_indices.append(index)
-                    print("HEAD INDEX AT", index)
+                    # print("HEAD INDEX AT", index)
                 index += 1
 
         tagger = stanford.get_tagger()

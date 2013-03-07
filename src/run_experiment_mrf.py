@@ -21,8 +21,11 @@ from util_run_experiment import all_target_languages
 from util_run_experiment import all_words
 from util_run_experiment import get_pickled_classifier
 
+import co_occur
+
 classifiers = {}
 
+joints = {}
 
 def unary_penalty_table(classifier, featureset):
     """Take a classifier and a featureset; return a dictionary where we've
@@ -34,7 +37,6 @@ def unary_penalty_table(classifier, featureset):
 
 def mrf_optimize(problem):
     """Build the MRF and do the optimization!!"""
-
     featureset = features.extract(problem)
 
     for lang in all_target_languages:
@@ -51,15 +53,27 @@ def mrf_optimize(problem):
         edgepotentials = {}
         for val1 in possible_values(l1):
             for val2 in possible_values(l2):
-                edgepotentials[(val1,val2)] = random.randint(1, 100)
-        Edge(l1, l2, edgepotentials)
-    out = beliefprop(100)
-    print(out)
+                joint = joints[(l1,l2)]
+                key = "{0}_{1}&&{2}_{3}".format(val1, l1, val2, l2)
 
-    answers = dict([(lang, "orilla") for lang in all_target_languages])
-    oof_answers = dict([(lang, ["orilla","banco"])
-                       for lang in all_target_languages])
+                # negative logprob of the joint probability. Definitely the best
+                # edge potential, for sure.
+                edgepotentials[(val1,val2)] = -math.log(joint[key], 2)
+                print(key, joint[key])
+        Edge(l1, l2, edgepotentials)
+
+    ## XXX how many iterations?
+    answers, oof_answers = beliefprop(20)
     return answers, oof_answers
+
+def build_cooccurrences(sourceword):
+    langpairs = list(itertools.combinations(all_target_languages, 2))
+    ## create an edge for each language pair.
+    for l1, l2 in langpairs:
+        cls = co_occur.Occurrence(sourceword,l1,l2)
+        joint = cls.get_joint()
+        joints[(l1,l2)] = joint
+        joints[(l2,l1)] = joint ## XXX(alexr): gross, should just store it once.
 
 def mrf_get_argparser():
     parser = argparse.ArgumentParser(description='clwsd')
@@ -78,9 +92,9 @@ def main():
     trialdir = args.trialdir
     stanford.taggerhome = args.taggerhome
 
-    print("Loading and tagging test problems...")
-    problems = util_run_experiment.get_test_instances(trialdir, sourceword)
-    print("OK loaded and tagged.")
+    ## load up the cooccurrences.
+    print("Loading cooccurrence information.")
+    build_cooccurrences(sourceword)
 
     for lang in all_target_languages:
         classifier = get_pickled_classifier(sourceword, lang, "level1")
@@ -89,6 +103,10 @@ def main():
             print("Couldn't load pickled L1 classifier?")
             return
     print("Loaded pickled L1 classifiers!")
+
+    print("Loading and tagging test problems...")
+    problems = util_run_experiment.get_test_instances(trialdir, sourceword)
+    print("OK loaded and tagged.")
 
     outfiles = {}
     for lang in all_target_languages:
