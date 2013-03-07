@@ -4,7 +4,6 @@ import sys
 import argparse
 import nltk
 
-from train_from_extracted import get_maxent_classifier
 import features
 import stanford
 
@@ -13,11 +12,11 @@ from util_run_experiment import output_one_best
 from util_run_experiment import output_five_best
 from util_run_experiment import all_target_languages
 from util_run_experiment import all_words
+from util_run_experiment import get_pickled_classifier
 
 def main():
     parser = util_run_experiment.get_argparser()
     args = parser.parse_args()
-    print(args)
     assert args.targetlang in all_target_languages
     assert args.sourceword in all_words
 
@@ -26,10 +25,17 @@ def main():
     trialdir = args.trialdir
     stanford.taggerhome = args.taggerhome
 
+    print("Loading and tagging test problems...")
     problems = util_run_experiment.get_test_instances(trialdir, sourceword)
+    print("OK loaded and tagged.")
 
-    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
-    classifier = get_maxent_classifier(sourceword, targetlang)
+    ## classifier = get_maxent_classifier(sourceword, targetlang)
+    classifier = get_pickled_classifier(sourceword, targetlang, "level1")
+    if not classifier:
+        print("Couldn't load pickled L1 classifier?")
+        return
+    print("Loaded pickled L1 classifier!")
+
 
     bestoutfn = "../L1output/{0}.{1}.best".format(sourceword, targetlang)
     oofoutfn = "../L1output/{0}.{1}.oof".format(sourceword, targetlang)
