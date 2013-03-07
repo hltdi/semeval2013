@@ -6,22 +6,15 @@ import nltk
 
 from parse_corpus import extract_wsd_problems
 from train_from_extracted import get_maxent_classifier
+from util_run_experiment import output_one_best
 import features
 import stanford
-
-def output_one_best(problem, target, solution):
-    """Return output for a solution for the one-best."""
-    return "{0}.{1} {2} :: {3};".format(problem.source_lex,
-                                        target,
-                                        problem.instance_id,
-                                        solution)
 
 def main():
     parser = argparse.ArgumentParser(description='clwsd')
     parser.add_argument('--sourceword', type=str, required=True)
     parser.add_argument('--targetlang', type=str, required=True)
     parser.add_argument('--taggerhome', type=str, required=True)
-    ## parser.add_argument('--classifier', type=str, nargs=1, required=False)
     args = parser.parse_args()
 
     all_target_languages = "de es fr it nl".split()
