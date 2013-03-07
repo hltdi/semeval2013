@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-
+import pickle
 from parse_corpus import extract_wsd_problems
 
 all_target_languages = "de es fr it nl".split()
@@ -48,7 +48,11 @@ def get_test_instances(trialdir, sourceword):
 def get_pickled_classifier(sourceword,targetlang,level):
     if level == 'level1': path = "L1pickle"
     else:  path = "../L2pickle"
-    classifier = pickle.load(
-                           open( "{}/{}.{}.{}.pickle".format(path,sourceword,target,level)  ,'rb')
-                                      )
-    return classifier
+    try:
+        classifier = pickle.load(
+                           open( "{}/{}.{}.{}.pickle".format(path,sourceword,targetlang,level)  ,'rb')
+                                  )
+    except: return None #erint ("{}/{}.{}.{}.pickle".format(path,sourceword,targetlang,level))
+    else:  return classifier    ##If the pickle isn't there, just return None
+
+
