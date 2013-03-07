@@ -127,6 +127,43 @@ def window_right(problem):
         out.update(windowfeatures)
     return out
 
+def window_bigrams(problem):
+    """Get the bigrams of window size 5, realling don't know what size is good."""
+    tokenized = nltk.tag.untag(problem.tagged)
+    out = {}
+    for index in problem.head_indices:
+        upperbound = index + 5
+        lowerbound = max(0,index-5)
+        words_after = tokenized[index+1:upperbound+1]
+        words_before = tokenized[lowerbound:index]
+        print(words_before,words_after)
+        bigrams_before = nltk.bigrams(words_before)
+        bigrams_after = nltk.bigrams(words_after)
+        bigrams_before.extend(bigrams_after)
+        windowfeatures = dict( [('wbigram({}&{})'.format(w[0],w[1]), True) for w in bigrams_before]
+                              )
+        out.update(windowfeatures)
+
+    print("The bigrams...",out)
+    return out
+
+def window_bigrams_with_tags(problem):
+    """Get the tagged bigrams, just three before and three after"""
+    tagged = [nltk.tag.tuple2str(tup) for tup in problem.tagged]
+    out = {}
+    for index in problem.head_indices:
+        ## window of WIDTH before
+        lowerbound = max(0, index-3)
+        bigrams_before = nltk.bigrams(tagged[lowerbound:index])
+        ## and WIDTH after
+        upperbound = index+3
+        bigrams_after = nltk.bigrams(tagged[index+1:upperbound+1])
+        bigrams_before.extend(bigrams_after)
+        windowfeatures = dict( [('wbigram({}&{})'.format(w[0],w[1]) ,True) for w in bigrams_before]  
+                            )
+        out.update(windowfeatures)
+    return out
+
 def extract(problem):
     """Given a WSDProblem, return the features for the sentence."""
     out = {}
@@ -140,6 +177,8 @@ def extract(problem):
         window_withtags,
         window_left,
         window_right,
+        window_bigrams,
+        window_bigrams_with_tags
     ]
     for funk in allfeatures:
         extracted = funk(problem)

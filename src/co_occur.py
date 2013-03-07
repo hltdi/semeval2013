@@ -62,9 +62,9 @@ class Occurrence:
 		print("##### 1 and 2",len(lan1_lan2))
 		print("##### 3 and 4",len(lan3_lan4))
 		print("##### all intersect:",len(intersection))		
-		for key in intersection:
+		#for key in intersection:
 			#print("{}#####\n####{}".format(key,intersection[key]))
-			print(key)
+		#	print(key)
 		print(lan1,lan2,lan3,lan4)
 	
 		return intersection

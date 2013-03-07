@@ -12,6 +12,7 @@ from operator import itemgetter
 
 from nltk.classify.maxent import MaxentClassifier
 
+import util_run_experiment
 from wsd_problem import WSDProblem
 from parse_corpus import extract_wsd_problems
 import read_gold
@@ -79,7 +80,7 @@ def get_training_data_from_extracted(sourceword, targetlang):
         featureset = extend_features(featureset,more_feature,frd1,frd2,frd3,frd4)
         label = answer
         assert(type(label) is str)
-        print("=================@@@@features {}\n@@@@label{}\n".format(featureset,label))
+        #print("=================@@@@features {}\n@@@@label{}\n".format(featureset,label))
         out.append((featureset, label))
     print("###Length of the output should be the same{}\n".format(len(out)))
     return out
@@ -100,31 +101,31 @@ def get_level1_answers(classifier_frd1,classifier_frd2,classifier_frd3,classifie
     answer_frd1 = classifier.classify()
 
 def get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword):
-    path = "../L1pickle/"
-    pickle_frd1  = sourceword +"."+frd1 + ".level1.pickle"
-    pickle_frd2  = sourceword +"."+frd2 + ".level1.pickle"
-    pickle_frd3  = sourceword +"."+frd3 + ".level1.pickle"
-    pickle_frd4  = sourceword +"."+frd4 + ".level1.pickle" 
-
-    classifier_frd1 = pickle.load(open(path+pickle_frd1,'rb'))
-    classifier_frd2 = pickle.load(open(path+pickle_frd2,'rb'))
-    classifier_frd3 = pickle.load(open(path+pickle_frd3,'rb'))
-    classifier_frd4 = pickle.load(open(path+pickle_frd4,'rb'))
+    
+    classifier_frd1 = util_run_experiment.get_pickled_classifier(sourceword,frd1,'level1')
+    classifier_frd2 = util_run_experiment.get_pickled_classifier(sourceword,frd2,'level1')
+    classifier_frd3 = util_run_experiment.get_pickled_classifier(sourceword,frd3,'level1')
+    classifier_frd4 = util_run_experiment.get_pickled_classifier(sourceword,frd4,'level1')
 
     return classifier_frd1,classifier_frd2,classifier_frd3,classifier_frd4
 
 
 def train_l2_classifiers():
+    all_languages = [sys.argv[1]]
     path = "../L2pickle"
-    all_target_languages = "nl de es fr it".split()
+    try: reposit = sys.argv[2]
+    except: reposit = "Bgm"
+
+    #all_languages = "nl de es fr it".split()
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_languages = ['es']
-    all_words = ['bank']
+    #all_languages = ['es']
+    #all_words = ['bank']
+    all_words = util_run_experiment.trial_words
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     for sourceword in all_words:
         for target in all_languages:
             level2_classifier = get_maxent_classifier(sourceword, target)
-            pickle.dump( level2_classifier,open( "{}/{}.{}.level2.pickle".format(path,sourceword,target),'wb')  )
+            pickle.dump( level2_classifier,open( "{}{}/{}.{}.level2.pickle".format(path,reposit,sourceword,target),'wb')  )
             #answer = level2_classifier.classifiy( {"cw(deposit)":True,"cw(money)":True,"cw(finacial)":True}  )
             #print("the answer::::",answer)
             ###pickle the level2 classifiers...        
