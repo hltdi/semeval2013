@@ -162,8 +162,8 @@ class Occurrence:
 
 		print("Total overlapped sents:",total,count)
 		self.sent_pairs = sent_pairs
-		for key in dic2:
-			if dic2[key]>1: print("It is duplicated!!!",key,duplicates2[key])
+		## for key in dic2:
+		## 	if dic2[key]>1: print("It is duplicated!!!",key,duplicates2[key])
 		if level2Mode: return sents_for_level2
 
 	def collect_data(self,pairs):
@@ -194,7 +194,9 @@ class Occurrence:
 		#return temp_dict
 		self.counts = temp_dict
 
+	@functools.lru_cache(maxsize=10000)
 	def get_joint(self):
+		print("computing joint.")
 		counts = self.counts
 		##Extend the label set.
 		SMOOTH = 0.0001
@@ -202,7 +204,7 @@ class Occurrence:
 		lan2_tags = self.lan2_tags_train
 		total = sum( [ sum( list(counts[w1].values()  ) ) for w1 in counts ] )
 		##joint probability.
-		joint = {}
+		joint = defaultdict(lambda: SMOOTH*SMOOTH) # XXX: good value?
 		check = 0
 		for lan1_word in lan1_tags:
 			for lan2_word in lan2_tags:
@@ -213,7 +215,7 @@ class Occurrence:
 				joint[key] = joint_p
 				#joint[(lan2_word +"&&"+lan1_word)] = joint_p
 				check += joint_p
-
+		## XXX: probabilities are now slightly unnormalized.
 		print (check)
 		return joint
 

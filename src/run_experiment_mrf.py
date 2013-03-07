@@ -42,7 +42,6 @@ def mrf_optimize(problem):
     for lang in all_target_languages:
         classifier = classifiers[lang]
         unary = unary_penalty_table(classifier, featureset)
-        print(unary)
         langnode = Node(lang, unary)
 
     ## get all the combinations of nodes.
@@ -50,31 +49,28 @@ def mrf_optimize(problem):
 
     ## create an edge for each language pair.
     for l1, l2 in langpairs:
+        print("building edges for", l1, l2)
         edgepotentials = {}
         for val1 in possible_values(l1):
             for val2 in possible_values(l2):
                 cooccurrence = cooccurrences[(l1,l2)]
-                try:
-                    joint = cooccurrence.lookup_joint(l1, val1, l2, val2)
-                except:
-                    joint_table = cooccurrence.get_joint()
-                    print(joint_table)
-                    assert False
-
+                joint = cooccurrence.lookup_joint(l1, val1, l2, val2)
                 # negative logprob of the joint probability. Definitely the best
                 # edge potential, for sure.
                 edgepotentials[(val1,val2)] = -math.log(joint, 2)
-                print(val1 + "/" + val2, joint)
         Edge(l1, l2, edgepotentials)
 
     ## XXX how many iterations?
+    print("mrf solving!!!")
     answers, oof_answers = beliefprop(20)
+    print("mrf solved!!!")
     return answers, oof_answers
 
 def build_cooccurrences(sourceword):
     langpairs = list(itertools.combinations(all_target_languages, 2))
     ## create an edge for each language pair.
     for l1, l2 in langpairs:
+        print("building cooccurrence", l1, l2)
         cls = co_occur.Occurrence(sourceword,l1,l2)
         cooccurrences[(l1,l2)] = cls
         ## XXX(alexr): gross, should just store it once.
