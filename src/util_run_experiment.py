@@ -44,3 +44,11 @@ def get_test_instances(trialdir, sourceword):
     to solve."""
     fn = "{0}/{1}.data".format(trialdir, sourceword)
     return extract_wsd_problems(fn)
+
+def get_pickled_classifier(sourceword,targetlang,level):
+    if level == 'level1': path = "L1pickle"
+    else:  path = "../L2pickle"
+    classifier = pickle.load(
+                           open( "{}/{}.{}.{}.pickle".format(path,sourceword,target,level)  ,'rb')
+                                      )
+    return classifier
