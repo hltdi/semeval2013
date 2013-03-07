@@ -63,7 +63,8 @@ class Occurrence:
 		print("##### 3 and 4",len(lan3_lan4))
 		print("##### all intersect:",len(intersection))		
 		for key in intersection:
-			print("{}#####\n####{}".format(key,intersection[key]))
+			#print("{}#####\n####{}".format(key,intersection[key]))
+			print(key)
 		print(lan1,lan2,lan3,lan4)
 	
 		return intersection
@@ -342,8 +343,7 @@ if __name__ == "__main__":
 	#sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
 	#for key in sent_l2:
 		#print(key,"   :::  ",sent_l2[key],"\n")
-	cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
-
+	kkk = cls.get_common_four_sents(word,lan1,lan2,lan3,lan4)
 
 
 		
