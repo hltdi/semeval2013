@@ -35,3 +35,11 @@ Berkeley/berkeleyaligner/output/*
 ## All the pickles that we're going to pickle.
 L1pickle/*.pickle
 L2pickle/*.pickle
+
+## All the output we're going to generate
+L1output/*.best
+L1output/*.oof
+L2output/*.best
+L2output/*.oof
+MRFoutput/*.best
+MRFoutput/*.oof
