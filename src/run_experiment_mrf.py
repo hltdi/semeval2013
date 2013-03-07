@@ -25,7 +25,7 @@ import co_occur
 
 classifiers = {}
 
-joints = {}
+cooccurrences = {}
 
 def unary_penalty_table(classifier, featureset):
     """Take a classifier and a featureset; return a dictionary where we've
@@ -53,13 +53,18 @@ def mrf_optimize(problem):
         edgepotentials = {}
         for val1 in possible_values(l1):
             for val2 in possible_values(l2):
-                joint = joints[(l1,l2)]
-                key = "{0}_{1}&&{2}_{3}".format(val1, l1, val2, l2)
+                cooccurrence = cooccurrences[(l1,l2)]
+                try:
+                    joint = cooccurrence.lookup_joint(l1, val1, l2, val2)
+                except:
+                    joint_table = cooccurrence.get_joint()
+                    print(joint_table)
+                    assert False
 
                 # negative logprob of the joint probability. Definitely the best
                 # edge potential, for sure.
-                edgepotentials[(val1,val2)] = -math.log(joint[key], 2)
-                print(key, joint[key])
+                edgepotentials[(val1,val2)] = -math.log(joint, 2)
+                print(val1 + "/" + val2, joint)
         Edge(l1, l2, edgepotentials)
 
     ## XXX how many iterations?
@@ -71,9 +76,9 @@ def build_cooccurrences(sourceword):
     ## create an edge for each language pair.
     for l1, l2 in langpairs:
         cls = co_occur.Occurrence(sourceword,l1,l2)
-        joint = cls.get_joint()
-        joints[(l1,l2)] = joint
-        joints[(l2,l1)] = joint ## XXX(alexr): gross, should just store it once.
+        cooccurrences[(l1,l2)] = cls
+        ## XXX(alexr): gross, should just store it once.
+        cooccurrences[(l2,l1)] = cls
 
 def mrf_get_argparser():
     parser = argparse.ArgumentParser(description='clwsd')
