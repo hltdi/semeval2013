@@ -8,6 +8,9 @@ from parse_corpus import extract_wsd_problems
 
 all_target_languages = "de es fr it nl".split()
 all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
+final_test_words = "coach education execution figure job letter match mission mood paper post pot range rest ring scene side soil strain test".split()
+
+
 trial_words = "bank coach education ring test range mood".split()##some trial data for choosing features.
 
 
