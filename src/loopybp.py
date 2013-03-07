@@ -105,6 +105,9 @@ def initialize_messages(nodes):
 ## current_messages is a map like: {(from, to): message, ...}
 
 def beliefprop(NSTEPS):
+    """Do BP on the network. Return two values: a dictionary from node names to
+    the one-best answer for that node, and a dictionary from node names to the
+    top 5 answers for that node."""
     previous_messages = {}
     current_messages = None
     previous_messages = initialize_messages(nodes)
@@ -117,19 +120,26 @@ def beliefprop(NSTEPS):
 
     ## OK, now let's get the actual best answers.
     best_values = {}
+    topfive_values = {}
     nodeset = set(nodes.keys())
     for node in nodeset:
         best_value = None
         lowest_penalty = INFINITY
+
+        vp_pairs = []
         for myval in possible_values(node):
             penalty = get_node_penalty(node, myval)
             for neighbor in nodeset - set([node]):
                 penalty += current_messages[(neighbor, node)][myval]
+            vp_pairs.append((myval, penalty))
             if (penalty < lowest_penalty):
               lowest_penalty = penalty
               best_value = myval
         best_values[node] = best_value
-    return best_values
+        vp_pairs.sort(key=itemgetter(1), reverse=True)
+        print(vp_pairs)
+        topfive_values[node] = [val for (val,penalty) in vp_pairs[:5]]
+    return best_values, topfive_values
 
 def main():
     a = Node('a', {'a1': 10, 'a2': 5})
@@ -141,7 +151,8 @@ def main():
                       ('a2','b2'):10,
                      }
     e1 = Edge('a', 'b', edgepotentials)
-    best_values = beliefprop()
+    best_values, top_values = beliefprop(10)
     print(best_values)
+    print(top_values)
 
 if __name__ == "__main__": main()
