@@ -118,7 +118,7 @@ def train_l2_classifiers():
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
     #all_languages = ['es']
     #all_words = ['bank']
-    all_words = util_run_experiment.trial_words
+    all_words = util_run_experiment.final_test_words
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     for sourceword in all_words:
         for target in all_languages:

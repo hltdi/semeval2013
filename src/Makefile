@@ -1,5 +1,7 @@
 l1classifiers: l1de l1es l1fr l1it l1nl
 
+l2classifiers: l2de l2es l2fr l2it l2nl
+
 l1de:
 	python3 pickle_l1_classifiers.py de
 l1es:
@@ -10,6 +12,17 @@ l1it:
 	python3 pickle_l1_classifiers.py it
 l1nl:
 	python3 pickle_l1_classifiers.py nl
+
+l2de:
+	python3 train_extracted_level2.py de
+l2es:
+	python3 train_extracted_level2.py es
+l2fr:
+	python3 train_extracted_level2.py fr
+l2it:
+	python3 train_extracted_level2.py it
+l2nl:
+	python3 train_extracted_level2.py nl
 
 l1experiments: l1_exp_de l1_exp_es l1_exp_fr l1_exp_it l1_exp_nl
 
