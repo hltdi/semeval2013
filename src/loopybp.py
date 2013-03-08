@@ -10,7 +10,8 @@ from functools import lru_cache
 from operator import itemgetter
 
 ## TUNABLE PARAMETERS (tune it up) ##
-TOTAL_MSG_PENALTY = 100
+## XXX(alexr): 5 is surely the best value and cannot be wrong.
+TOTAL_MSG_PENALTY = 20
 
 ## this might be a good thing to do with Cython.
 
@@ -25,11 +26,9 @@ class Node:
         self.potentials = potentials
         nodes[name] = self
 
-@lru_cache(maxsize=100)
 def get_node_penalty(name, value):
     return nodes[name].potentials[value]
 
-@lru_cache(maxsize=100)
 def possible_values(name):
     return set(nodes[name].potentials.keys())
 
@@ -43,7 +42,6 @@ class Edge:
         v1, v2 = sorted([v1, v2])
         edges[(v1,v2)] = self
 
-@lru_cache(maxsize=100)
 def get_edge_penalty(v1, v1_val, v2, v2_val):
     edge = get_edge(v1, v2)
     if v1 < v2:
@@ -51,7 +49,6 @@ def get_edge_penalty(v1, v1_val, v2, v2_val):
     else:
         return edge.potentials[(v2_val, v1_val)]
 
-@lru_cache(maxsize=100)
 def get_edge(v1, v2):
     """Return the Edge object for the two named nodes."""
     v1, v2 = sorted([v1, v2])
@@ -136,6 +133,7 @@ def beliefprop(NSTEPS):
               lowest_penalty = penalty
               best_value = myval
         best_values[node] = best_value
+        print(node, best_value)
         vp_pairs.sort(key=itemgetter(1), reverse=True)
         topfive_values[node] = [val for (val,penalty) in vp_pairs[:5]]
     return best_values, topfive_values

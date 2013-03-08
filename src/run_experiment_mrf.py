@@ -32,7 +32,8 @@ def unary_penalty_table(classifier, featureset):
     turned the probabilities into negative logprobs."""
     dist = classifier.prob_classify(featureset)
     labels_and_probs = [(key, dist.prob(key)) for key in dist.samples()]
-    return dict([(label, -math.log(prob,2))
+    ## to be really silly, scale up the unary potentials.
+    return dict([(label, 10 * -math.log(prob,2))
                  for (label, prob) in labels_and_probs])
 
 def mrf_optimize(problem):
@@ -42,6 +43,7 @@ def mrf_optimize(problem):
     for lang in all_target_languages:
         classifier = classifiers[lang]
         unary = unary_penalty_table(classifier, featureset)
+        print(unary)
         langnode = Node(lang, unary)
 
     ## get all the combinations of nodes.
@@ -62,7 +64,7 @@ def mrf_optimize(problem):
 
     ## XXX how many iterations?
     print("mrf solving!!!")
-    answers, oof_answers = beliefprop(20)
+    answers, oof_answers = beliefprop(5)
     print("mrf solved!!!")
     return answers, oof_answers
 
