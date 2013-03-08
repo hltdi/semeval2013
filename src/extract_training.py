@@ -128,6 +128,34 @@ def batch_lemmatize(candidates, targetlang, tt_home):
     for candidate,lemmas in zip(candidates, lemmatized_sentences):
         candidate.source_lemmatized = lemmas
 
+contractions = \
+"l' d' dell' un' all' dall' nell' sull'".split()
+def strip_initial_contraction(label):
+    """Strip out l' and d' (fr) and dell' (it), etc."""
+    normalized_label = label.replace("’", "'")
+    for contraction in contractions:
+        if normalized_label.startswith(contraction):
+            out = normalized_label[len(contraction):]
+            print("CONTRACTION DETECTED", label, contraction)
+            print("STRIPPED TO", out)
+            return out
+    return label
+
+import string
+punctuations = string.punctuation + "»¡"
+
+def strip_edge_punctuation(label):
+    """Strip out punctuation along the edges. It's pretty bad if this gets into
+    the training data."""
+    for punc in punctuations:
+        if label.startswith(punc):
+            print("STRIPPED", punc, "FROM", label)
+            label = label[1:]
+        if label.endswith(punc):
+            print("STRIPPED", punc, "FROM", label)
+            label = label[:1]
+    return label
+
 def print_candidate_to_file(candidate, index, label, outfile):
     """Given a candidate object, the index of the head word in the source
     language, and the label we want to mark it with, print it into the
@@ -141,6 +169,8 @@ def print_candidate_to_file(candidate, index, label, outfile):
     print(index, file=outfile) ## index of source word
     ## print the label
     assert "<unknown>" not in label
+    label = strip_initial_contraction(label)
+    label = strip_edge_punctuation(label)
     print(label, file=outfile)
 
 def get_argparser():
@@ -272,7 +302,9 @@ def main():
                 if (source_lemmas[i] == sourceword and tags[i] in NOUN):
                     lemmatized_labels.add(l_label)
                     unlemmatized_labels.add(u_label)
-                    if "<unknown>" not in l_label:
+                    if ("<unknown>" not in l_label and
+                        "@" not in l_label and
+                        "|" not in l_label):
                         print_candidate_to_file(candidate, i, l_label, outfile)
                     else:
                         print_candidate_to_file(candidate, i, u_label, outfile)

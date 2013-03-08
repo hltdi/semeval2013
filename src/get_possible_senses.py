@@ -26,6 +26,7 @@ def senses(sourceword, target):
             word_count_pairs = []
             for wordandcount in rest.split(';'):
                 word, count = wordandcount.rsplit(None, 1) # count is rightmost
+                word = word.lower()
                 out.add(word)
     return out
 
