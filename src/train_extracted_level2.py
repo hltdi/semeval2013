@@ -113,8 +113,6 @@ def get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword):
 def train_l2_classifiers():
     all_languages = [sys.argv[1]]
     path = "../L2pickle"
-    try: reposit = sys.argv[2]
-    except: reposit = "Bgm"
 
     #all_languages = "nl de es fr it".split()
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
@@ -125,7 +123,7 @@ def train_l2_classifiers():
     for sourceword in all_words:
         for target in all_languages:
             level2_classifier = get_maxent_classifier(sourceword, target)
-            pickle.dump( level2_classifier,open( "{}{}/{}.{}.level2.pickle".format(path,reposit,sourceword,target),'wb')  )
+            pickle.dump( level2_classifier,open( "{}/{}.{}.level2.pickle".format(path,sourceword,target),'wb')  )
             #answer = level2_classifier.classifiy( {"cw(deposit)":True,"cw(money)":True,"cw(finacial)":True}  )
             #print("the answer::::",answer)
             ###pickle the level2 classifiers...        

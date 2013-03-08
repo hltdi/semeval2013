@@ -11,14 +11,10 @@ from train_from_extracted import get_maxent_classifier
 import util_run_experiment
 def main():
     lan = sys.argv[1]
-    try: reposit = sys.argv[2]
-    except: reposit = "Bgm"
-    #reposit = "" 
-    all_target_languages = "nl de es fr it".split()
+    ## all_target_languages = "nl de es fr it".split()
     all_target_languages = [lan]
     all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_words = util_run_experiment.trial_words
-    #assert len(all_words) == 25
+    assert len(all_words) == 25
     #assert len(all_target_languages) == 5
 
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
@@ -27,7 +23,7 @@ def main():
             print("Training {0}/{1}".format(sourceword, target))
             classifier = get_maxent_classifier(sourceword, target)
             picklefn = \
-                "../L1pickle{0}/{1}.{2}.level1.pickle".format(reposit,sourceword, target)  ##if the trial data, another repository
+                "../L1pickle/{0}.{1}.level1.pickle".format(sourceword, target)
             with open(picklefn, "wb") as outfile:
                 pickle.dump(classifier, outfile)
 
