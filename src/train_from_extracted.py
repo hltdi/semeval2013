@@ -17,6 +17,7 @@ from wsd_problem import WSDProblem
 from parse_corpus import extract_wsd_problems
 import read_gold
 import features
+import stanford
 
 def get_training_data_from_extracted(sourceword, targetlang):
     """Return a list of (featureset, label) for training."""
@@ -94,12 +95,14 @@ def main():
     classifier = get_maxent_classifier(sourceword, target)
 
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
+    ## XXX(alexr): fix later.
+    stanford.taggerhome = "/home/alex/software/stanford-postagger-2012-11-11"
     problems = extract_wsd_problems(fn)
     gold_answers = read_gold.get_gold_answers(sourceword, target)
     for problem in problems:
         featureset = features.extract(problem)
         answer = classifier.classify(featureset)
-        print(problem.context)
+        print(problem.tokenized)
         print(answer)
         label = gold_answers[problem.instance_id]
         print("CORRECT" if label == answer else "WRONG", end=" ")
