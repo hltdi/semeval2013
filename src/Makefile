@@ -23,3 +23,16 @@ l1_exp_it:
 	./run_one_l1_language.sh it
 l1_exp_nl:
 	./run_one_l1_language.sh nl
+
+## target to extract all the training data in parallel
+extract_all_training: extract_de extract_es extract_fr extract_it extract_nl
+extract_de:
+	./extract_onelanguage_training.sh de
+extract_es:
+	./extract_onelanguage_training.sh es
+extract_fr:
+	./extract_onelanguage_training.sh fr
+extract_it:
+	./extract_onelanguage_training.sh it
+extract_nl:
+	./extract_onelanguage_training.sh nl
