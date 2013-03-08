@@ -9,6 +9,7 @@ import pickle
 import sys
 import argparse
 from operator import itemgetter
+from collections import defaultdict
 
 from nltk.classify.maxent import MaxentClassifier
 
@@ -49,9 +50,27 @@ def get_training_data_from_extracted(sourceword, targetlang):
         #input()
     return out
 
+def remove_onecount_instances(instances):
+    """Given a list of featureset,label instances, find the ones with labels
+    that only happen once. Remove them."""
+    labelcounts = defaultdict(int)
+    onecounts = set()
+    for (featureset,label) in instances:
+        labelcounts[label] += 1
+    for label in labelcounts:
+        if labelcounts[label] == 1:
+            onecounts.add(label)
+    return [(featureset,label) for (featureset,label) in instances
+                               if label not in onecounts]
+
 def get_maxent_classifier(sourceword, target):
     instances = get_training_data_from_extracted(sourceword, target)
     print("got {0} training instances!!".format(len(instances)))
+    without_onecounts = remove_onecount_instances(instances)
+    print("removed {0} one-count instances!!".format(
+        len(instances) - len(without_onecounts)))
+    instances = without_onecounts
+
     print("... training ...")
     classifier = MaxentClassifier.train(instances,
                                         trace=0,
@@ -71,6 +90,7 @@ def main():
     assert args.targetlang[0] in all_target_languages
     target = args.targetlang[0]
     sourceword = args.sourceword[0]
+    nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
     classifier = get_maxent_classifier(sourceword, target)
 
     fn = "../trialdata/alltrials/{0}.data".format(sourceword)
