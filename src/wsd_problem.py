@@ -42,7 +42,8 @@ class WSDProblem:
         self.head_indices = []
 
         context = context.replace("<head>", START)
-        context = context.replace("</head>", END)
+        ## XXX(alexr): this is completely terrible.
+        context = context.replace("</head>", END + " ")
 
         sentences = nltk.sent_tokenize(context)
         tokenized = [nltk.word_tokenize(sent) for sent in sentences]
@@ -51,7 +52,11 @@ class WSDProblem:
         for sent_index,sent in enumerate(tokenized):
             for word_index,word in enumerate(sent):
                 if word.startswith(START):
-                    assert word.endswith(END)
+                    if not word.endswith(END):
+                        print(repr(word))
+                        print(tokenized)
+                        print(context)
+                        assert False
                     sent[word_index] = word.replace(START,"").replace(END,"")
                     self.head_indices.append(index)
                     # print("HEAD INDEX AT", index)
