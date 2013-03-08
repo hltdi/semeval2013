@@ -136,15 +136,12 @@ def window_bigrams(problem):
         lowerbound = max(0,index-5)
         words_after = tokenized[index+1:upperbound+1]
         words_before = tokenized[lowerbound:index]
-        print(words_before,words_after)
         bigrams_before = nltk.bigrams(words_before)
         bigrams_after = nltk.bigrams(words_after)
         bigrams_before.extend(bigrams_after)
         windowfeatures = dict( [('wbigram({}&{})'.format(w[0],w[1]), True) for w in bigrams_before]
                               )
         out.update(windowfeatures)
-
-    print("The bigrams...",out)
     return out
 
 def window_bigrams_with_tags(problem):
