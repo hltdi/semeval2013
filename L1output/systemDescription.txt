@@ -1,0 +1,16 @@
+Submission Name: hltdi-l1
+
+Approach:
+----------
+
+Short description of the approach:
+We use alignments and some preprocessing to locate training instances in the
+Europarl_Intersection corpus, extract training instances, and train a maxent
+classifier over local context features similar to those used by Lefever and
+Hoste.
+
+Resources that were used:
+The Europarl_Intersection corpus.
+
+Tools that were used (preprocessing, machine learning tools, etc)
+NLTK, Stanford Tagger, Berkeley Aligner, TreeTagger (for lemmatization), megam.

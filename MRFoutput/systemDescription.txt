@@ -1,0 +1,18 @@
+Submission Name: hltdi-mrf
+
+Approach:
+----------
+
+Short description of the approach:
+Our "MRF" model builds a Markov network of L1 classifiers in an effort to find
+the best translation into all five target languages jointly. This network has
+nodes that correspond to the distribution produced by the L1 classifiers, and
+edges with pairwise potentials that are derived from the joint probabilities of
+target-language labels occurring together in the training data. We optimize
+assignments over the five output variables using loopy belief propagation.
+
+Resources that were used:
+The Europarl_Intersection corpus.
+
+Tools that were used (preprocessing, machine learning tools, etc)
+NLTK, Stanford Tagger, Berkeley Aligner, TreeTagger (for lemmatization), megam.

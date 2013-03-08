@@ -1,0 +1,19 @@
+Submission Name: hltdi-l2
+
+Approach:
+----------
+
+Short description of the approach:
+Our "L2" model builds on the L1 model, but with the translations of the word of
+interest into the four other target languages as additional features. At
+training time, these translations are extracted from the training data used to
+produce the L1 classifiers, and at testing time, the translations are estimated
+using the L1 classifiers. So as in the work of Lefever and Hoste, our L2
+classifiers make use of several aligned bitext corpora, but without relying on a
+complete MT system.
+
+Resources that were used:
+The Europarl_Intersection corpus.
+
+Tools that were used (preprocessing, machine learning tools, etc)
+NLTK, Stanford Tagger, Berkeley Aligner, TreeTagger (for lemmatization), megam.
