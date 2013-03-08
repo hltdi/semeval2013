@@ -25,7 +25,7 @@ def test_level2(sourceword,target):
     level2_classifier = util_run_experiment.get_pickled_classifier(sourceword,target,'level2')
     frd1,frd2,frd3,frd4 = sorted(list(get_four_friends(target)))   ##Need 4 more features from level1.
     classfrd1,classfrd2,classfrd3,classfrd4 = get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword)
-    #finaldir = "../trialdata/alltrials/"
+    # finaldir = "../trialdata/alltrials/"
     finaldir = "../finaltest"
     problems = util_run_experiment.get_test_instances(finaldir, sourceword)    
 
@@ -46,18 +46,10 @@ def test_level2(sourceword,target):
 
 
 def main():
-    #aa = util_run_experiment.get_pickled_classifier("ring","es","level2")
-    #kk = util_run_experiment.get_pickled_classifier("bank","es","level2")
-    #print(aa,kk)
-
     #all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
     all_target_languages = "de es fr it nl".split()
 
-    all_words = ['test']
-    #all_words = util_run_experiment.final_test_words[:2]
-    #all_words = ['bank']
-    all_target_languages = ['es']
-
+    all_words = util_run_experiment.final_test_words
     stanford.taggerhome = '/home/liucan/stanford-postagger-2012-11-11'
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
 

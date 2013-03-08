@@ -19,6 +19,8 @@ import read_gold
 import features
 import stanford
 from co_occur import Occurrence
+import train_from_extracted
+
 
 def get_four_friends(target):
     all_languages = set(['es','fr','nl','de','it'])
@@ -87,6 +89,7 @@ def get_training_data_from_extracted(sourceword, targetlang):
 
 def get_maxent_classifier(sourceword, target):
     instances = get_training_data_from_extracted(sourceword, target)
+    instances = train_from_extracted.remove_onecount_instances(instances)
     print("got {0} training instances!!".format(len(instances)))
     print("... training ...")
     classifier = MaxentClassifier.train(instances,
@@ -113,13 +116,9 @@ def get_level1_classifiers(frd1,frd2,frd3,frd4,sourceword):
 def train_l2_classifiers():
     all_languages = [sys.argv[1]]
     path = "../L2pickle"
-
-    #all_languages = "nl de es fr it".split()
-    all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    #all_languages = ['es']
-    #all_words = ['bank']
     all_words = util_run_experiment.final_test_words
     nltk.classify.megam.config_megam(bin='/usr/local/bin/megam')
+    
     for sourceword in all_words:
         for target in all_languages:
             level2_classifier = get_maxent_classifier(sourceword, target)
