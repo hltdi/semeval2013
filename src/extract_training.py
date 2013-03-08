@@ -142,7 +142,7 @@ def strip_initial_contraction(label):
     return label
 
 import string
-punctuations = string.punctuation + "»¡"
+punctuations = string.punctuation + "«»¡"
 
 def strip_edge_punctuation(label):
     """Strip out punctuation along the edges. It's pretty bad if this gets into
@@ -171,7 +171,8 @@ def print_candidate_to_file(candidate, index, label, outfile):
     assert "<unknown>" not in label
     label = strip_initial_contraction(label)
     label = strip_edge_punctuation(label)
-    print(label, file=outfile)
+    if label:
+        print(label, file=outfile)
 
 def get_argparser():
     """Build the argument parser for main."""
