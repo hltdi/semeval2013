@@ -7,6 +7,7 @@ This file gets the co-occurrence table for languages.
 import math
 import pickle
 import sys
+import functools
 from collections import defaultdict
 ### import the alignment file.
 SMOOTH = 0.002
@@ -16,8 +17,8 @@ class Occurrence:
 	def __init__(self,sourceword,lan1,lan2):
 		self.sent_pairs = []
 		self.cooccur = defaultdict(  lambda: defaultdict (lambda:0))
-		self.lan1_labels = self.get_labels(sourceword,lan1)
-		self.lan2_labels = self.get_labels(sourceword,lan2)       		
+		self.lan1_labels = set()
+		self.lan2_labels = set()
 		self.lan1_tags_train = set()
 		self.lan2_tags_train = set()
 		self.unary_counts1 = defaultdict(lambda:0)
@@ -29,20 +30,6 @@ class Occurrence:
 		self.get_count()
 		self.lan1 = lan1
 		self.lan2 = lan2
-
-
-	def get_labels(self,sourceword,lan):
-		path = "../Senses/"
-		labels = {}
-		lanFN = path+sourceword +"." + lan 		
-		fileO = open(lanFN,'r')
-		line = fileO.readline()
-		while line:
-			labels[line.strip()] = 1
-			line = fileO.readline()
-		
-		fileO.close()
-		return labels
 
 	def get_common_four_sents(self,word,lan1,lan2,lan3,lan4):
 
@@ -122,6 +109,7 @@ class Occurrence:
 				##the old key is just sentence. Since sentences are not unique, 
 				##we should use sentence_index as the unique key, hopefully sentence_index don't have
 				##too many repeats.
+				assert (triple[2] == triple[2].lower())
 				mappings1["{}####{}".format(triple[0],triple[1])] = (triple[2])
 				duplicates1["{}####{}".format(triple[0],triple[1])].append(triple[2])
 				dic1["{}####{}".format(triple[0],triple[1])] +=1
@@ -137,6 +125,7 @@ class Occurrence:
 			if count %3 ==1: pass ##add this sentence to s
 				#dic2[line2.strip()] +=1
 			if count%3==0:	
+				assert (triple[2] == triple[2].lower())
 				#mappings2[triple[0]] = (triple[2])
 				mappings2["{}####{}".format(triple[0],triple[1])] = (triple[2])
 				duplicates2["{}####{}".format(triple[0],triple[1])].append(triple[2])
@@ -173,8 +162,8 @@ class Occurrence:
 
 		print("Total overlapped sents:",total,count)
 		self.sent_pairs = sent_pairs
-		for key in dic2:
-			if dic2[key]>1: print("It is duplicated!!!",key,duplicates2[key])
+		## for key in dic2:
+		## 	if dic2[key]>1: print("It is duplicated!!!",key,duplicates2[key])
 		if level2Mode: return sents_for_level2
 
 	def collect_data(self,pairs):
@@ -205,23 +194,28 @@ class Occurrence:
 		#return temp_dict
 		self.counts = temp_dict
 
+	@functools.lru_cache(maxsize=10000)
 	def get_joint(self):
+		print("computing joint.")
 		counts = self.counts
 		##Extend the label set.
 		SMOOTH = 0.0001
-		lan1_tags = self.lan1_tags_train.union(set(self.lan1_labels.keys()))
-		lan2_tags = self.lan2_tags_train.union(set(self.lan2_labels.keys()))
+		lan1_tags = self.lan1_tags_train
+		lan2_tags = self.lan2_tags_train
 		total = sum( [ sum( list(counts[w1].values()  ) ) for w1 in counts ] )
 		##joint probability.
-		joint = {}
+		joint = defaultdict(lambda: SMOOTH*SMOOTH) # XXX: good value?
 		check = 0
 		for lan1_word in lan1_tags:
 			for lan2_word in lan2_tags:
 				joint_p = 1.0* (  SMOOTH + counts[lan1_word][lan2_word]  ) / (total + SMOOTH*len(lan1_tags)*len(lan2_tags))
-				joint[(lan1_word +"_"+self.lan1+"&&"+lan2_word+"_"+self.lan2)] = joint_p
+				key = (lan1_word +"_"+self.lan1+"&&"+lan2_word+"_"+self.lan2)
+				## make sure all labels are lowercased.
+				key = key.lower()
+				joint[key] = joint_p
 				#joint[(lan2_word +"&&"+lan1_word)] = joint_p
 				check += joint_p
-
+		## XXX: probabilities are now slightly unnormalized.
 		print (check)
 		return joint
 
@@ -229,8 +223,10 @@ class Occurrence:
 	def get_conditional(self):
 		counts = self.counts
 		##Extend the labels.
-		lan1_tags = self.lan1_tags_train.union(set(self.lan1_labels.keys()))
-		lan2_tags = self.lan2_tags_train.union(set(self.lan2_labels.keys()))
+		lan1_tags = self.lan1_tags_train
+		lan2_tags = self.lan2_tags_train
+		lan1_tags = [tag.lower() for tag in lan1_tags]
+		lan2_tags = [tag.lower() for tag in lan2_tags]
 		size1 = len(lan1_tags)
 		size2 = len(lan2_tags)
 			
@@ -308,8 +304,13 @@ class Occurrence:
 		pickle.dump(cond2,open(cond2pname,'wb'))
 		pickle.dump(joint,open(jointpname,'wb'))
 
-	def lookup_joint(self,lan1,word_lan1,lan2,word_lan2,dic):
+	@functools.lru_cache(maxsize=10000)
+	def lookup_joint(self,lan1,word_lan1,lan2,word_lan2):
+		if (self.lan1 == lan2) and (self.lan2 == lan1):
+			lan2,lan1 = lan1,lan2
+			word_lan1,word_lan2 = word_lan2,word_lan1
 		key = "{}_{}&&{}_{}".format(word_lan1,lan1,word_lan2,lan2)
+		dic = self.get_joint()
 		return dic[key]
 
 def main():
@@ -346,7 +347,9 @@ if __name__ == "__main__":
 	#print(cls.duplicate_pair(['a','f'],['b','c','e']))
 	cond1,cond2 = cls.get_conditional()
 	joint = cls.get_joint()
-	print(cls.lookup_joint('it','banca','es','banco',joint))
+	print(cls.lookup_joint('it','banca','es','banco'))
+	print(cls.lookup_joint('es','banco','it','banca'))
+	print(cls.lookup_joint('it','banca','de','bank'))
 	#sent_l2 = cls.get_common_sents(word,lan1,lan2,True)
 	#for key in joint:
 	#	print(key,"   :::  ",joint[key],"\n")

@@ -25,7 +25,7 @@ import co_occur
 
 classifiers = {}
 
-joints = {}
+cooccurrences = {}
 
 def unary_penalty_table(classifier, featureset):
     """Take a classifier and a featureset; return a dictionary where we've
@@ -42,7 +42,6 @@ def mrf_optimize(problem):
     for lang in all_target_languages:
         classifier = classifiers[lang]
         unary = unary_penalty_table(classifier, featureset)
-        print(unary)
         langnode = Node(lang, unary)
 
     ## get all the combinations of nodes.
@@ -50,30 +49,32 @@ def mrf_optimize(problem):
 
     ## create an edge for each language pair.
     for l1, l2 in langpairs:
+        print("building edges for", l1, l2)
         edgepotentials = {}
         for val1 in possible_values(l1):
             for val2 in possible_values(l2):
-                joint = joints[(l1,l2)]
-                key = "{0}_{1}&&{2}_{3}".format(val1, l1, val2, l2)
-
+                cooccurrence = cooccurrences[(l1,l2)]
+                joint = cooccurrence.lookup_joint(l1, val1, l2, val2)
                 # negative logprob of the joint probability. Definitely the best
                 # edge potential, for sure.
-                edgepotentials[(val1,val2)] = -math.log(joint[key], 2)
-                print(key, joint[key])
+                edgepotentials[(val1,val2)] = -math.log(joint, 2)
         Edge(l1, l2, edgepotentials)
 
     ## XXX how many iterations?
+    print("mrf solving!!!")
     answers, oof_answers = beliefprop(20)
+    print("mrf solved!!!")
     return answers, oof_answers
 
 def build_cooccurrences(sourceword):
     langpairs = list(itertools.combinations(all_target_languages, 2))
     ## create an edge for each language pair.
     for l1, l2 in langpairs:
+        print("building cooccurrence", l1, l2)
         cls = co_occur.Occurrence(sourceword,l1,l2)
-        joint = cls.get_joint()
-        joints[(l1,l2)] = joint
-        joints[(l2,l1)] = joint ## XXX(alexr): gross, should just store it once.
+        cooccurrences[(l1,l2)] = cls
+        ## XXX(alexr): gross, should just store it once.
+        cooccurrences[(l2,l1)] = cls
 
 def mrf_get_argparser():
     parser = argparse.ArgumentParser(description='clwsd')
