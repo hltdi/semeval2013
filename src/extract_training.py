@@ -163,15 +163,15 @@ def print_candidate_to_file(candidate, index, label, outfile):
     withtags = map(nltk.tag.tuple2str, candidate.source_tagged)
     withtags = list(withtags)
     tagged = " ".join(withtags)
-    ## print the tagged source context.
-    print(tagged, file=outfile)
-    ## print the index of the head word.
-    print(index, file=outfile) ## index of source word
-    ## print the label
     assert "<unknown>" not in label
     label = strip_initial_contraction(label)
     label = strip_edge_punctuation(label)
     if label:
+        ## print the tagged source context.
+        print(tagged, file=outfile)
+        ## print the index of the head word.
+        print(index, file=outfile) ## index of source word
+        ## print the label
         print(label, file=outfile)
 
 def get_argparser():
