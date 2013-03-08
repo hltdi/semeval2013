@@ -47,7 +47,7 @@ def test_level2(sourceword,target):
 
 def main():
     #all_words = "bank coach education execution figure job letter match mission mood movement occupation paper passage plant post pot range rest ring scene side soil strain test".split()
-    all_target_languages = "de es fr it nl".split()
+    all_target_languages = [sys.argv[1]]
 
     all_words = util_run_experiment.final_test_words
     stanford.taggerhome = '/home/liucan/stanford-postagger-2012-11-11'

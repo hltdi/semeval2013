@@ -37,6 +37,18 @@ l1_exp_it:
 l1_exp_nl:
 	./run_one_l1_language.sh nl
 
+l2experiments: l2_exp_de l2_exp_es l2_exp_fr l2_exp_it l2_exp_nl
+l2_exp_de:
+	python3 run_experiment_l2.py de
+l2_exp_es:
+	python3 run_experiment_l2.py es
+l2_exp_fr:
+	python3 run_experiment_l2.py fr
+l2_exp_it:
+	python3 run_experiment_l2.py it
+l2_exp_nl:
+	python3 run_experiment_l2.py nl
+
 ## target to extract all the training data in parallel
 extract_all_training: extract_de extract_es extract_fr extract_it extract_nl
 extract_de:
