@@ -64,7 +64,7 @@ def mrf_optimize(problem):
 
     ## XXX how many iterations?
     print("mrf solving!!!")
-    answers, oof_answers = beliefprop(5)
+    answers, oof_answers = beliefprop(10)
     print("mrf solved!!!")
     return answers, oof_answers
 

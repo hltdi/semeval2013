@@ -11,7 +11,7 @@ from operator import itemgetter
 
 ## TUNABLE PARAMETERS (tune it up) ##
 ## XXX(alexr): 5 is surely the best value and cannot be wrong.
-TOTAL_MSG_PENALTY = 20
+TOTAL_MSG_PENALTY = 100
 
 ## this might be a good thing to do with Cython.
 
