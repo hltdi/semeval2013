@@ -177,8 +177,8 @@ def extract(problem):
         window_withtags,
         window_left,
         window_right,
-        window_bigrams,
-        window_bigrams_with_tags
+        #window_bigrams,
+        #window_bigrams_with_tags
     ]
     for funk in allfeatures:
         extracted = funk(problem)
