@@ -64,6 +64,14 @@ def extract_wsd_problems(fn):
     for (lexelt, head_count, context, inst) in list(handler.sentences):
         problem = WSDProblem(lexelt, context, instance_id=inst, testset=True)
         out.append(problem)
+
+    sents = [problem.tokenized for problem in out]
+    tagger = stanford.get_tagger()
+    tagged_sents = tagger.batch_tag(sents)
+    assert len(tagged_sents) == len(out)
+    for tagged_sent,problem in zip(tagged_sents, out):
+        problem.tagged = tagged_sent
+    print("tagged.")
     return out
 
 def main():

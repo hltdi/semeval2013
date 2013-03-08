@@ -33,7 +33,7 @@ class WSDProblem:
             self.init_trainingset(context, head_index)
 
         self.lemmatized = [wnl.lemmatize(token.lower())
-                           for token in nltk.tag.untag(self.tagged)]
+                           for token in self.tokenized]
 
     def init_testset(self, context):
         """If we're coming from the test set, we haven't tagged yet. Probably
@@ -54,14 +54,10 @@ class WSDProblem:
                     assert word.endswith(END)
                     sent[word_index] = word.replace(START,"").replace(END,"")
                     self.head_indices.append(index)
-                    # print("HEAD INDEX AT", index)
                 index += 1
-
-        tagger = stanford.get_tagger()
-        tagged_sents = tagger.batch_tag(tokenized)
-        self.tagged = []
-        for ts in tagged_sents:
-            self.tagged += ts
+        self.tokenized = []
+        for sent in tokenized:
+            self.tokenized += sent
 
     def init_trainingset(self, context, head_index):
         """In this case, we should get context as a tagged string, out of the
@@ -71,6 +67,7 @@ class WSDProblem:
         assert type(head_index) is int
         split = context.split()
         self.tagged = [nltk.tag.str2tuple(tok) for tok in split]
+        self.tokenized = nltk.tag.untag(self.tagged)
         self.head_indices = [head_index]
 
     def __str__(self):
