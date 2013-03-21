@@ -1,14 +1,13 @@
-%
-% File naaclhlt2013.tex
-%
-
 \documentclass[11pt,letterpaper]{article}
 \usepackage{naaclhlt2013}
 \usepackage{times}
 \usepackage{latexsym}
 \setlength\titlebox{6.5cm}    % Expanding the titlebox
+\usepackage{float}
+\floatstyle{boxed}
+\restylefloat{figure}
 
-\title{Bring the CL-WSD Ruckus.}
+\title{The HLTDI disambiguatr: some CL-WSD Systems for SemEval Task 10}
 
 \author{Alex Rudnick, Can Liu and Michael Gasser\\
 	    Indiana University, School of Informatics and Computing \\
@@ -18,14 +17,242 @@
 
 \begin{document}
 \maketitle
-\begin{abstract}
-Since the dawn of time man has yearned to destroy the sun.
 
-Now we can do the next-best thing: cross-language word-sense disambiguation.
+\begin{abstract}
+We present our approaches to CL-WSD for the Semeval 2013 Task 10, which came in
+three varieties: "one layer" classifiers, which are single maximum-entropy
+classifiers making use of local context features, "two layer" classifiers,
+which are the same as the one-layer classifiers except that they use the
+translation of the word of interest into four other target languages as
+features, and lastly, the "MRF" classifiers, which build a network of five
+layer-one classifiers to allow them to solve the classification task jointly.
 \end{abstract}
 
 \section{Introduction}
-RTFM: \cite{DBLP:books/daglib/0067131}
+Following the work of Lefever and Hoste (2011 (original ParaSense paper)), we
+are working on systems that that make use of multiple bitext corpora for the
+cross-language word-sense disambiguation (CL-WSD) task, without the need to
+call a complete MT system at inference time.
+
+CL-WSD has been shown useful for statistical machine translation, and we are
+particularly interested in applying it to rule-based systems.
+
+
+We presented three systems in this competition, which were variations on the
+theme of a maximum entropy classifier for each ambiguous noun, trained on local
+context features similar to those used in previous work and familiar from the
+WSD literature.
+
+
+Our systems had similar results, but our simplest system came in first place
+for the out-of-five evaluation for three languages. All of our systems beat the
+baseline in every case.  In the 2013 competition (XXX cite), winning especially
+hard on Flemish, Inuktitut and Oromo (XXX fill this in).
+
+
+Our three systems made use of the same training data, which we extracted from
+the Europarl Intersection corpus, meaning that the English-language source
+sentences were identical for each of the five corpora. But the source-language
+sentences need not be identical, and we plan to explore relaxing this
+restriction in future work.
+
+
+In the following sections, we will describe our three systems, followed by the
+common preprocessing steps that we performed, and then discuss results and
+future work.
+
+\section{L1}
+Our simplest system, called "L1" (in contrast with "L2", which we will describe
+next), makes use of supervised learning to train a maximum entropy (logistic
+regression) classifier over a large number of features, described in Figure
+\ref{features}.
+
+Most of the work in producing the L1 classifiers is locating relevant training
+examples from the bitext corpus.
+Once we find translation pairs that we want to include in the training data
+(mappings from English-language sentences and instances of the ambiguous word
+in question to the appropriate target-language lemma), we extract features from
+the ...
+
+We use alignments and some preprocessing to locate training instances in the
+Europarl Intersection corpus, extract training instances, and train a maxent
+classifier over local context features similar to those used by Lefever and
+Hoste.
+
+\begin{figure}
+  \begin{itemize}
+  \item word form
+  \item word tag
+  \item word lemma
+  \item for words in the three-word window on both sides
+  \item wordform, lemma, pos tag
+  \item for words in a five-word window on both sides
+  \item bigrams and tagged bigrams (just in case)
+  \end{itemize}
+  \label{features}
+  \caption{some features}
+\end{figure}
+
+
+\section{L2}
+Our "L2" model builds on the L1 model, but with the translations of the word of
+interest into the four other target languages as additional features. At
+training time, these translations are extracted from the training data used to
+produce the L1 classifiers, and at testing time, the translations are estimated
+using the L1 classifiers. So as in the work of Lefever and Hoste, our L2
+classifiers make use of several aligned bitext corpora, but without relying on
+a complete MT system.
+
+
+\section{MRF}
+Our "MRF" model builds a Markov network of L1 classifiers in an effort to find
+the best translation into all five target languages jointly. This network has
+nodes that correspond to the distribution produced by the L1 classifiers, and
+edges with pairwise potentials that are derived from the joint probabilities of
+target-language labels occurring together in the training data. We optimize
+assignments over the five output variables using loopy belief propagation
+
+
+\section{resources and tools}
+The Europarl Intersection corpus.
+	
+
+\section{preprocessing steps}
+For simplicity and comparability with previous work, we worked entirely with
+the Europarl Intersection corpus provided by the competition organizers.
+
+
+tools: NLTK, Stanford Tagger, Berkeley Aligner, TreeTagger (for lemmatization),
+megam for learning.
+
+
+We converted the English side of the text to ascii (XXX: why did we do that?
+does Stanford Tagger work better on ASCII? ...) We tokenized both the English
+and target language text with the default word tokenizer from NLTK.  We aligned
+each of the English and target language pairs (en/de, en/es, etc) with the
+Berkeley Aligner, with very nearly the default settings, except that we ran 20
+iterations each of IBM Model 1 and 20 iterations of the HMM alignment
+algorithm. Is that the right number? Who can say, really?
+
+
+We found an unreasonable bug with TreeTagger that alexr tracked down, which was
+breaking our attempts to call TreeTagger programmatically. Helmut fixed the
+bug. But he did not release the code to TreeTagger, which is weird.
+(TODO(alexr): clone TreeTagger or at least the lemmatizer parts and release an
+open source version). Had nobody ever tried to lemmatize English and then
+programmatically parse TreeTagger's output before?
+
+
+We also found another bug that made it seem like our alignments were awful.
+That was two more problems with TreeTagger -- it turned out that it was calling
+both a tokenizer and a mwe-expression chunker. (those could be fixed in the
+Perl wrappers for TreeTagger, thankfully)
+
+
+Once TreeTagger wasn't screwing up our alignments, our alignments seemed pretty
+good, so we used those, such that we had one-to-many alignments from English
+words into the target language sentences.
+
+
+We also cheated a bit by using the gold standard labels from last time, looking
+for instances of the gold labels in the target text; if our noun had an
+alignment into those gold standard labels, we preferred taking that gold label
+(labels can be multi-word expressions).
+
+
+We dropped all of the training instances with labels that only occurred once,
+considering them likely alignment errors or other noise.
+
+
+\section{results}
+So it's kind of surprising -- at least in this case, our simplest system did
+the best job. We're comfortable claiming second place for most of the
+languages, though Marine did a great job for Spanish.
+
+
+It's kind of like a negative result -- we were hoping that we could do a better
+job with the L2 classifiers or perhaps the MRF classifiers, but really, they
+don't improve much on the L1 ones.
+So what does that mean?
+It seems like Els's features really are richer -- she gets translations for all
+the different words in the source language and uses the other-target-language
+bag-of-words as features. That's a lot of features. We're kind of forcing the
+information through a narrower pass -- we just get one decision.
+
+
+\section{Conclusions and future work}
+
+
+While our systems had a strong showing in the competition, always beating the
+MFS baseline and achieving the top score for three of the five languages in the
+OOF evaluation, our system that performed the best was the simplest one.
+
+
+We hope that in the future we will be able to ...
+ use more classifiers for the L2 classifier
+
+ the beauty of the L2 classifier approach is that the bitext corpora, they
+only have to share a source language -- the sentences in your corpora don't
+have to share anything else. Intuitively, it might help for the different
+corpora to be different.
+
+ we could easily build up more L1 classifiers from any sense-tagged corpus in
+our source language. That would be extremely easy.
+
+such as, for example, the sense-tagged corpus distributed with Wordnet:
+http://wordnet.princeton.edu/glosstag.shtml
+
+
+or the new Google/Amherst wikipedia-tagged corpus, WikiLinks:
+http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html
+
+
+we could even use, as L2 features, other monolingual WSD systems. Any
+monolingual WSD system, in fact.
+
+
+an argument against this is that if you have so many bitext corpora, why
+don't you just train up a whole SMT system for each language pair? Then you
+could do Els's approach of getting bag-of-words features for your
+classification. But that's a pain, and do you really want to run Joshua five
+times every time you want to translate a noun? IMPORTANT QUESTION: does our L2
+work as well as Els on the 2010 trial data? Should run that whole experiment.
+
+
+come up with better ways to set the edge weights for the MRF. We tried doing
+the negative logprob of joint probabilities (and then weighting those with
+sort of an arbitrary hyperparameter), and that intuitively seems like it might
+be the right thing, but we don't know. We should have tested more. What would
+be really great would be a way to estimate these probabilities even if we
+can't get them from training data
+
+we could do active learning, actually, to get labels for the same sentence
+in multiple target languages. Ask a human "here's a sentence in English, what's
+the best translation into target languages X and Y", for the ones we're unsure
+about!
+
+or just one target language at a time!
+
+this would be really easy to crowdsource.
+
+this would even be pretty easy to crowdsource for es Guarani, if we have
+people who speak Spanish and any other language handy... (gn, en...)
+
+We could also do semi-supervised learning. If we're really confident about
+two labels for a given output sentence, then maybe take both of those labels as
+training data. (maybe put this in the "possible ridiculous ideas for later"
+bin, not in the paper)
+
+
+References
+
+Els 2011: http://www.aclweb.org/anthology-new/P/P11/P11-2055.bib
+
+Els 2013: the shared task paper.
+
+Maybe cite Fran's dissertation on how he's doing lexical selection for Apertium
+
+\cite{DBLP:books/daglib/0067131}
 
 \section*{Acknowledgments}
 
