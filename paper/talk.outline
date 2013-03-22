@@ -1,0 +1,59 @@
+Talk Outline:
+
+
+1)Motivation: why word sense disambiguation in machine translation?
+**some good and interesting examples
+
+2)Background: Semeval. What did people do, 
+how was their systems, 
+why hard 
+why not hard?
+**look at previous teams' papers and summerize
+From Els work: information from other languages help.
+
+
+3)The models (on a concept level)
+ 3.1)Our system: also based on "information from other languages help"
+ -what do we want to propose/experiment most?   MRF!
+ -MRF idea: since languages are related, their translations should agree on one another, and we should solve this jointly.
+ ***good examples
+ -MRF description: each node is one langauge, and edges the relationship between languages. 
+ -What we want to solve is MAP inference.  Finding the maximum global assignment.
+ -Exact inference on this graph is expensive, so approximate solution:   
+       Loopy Belief propagation, how..(shortly describe)
+
+-Concern about our current MRF, the joint probability.
+
+3.2)
+ Two other systems:
+ L1: a basic maxent classifier  + English sentence features
+ L2: a basic maxent classifier  + English sentence features + translations of 4 frien
+
+4)Features that we use (on a implementation level)
+-why we think to use them
+-are there better features? Hear about Clingding suggestions
+
+
+5)Preprocessing: (on a implementation level)
+It is the part we don't like about this competition, it is not a fair evalation on the WSD methods when there is not standard way to preprocess.
+Trained on EuroPal Intersection Data, more specifically speaking, they're bitex of English-target language.
+POS tagging and tokenization : Stanford Tagger
+Lemmatization:  TreeTagger
+Alignments:  Berkerley Aligner
+**How is aligning done
+
+6)Training and testing (on a implementation level)
+
+
+7)Results: which 20 words
+Give a table of the results. 5 languages, 3 systems, 2 evaluations. Should have 30 entries
+
+Analysis: 
+**What do these results mean?
+**Why is L1 the simplest system the best, not L2 or MRF?
+
+8)Future work:
+-The factors that affect the system performace;
+ -What did we train on, more training data?  Bitex instead of Intersection from Europal.
+ -How did we the translations for friend-languages
+ -How did we set the parameteres in the MRF?
