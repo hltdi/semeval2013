@@ -62,27 +62,32 @@ common preprocessing steps that we performed, and then discuss results and
 future work.
 
 \section{L1}
+preprocessing, training, testing\\
 Our simplest system, called "L1" (in contrast with "L2", which we will describe
-next), makes use of supervised learning to train a maximum entropy (logistic
+next), is trained on bitext for a single target language.It makes use of supervised learning to train a maximum entropy (logistic
 regression) classifier over a large number of features, described in Figure
-\ref{features}.
+\ref{features}. 
+We have a ``L1" classifier for each word of interest in each target language.\\  
 
 Most of the work in producing the L1 classifiers is locating relevant training
-examples from the bitext corpus.
+examples from the bitext corpus. We are only interested in bitex sentence pairs where the source language sentence contains the word of interest.
+
 Once we find translation pairs that we want to include in the training data
 (mappings from English-language sentences and instances of the ambiguous word
 in question to the appropriate target-language lemma), we extract features from
-the ...
+the English-language sentence. 
 
-We use alignments and some preprocessing to locate training instances in the
-Europarl Intersection corpus, extract training instances, and train a maxent
-classifier over local context features similar to those used by Lefever and
+Several steps of preprocessing were needed. We first POS tagged the sentences, since we are only interested in nouns.
+Then align the words in each sentence pair, and lemmatize the target sentence.
+After locating words of interest in the
+Europarl Intersection corpus, training instances were extracted, and a maxent
+classifier was trained over local context features similar to those used by Lefever and
 Hoste.
 
 \begin{figure}
   \begin{itemize}
   \item word form
-  \item word tag
+  \item word tag (word with tag?)
   \item word lemma
   \item for words in the three-word window on both sides
   \item wordform, lemma, pos tag
@@ -93,15 +98,22 @@ Hoste.
   \caption{some features}
 \end{figure}
 
+Note: word tag is different from word with tag (so as for bigram and bigram with tag). eg. ``NN" is a tag for ``bank", but ``bank_NN" is the word with tag. We include this because tags are good indicator of word senses, and the senses of context helps disambiguate the target word. 
 
 \section{L2}
-Our "L2" model builds on the L1 model, but with the translations of the word of
-interest into the four other target languages as additional features. At
-training time, these translations are extracted from the training data used to
-produce the L1 classifiers, and at testing time, the translations are estimated
-using the L1 classifiers. So as in the work of Lefever and Hoste, our L2
-classifiers make use of several aligned bitext corpora, but without relying on
-a complete MT system.
+As in the work of Lefever and Hoste, the ``L2" model and MRF model both use translation for four other languages as features, but in different ways.
+``L2" model is a maxent classifier with features 1) from English source sentence (the same features as L1), 2) translation for the target word into other four languages. 
+At training time, these translations are extracted from the aligned sentences in Europarl Intersection data. 
+At testing time, the translations are estimated using the L1 classifiers. 
+%Our "L2" model builds on the L1 model, but with the translations of the word of
+%interest into the four other target languages as additional features.
+The translations seems to be an important factor in the performance of L2, Lefever and Hoste used a MT system for the translations instead.
+???
+
+%Unfortunately, it is difficult to evaluate which one gives better performance. It would be a fairer comparison of the WSD systems if a standardized way %of translations 
+%So as in the work of Lefever and Hoste, our L2
+%classifiers make use of several aligned bitext corpora, but without relying on
+%a complete MT system.
 
 
 \section{MRF}
@@ -112,7 +124,17 @@ edges with pairwise potentials that are derived from the joint probabilities of
 target-language labels occurring together in the training data. We optimize
 assignments over the five output variables using loopy belief propagation
 
+The idea of MRF is that translations for five target languages must agree with each other, since these languages are all related.
+It is then natural to ask: how related are they and can MRF represent different closeness between languages?
+???
+We know that Dutch is more related to German than with Spanish, Italian and French. Can this closeness be represented by the pairwise potentials?
 
+We had some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
+
+The future work should experiment on different weight we put on the pairwise potentials...
+
+problem with joint probability as potentials, 
+conditional probability as potentials, we could abuse the mathematics of MRF a little bit and experiment on this approximate potential.
 \section{resources and tools}
 The Europarl Intersection corpus.
 	
