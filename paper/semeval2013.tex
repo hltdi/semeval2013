@@ -7,7 +7,7 @@
 \floatstyle{boxed}
 \restylefloat{figure}
 
-\title{The HLTDI disambiguatr: some CL-WSD Systems for SemEval Task 10}
+\title{HLTDI: CL-WSD Using Markov Random Fields for SemEval-2013 Task 10}
 
 \author{Alex Rudnick, Can Liu and Michael Gasser\\
 	    Indiana University, School of Informatics and Computing \\
@@ -20,15 +20,14 @@
 
 \begin{abstract}
 We present our entries for the SemEval-2013 cross-language word-sense
-disambiguation task \cite{task10}. We submitted three entries, which were based
-around classifiers trained on local context features, with some elaborations.
+disambiguation task \cite{task10}. We submitted three systems based
+on classifiers trained on local context features, with some elaborations.
 Our three systems, in increasing order of complexity, were: maximum entropy
 classifiers trained to predict the desired target-language phrase (we called
 this system ``L1"); similar classifiers, but with the desired target-language
 phrase for the other four languages as features (``L2"); and lastly, networks
 of five classifiers, over which we do loopy belief propagation in an attempt to
-solve the classification task jointly (``MRF"). Our more elaborate systems did
-not improve over our simpler one, but we plan to continue their development.
+solve the classification task jointly (``MRF").
 \end{abstract}
 
 \section{Introduction}
@@ -186,21 +185,13 @@ Berkeley Aligner, with very nearly the default settings, except that we ran 20
 iterations each of IBM Model 1 and 20 iterations of the HMM alignment
 algorithm. Is that the right number? Who can say, really?
 
-We found an unreasonable bug with TreeTagger that alexr tracked down, which was
-breaking our attempts to call TreeTagger programmatically. Helmut fixed the
-bug. But he did not release the code to TreeTagger, which is weird.
-(TODO(alexr): clone TreeTagger or at least the lemmatizer parts and release an
-open source version). Had nobody ever tried to lemmatize English and then
-programmatically parse TreeTagger's output before?
-
 We also found another bug that made it seem like our alignments were awful.
 That was two more problems with TreeTagger -- it turned out that it was calling
 both a tokenizer and a mwe-expression chunker. (those could be fixed in the
 Perl wrappers for TreeTagger, thankfully)
 
-Once TreeTagger wasn't screwing up our alignments, our alignments seemed pretty
-good, so we used those, such that we had one-to-many alignments from English
-words into the target language sentences.
+At this point, we had one-to-many alignments from English words into the target
+language sentences.
 
 We also cheated a bit by using the gold standard labels from last time, looking
 for instances of the gold labels in the target text; if our noun had an
@@ -217,6 +208,7 @@ general.
 
 Also, in the out-of-five case, the L1 classifiers are usually better... in
 fact, they won the competition for three of the five languages.
+However ...
 
 It seems like Els's features really are richer -- she gets translations for all
 the different words in the source language and uses the other-target-language
@@ -228,6 +220,7 @@ classifiers, so they do seem to help at least a bit. (though the results aren't
 all that much better...)
 
 What went wrong with the MRF classifiers with the OOF evaluation??!
+TODO(alexr): now we know what went wrong. Write about it!
 
 \begin{table*}[t!]
   \begin{center}
