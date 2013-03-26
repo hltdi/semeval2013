@@ -18,14 +18,15 @@
 \begin{document}
 \maketitle
 
+%what resource did we use, 
 \begin{abstract}
-We present our approaches to CL-WSD for the Semeval 2013 Task 10, which came in
-three varieties: "one layer" classifiers, which are single maximum-entropy
-classifiers making use of local context features, "two layer" classifiers,
-which are the same as the one-layer classifiers except that they use the
-translation of the word of interest into four other target languages as
-features, and lastly, the "MRF" classifiers, which build a network of five
-layer-one classifiers to allow them to solve the classification task jointly.
+We present our approaches to CL-WSD(Cross-Lingual Word Sense Disambiguation) for the Semeval 2013 Task 10, which came in
+three varieties: 
+"One layer" Classifiers, which are single maximum-entropy classifiers making use of monolingual context features. %local context features,
+ "Two layer" Classifiers,which are based on layer-one classifiers and also use multilingual features that are translations for four other languages. 
+ %which are the same as the one-layer classifiers except that they use the translation of the word of interest into four other target languages as features, 
+And lastly, the "MRF(Markov Random Field)" Classifiers, which also use multilingual features. Instead of translate each language separately, they build a network of five layer-one classifiers to allow them to find the translation for five languages jointly.%solve the classification task jointly.
+%=We will also discuss the results and findings. 
 \end{abstract}
 
 \section{Introduction}
@@ -130,7 +131,7 @@ It is then natural to ask: how related are they and can MRF represent different 
 ???
 We know that Dutch is more related to German than with Spanish, Italian and French. Can this closeness be represented by the pairwise potentials?
 
-We had some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
+There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
 
 The future work should experiment on different weight we put on the pairwise potentials...
 
