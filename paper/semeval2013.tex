@@ -34,8 +34,7 @@ We present our entries for the SemEval-2013 cross-language word-sense
 disambiguation task \cite{task10}. We submitted three systems based
 on classifiers trained on local context features, with some elaborations.
 Our three systems, in increasing order of complexity, were: maximum entropy
-classifiers trained to predict the desired target-language phrase (we called
-this system ``L1"); similar classifiers, but with the desired target-language
+classifiers trained to predict the desired target-language phrase using only monolingual features (we called this system ``L1"); similar classifiers, but with the desired target-language
 phrase for the other four languages as features (``L2"); and lastly, networks
 of five classifiers, over which we do loopy belief propagation in an attempt to
 solve the classification task jointly (``MRF").
@@ -53,27 +52,28 @@ has been shown to be improve machine translation even in the case of
 phrase-based SMT systems (cite Carpuat and Wu), which can mitigate the
 ambiguities through the use of a language model and phrase-tables with
 multi-word phrases.
-CL-WSD has been shown useful for statistical machine translation, and we are
-particularly interested in applying it to rule-based systems.
+CL-WSD has been shown useful for statistical machine translation (cite Carpuat and Wu), although in future work we are particularly interested in applying it to rule-based systems. (XXX: is this relevant?)
 
-In the Semeval-2013 CL-WSD task \cite{task10}, we are asked to provide
-translations for twenty ambiguous nouns...
+In the Semeval-2013 CL-WSD task \cite{task10}, we are asked to build a system that can provide
+translations for twenty ambiguous English nouns in their contexts. The five target languages in the shared task are Spanish, Dutch, German, Italian and French. There were two settings for the evaluation, ``best" and ``oof". In either case, systems may present multiple possible answers for a given translation, although in the ``best" setting, the first answer is given more weight, which encourages only returning the one-best. In the ``oof" setting, systems are encouraged to return the top-five most likely translations. For a complete explanation of the settings, please see the shared task description \cite{task10}.
 
+%% consider: maybe move this to related work?
 Following the work of Lefever and Hoste
-\shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we are developing systems
-that that make use of multiple bitext corpora for the cross-language word-sense
-disambiguation (CL-WSD) task, without the need to call a complete MT system at
-inference time.
+\shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to develop systems
+that make use of multiple bitext corpora for the CL-WSD task.
+ParaSense, the system of Lefever and Hoste, takes into account evidence from all of the available parallel corpora. Let $S$ be the set of five target languages and $t$ be the particular target language of interest at the moment; ParaSense creates bag-of-words features from the translations of the target sentence into the languages $S - \lbrace{t \rbrace}$. Given corpora that are parallel over many languages, this is straightforward to do at training time, however at testing time it requires the use of a complete MT system into the four other languages, which is computationally prohibitive. Thus in our work, we have developed systems that make use of many parallel corpora but require neither a locally running MT system nor access to an online translation API.
 
 We presented three systems in this competition, which were variations on the
 theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
 WSD literature.
 
-Our systems had similar results, but our simplest system came in first place
-for the out-of-five evaluation for three languages. All of our systems beat the
-baseline in every case.  We winning especially hard on Flemish, Inuktitut and
-Oromo (XXX fill this in).
+Our systems had similar results, but at the time of the evaluation, our simplest system came in first place for the out-of-five evaluation for three languages (Spanish, German, and Italian).
+However, after the evaluation, we fixed a simple (slightly embarrassing) bug in our MRF code, which resulted in the MRF system posting even better results for the OOF evaluation.
+
+on the \emph{oof} evaluation, we had the best results for Spanish, German, and Italian.
+All of our systems beat the ``most-frequent sense" baseline in every case.
+
 
 Our three systems made use of the same training data, which we extracted from
 the Europarl Intersection corpus, meaning that the English-language source
