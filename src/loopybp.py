@@ -134,7 +134,7 @@ def beliefprop(NSTEPS):
               best_value = myval
         best_values[node] = best_value
         print(node, best_value)
-        vp_pairs.sort(key=itemgetter(1), reverse=True)
+        vp_pairs.sort(key=itemgetter(1), reverse=False)
         topfive_values[node] = [val for (val,penalty) in vp_pairs[:5]]
     return best_values, topfive_values
 
