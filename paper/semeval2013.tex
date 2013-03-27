@@ -274,8 +274,9 @@ considering them likely alignment errors or other noise.
   \end{center}
 \end{table*}
 
+%% edit and expand!
 For the \emph{best} evaluation, the more sophisticated classifiers usually do
-better. though not always. It's not totally clear that they're better in
+better, though not always. It's not totally clear that they're better in
 general.
 
 It seems like Els's features really are richer -- she gets translations for all
@@ -285,9 +286,6 @@ information through a narrower pass -- we just get one decision.
 
 TODO(alexr): now we know what went wrong. Write about it!
 
-
-
-\section{Further experiments}
 TODO(alexr): run the experiment where we do the L2 classifiers, but with the
 \emph{predicted} target-language word as the feature.
 
@@ -312,10 +310,10 @@ We could easily build up more L1 classifiers from any sense-tagged corpus in
 our source language. That would be extremely easy.
 
 such as, for example, the sense-tagged corpus distributed with Wordnet:
-\footnote{yeah: http://wordnet.princeton.edu/glosstag.shtml}
+\footnote{\url{http://wordnet.princeton.edu/glosstag.shtml}}
 
 or the new Google/Amherst wikipedia-tagged corpus, WikiLinks:
-\footnote{yeah: http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html}
+\footnote{\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html}}
 
 We could even use, as L2 features, other monolingual WSD systems. Any
 monolingual WSD system, in fact.
@@ -336,33 +334,13 @@ be the right thing, but we don't know. We should have tested more. What would
 be really great would be a way to estimate these probabilities even if we
 can't get them from training data
 
-we could do active learning, actually, to get labels for the same sentence
-in multiple target languages. Ask a human "here's a sentence in English, what's
-the best translation into target languages X and Y", for the ones we're unsure
-about!
-
-or just one target language at a time!
-
-this would be really easy to crowdsource.
-
-this would even be pretty easy to crowdsource for es Guarani, if we have
-people who speak Spanish and any other language handy... (gn, en...)
-
-As we're primarily interested in MT for low-resourced and disadvantaged
+As we are primarily interested in MT for low-resourced and disadvantaged
 languages, we plan to adapt this system to Spanish/Guarani MT in the near
 future -- earlier experiments were done with a similar, though less
 sophisticated, system for Quechua \cite{rudnick:2011:RANLPStud}.
 
-We could also do semi-supervised learning. If we're really confident about
-two labels for a given output sentence, then maybe take both of those labels as
-training data. (maybe put this in the "possible ridiculous ideas for later"
-bin, not in the paper)
-
-
-
-\section*{Acknowledgments}
-
-Do not number the acknowledgment section.
+%% \section*{Acknowledgments}
+%% Do not number the acknowledgment section.
 
 \bibliographystyle{naaclhlt2013.bst}
 \bibliography{semeval2013.bib}{}
