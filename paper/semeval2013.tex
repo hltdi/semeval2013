@@ -5,6 +5,7 @@
 \setlength\titlebox{6.5cm}    % Expanding the titlebox
 \usepackage{url}
 \usepackage{float}
+\usepackage{graphicx}
 \floatstyle{boxed}
 \restylefloat{figure}
 
@@ -170,6 +171,13 @@ Lefever and Hoste used a MT system for the translations instead.
 %system.
 
 \section{MRF}
+\begin{figure}
+  \includegraphics[width=8cm]{pentagram.pdf}
+  \label{pentagram}
+  \caption{The network structure used in the MRF system: a complete five-graph
+  where each node represents a variable for the translation into a target
+language}
+\end{figure}
 Our "MRF" model builds a Markov network of L1 classifiers in an effort to find
 the best translation into all five target languages jointly. This network has
 nodes that correspond to the distribution produced by the L1 classifiers, and
@@ -184,7 +192,6 @@ languages?  ???  We know that Dutch is more related to German than with
 Spanish, Italian and French. Can this closeness be represented by the pairwise
 potentials?
 
-%% TODO: build a diagram of the network. THE TRANSLATION PENTAGRAM.
 
 There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
 We had some concern about pairwise potential in MRF, which is joint
@@ -197,42 +204,6 @@ potentials...
 problem with joint probability as potentials, conditional probability as
 potentials, we could abuse the mathematics of MRF a little bit and experiment
 on this approximate potential.
-
-\section{Training Data Extraction}
-For simplicity and comparability with previous work, we worked entirely with
-the Europarl Intersection corpus provided by the task organizers.  Europarl
-(XXX cite europarl) is a parallel corpus of proceedings of the European
-Parliament, which is available in XXX languages, although not every sentence is
-translated into every language. The Europarl Intersection is the intersection
-of the sentences from Europarl that are available in English and all five of
-the target languages for the task.
-
-In order to produce the training data for the classifiers, we first tokenized
-the text for all six languages with the default NLTK tokenizer \cite{nltkbook},
-and tagged the English text with the Stanford Tagger
-\cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
-with each of the target languages using the Berkeley Aligner
-\cite{denero-klein:2007:ACLMain}, with very nearly the default settings, except
-that we ran 20 iterations each of IBM Model 1 and 20 iterations of the HMM
-alignment algorithm, such that we got one-to-many alignments from English to
-target-language words.
-
-We used TreeTagger to extract lemmas for \cite{Schmid95improvementsin}
-(XXX: did we ever use TreeTagger on the English text? Was it always the wordnet
-lemmatizer for English?);
-
-We also found another bug that made it seem like our alignments were awful.
-That was two more problems with TreeTagger -- it turned out that it was calling
-both a tokenizer and a mwe-expression chunker. (those could be fixed in the
-Perl wrappers for TreeTagger, thankfully)
-
-We also cheated a bit by using the gold standard labels from last time, looking
-for instances of the gold labels in the target text; if our noun had an
-alignment into those gold standard labels, we preferred taking that gold label
-(labels can be multi-word expressions).
-
-We dropped all of the training instances with labels that only occurred once,
-considering them likely alignment errors or other noise.
 
 \section{Results}
 \begin{table*}[t!]
@@ -287,6 +258,43 @@ TODO(alexr): now we know what went wrong. Write about it!
 
 TODO(alexr): run the experiment where we do the L2 classifiers, but with the
 \emph{predicted} target-language word as the feature.
+
+
+\section{Training Data Extraction}
+For simplicity and comparability with previous work, we worked entirely with
+the Europarl Intersection corpus provided by the task organizers.  Europarl
+(XXX cite europarl) is a parallel corpus of proceedings of the European
+Parliament, which is available in XXX languages, although not every sentence is
+translated into every language. The Europarl Intersection is the intersection
+of the sentences from Europarl that are available in English and all five of
+the target languages for the task.
+
+In order to produce the training data for the classifiers, we first tokenized
+the text for all six languages with the default NLTK tokenizer \cite{nltkbook},
+and tagged the English text with the Stanford Tagger
+\cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
+with each of the target languages using the Berkeley Aligner
+\cite{denero-klein:2007:ACLMain}, with very nearly the default settings, except
+that we ran 20 iterations each of IBM Model 1 and 20 iterations of the HMM
+alignment algorithm, such that we got one-to-many alignments from English to
+target-language words.
+
+We used TreeTagger to extract lemmas for \cite{Schmid95improvementsin}
+(XXX: did we ever use TreeTagger on the English text? Was it always the wordnet
+lemmatizer for English?);
+
+We also found another bug that made it seem like our alignments were awful.
+That was two more problems with TreeTagger -- it turned out that it was calling
+both a tokenizer and a mwe-expression chunker. (those could be fixed in the
+Perl wrappers for TreeTagger, thankfully)
+
+We also cheated a bit by using the gold standard labels from last time, looking
+for instances of the gold labels in the target text; if our noun had an
+alignment into those gold standard labels, we preferred taking that gold label
+(labels can be multi-word expressions).
+
+We dropped all of the training instances with labels that only occurred once,
+considering them likely alignment errors or other noise.
 
 \section{Conclusions and future work}
 While our systems had a strong showing in the competition, always beating the
