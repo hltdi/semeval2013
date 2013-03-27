@@ -22,13 +22,6 @@
 %what resource did we use, 
 \begin{abstract}
 
-We present our approaches to CL-WSD(Cross-Lingual Word Sense Disambiguation) for the Semeval 2013 Task 10, which came in
-three varieties: 
-"One layer" Classifiers, which are single maximum-entropy classifiers making use of monolingual context features. %local context features,
- "Two layer" Classifiers,which are based on layer-one classifiers and also use multilingual features that are translations for four other languages. 
- %which are the same as the one-layer classifiers except that they use the translation of the word of interest into four other target languages as features, 
-And lastly, the "MRF(Markov Random Field)" Classifiers, which also use multilingual features. Instead of translate each language separately, they build a network of five layer-one classifiers to allow them to find the translation for five languages jointly.%solve the classification task jointly.
-%=We will also discuss the results and findings. 
 
 We present our entries for the SemEval-2013 cross-language word-sense
 disambiguation task \cite{task10}. We submitted three systems based
@@ -85,18 +78,22 @@ In the following sections, we will describe our three systems, followed by the
 common preprocessing steps that we performed, and then discuss results and
 future work.
 
+We will describe our systems in a increasing order of complexity.
 \section{L1}
 preprocessing, training, testing\\
 
-Our simplest system, called "L1" (in contrast with "L2", which we will describe
-next), is trained on bitext for a single target language.It makes use of
-supervised learning to train a maximum entropy (logistic regression) classifier
-over a large number of features, described in Figure \ref{features}. 
-We have a ``L1" classifier for each word of interest in each target language.
+The one-layer classifier (which we call L1), is a Maximum Entropy (Multinomial Logistic Regression) classifier that uses only monolingual features from English.
+Although this shared task is performed in an unsupervised manner (there is no annotated corpora), L1 was constructed in a supervised way.
+With bitext of English and target language available from EuroParl, we extracted training instances from aligned sentences, where we used rich local context features(described below).
+The L1 was trained for each target language and for each word of interest. 
 
-Most of the work in producing the L1 classifiers is locating relevant training
-examples from the bitext corpus. We are only interested in bitex sentence pairs
-where the source language sentence contains the word of interest.
+An important part of building L1 is extracting relevant and good training instances. 
+(We feel that it would be fairer if a standard way is provided..but maybe not it's unsupervised anyway XXX ???)
+We used alignments from Berkeley Aligner to locate the corresponding translation for a source English word,
+and lemmatize this translation using TreeTagger to produce a label.  
+The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
+In it an  
+
 
 Once we find translation pairs that we want to include in the training data
 (mappings from English-language sentences and instances of the ambiguous word
