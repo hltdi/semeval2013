@@ -146,6 +146,8 @@ with tag). eg. ``NN" is a tag for ``bank", but ``bank/NN" is the word with tag.
 We include this because tags are good indicator of word senses, and the senses
 of context helps disambiguate the target word. 
 
+megam for learning \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
+\cite{daume04cg-bfgs}
 \section{L2}
 As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
 translation for four other languages as features, but in different ways.  ``L2"
@@ -166,7 +168,6 @@ Lefever and Hoste used a MT system for the translations instead.
 %translations So as in the work of Lefever and Hoste, our L2 classifiers make
 %use of several aligned bitext corpora, but without relying on a complete MT
 %system.
-
 
 \section{MRF}
 Our "MRF" model builds a Markov network of L1 classifiers in an effort to find
@@ -197,35 +198,33 @@ problem with joint probability as potentials, conditional probability as
 potentials, we could abuse the mathematics of MRF a little bit and experiment
 on this approximate potential.
 
-\section{Resources and tools}
-The Europarl Intersection corpus.
-
+\section{Training Data Extraction}
 For simplicity and comparability with previous work, we worked entirely with
-the Europarl Intersection corpus provided by the competition organizers.
-	
+the Europarl Intersection corpus provided by the task organizers.  Europarl
+(XXX cite europarl) is a parallel corpus of proceedings of the European
+Parliament, which is available in XXX languages, although not every sentence is
+translated into every language. The Europarl Intersection is the intersection
+of the sentences from Europarl that are available in English and all five of
+the target languages for the task.
 
-\section{preprocessing steps}
-NLTK \cite{nltkbook}
-Stanford Tagger \cite{Toutanova03feature-richpart-of-speech}
-Berkeley Aligner \cite{denero-klein:2007:ACLMain}
-TreeTagger \cite{Schmid95improvementsin}
-megam for learning \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
-\cite{daume04cg-bfgs}
+In order to produce the training data for the classifiers, we first tokenized
+the text for all six languages with the default NLTK tokenizer \cite{nltkbook},
+and tagged the English text with the Stanford Tagger
+\cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
+with each of the target languages using the Berkeley Aligner
+\cite{denero-klein:2007:ACLMain}, with very nearly the default settings, except
+that we ran 20 iterations each of IBM Model 1 and 20 iterations of the HMM
+alignment algorithm, such that we got one-to-many alignments from English to
+target-language words.
 
-We tokenized both the English and target language text with the default word
-tokenizer from NLTK.  We aligned each of the English and target language pairs
-(en/de, en/es, etc) with the Berkeley Aligner, with very nearly the default
-settings, except that we ran 20 iterations each of IBM Model 1 and 20
-iterations of the HMM alignment algorithm. Is that the right number? Who can
-say, really?
+We used TreeTagger to extract lemmas for \cite{Schmid95improvementsin}
+(XXX: did we ever use TreeTagger on the English text? Was it always the wordnet
+lemmatizer for English?);
 
 We also found another bug that made it seem like our alignments were awful.
 That was two more problems with TreeTagger -- it turned out that it was calling
 both a tokenizer and a mwe-expression chunker. (those could be fixed in the
 Perl wrappers for TreeTagger, thankfully)
-
-At this point, we had one-to-many alignments from English words into the target
-language sentences.
 
 We also cheated a bit by using the gold standard labels from last time, looking
 for instances of the gold labels in the target text; if our noun had an
