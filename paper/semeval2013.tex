@@ -301,43 +301,39 @@ We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
 \section{Conclusions and future work}
-While our systems had a strong showing in the competition, always beating the
-MFS baseline and achieving the top score for three of the five languages in the
-OOF evaluation, our system that performed the best during the competition was
-the simplest one.
+Our systems had a strong showing in the competition, always beating the MFS
+baseline and achieving the top score for three of the five languages in the OOF
+evaluation. Our systems that took into account evidence from multiple sources
+had better performance than the simpler one: our top result came from either
+the L2 or the MRF classifier for both evaluations, for each language.
 
-As Lefever and Hoste have shown \cite{lefever-hoste-decock:2011:ACL-HLT2011},
-using evidence from multiple parallel corpora can be helpful 
+We expect that the L2 classifier could be improved by adding features derived
+from more classifiers. Particularly, we hypothesize that classifiers trained on
+completely different corpora -- instead of corpora that are mutally parallel --
+would improve the system by making use of information from many disparate
+sources. The L2 classifier approach only requires that its the first-layer
+classifiers make \emph{some} prediction based on text in the source language.
+They need not be trained from the same source text, depend on the same
+features, or even output words as labels. In future work we will explore
+all of these variations. One could, for example, train a monolingual WSD system
+on a sense-tagged corpus \footnote{Perhaps the sense-tagged corpus from Wordnet
+(\url{http://wordnet.princeton.edu/glosstag.shtml})
+or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
+tagged with ``sense labels" that are just links to disambiguated Wikipedia
+articles
+(\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
+and use this as an extra information source for an L2 classifier.
 
-We hope that in the future we will be able to ...
- use more classifiers for the L2 classifier
-
- the beauty of the L2 classifier approach is that the bitext corpora, they
-only have to share a source language -- the sentences in your corpora don't
-have to share anything else. Intuitively, it might help for the different
-corpora to be different.
-
-We could easily build up more L1 classifiers from any sense-tagged corpus in
-our source language. That would be extremely easy.
-
-such as, for example, the sense-tagged corpus distributed with Wordnet:
-\footnote{\url{http://wordnet.princeton.edu/glosstag.shtml}}
-
-or the new Google/Amherst wikipedia-tagged corpus, WikiLinks:
-\footnote{\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html}}
-
-We could even use, as L2 features, other monolingual WSD systems. Any
-monolingual WSD system, in fact.
-
-
-an argument against this is that if you have so many bitext corpora, why
-don't you just train up a whole SMT system for each language pair? Then you
-could do Els's approach of getting bag-of-words features for your
-classification. But that's a pain, and do you really want to run Joshua five
-times every time you want to translate a noun? IMPORTANT QUESTION: does our L2
-work as well as Els on the 2010 trial data? Should run that whole experiment.
+%% an argument against this is that if you have so many bitext corpora, why
+%% don't you just train up a whole SMT system for each language pair? Then you
+%% could do Els's approach of getting bag-of-words features for your
+%% classification. But that's a pain, and do you really want to run Joshua five
+%% times every time you want to translate a noun? IMPORTANT QUESTION: does our
+%% L2 work as well as Els on the 2010 trial data? Should run that whole
+%% experiment.
 
 
+For the MRF classifiers ...
 come up with better ways to set the edge weights for the MRF. We tried doing
 the negative logprob of joint probabilities (and then weighting those with
 sort of an arbitrary hyperparameter), and that intuitively seems like it might
