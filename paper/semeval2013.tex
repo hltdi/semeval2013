@@ -3,6 +3,7 @@
 \usepackage{times}
 \usepackage{latexsym}
 \setlength\titlebox{6.5cm}    % Expanding the titlebox
+\usepackage{url}
 \usepackage{float}
 \floatstyle{boxed}
 \restylefloat{figure}
@@ -21,23 +22,16 @@
 
 %what resource did we use, 
 \begin{abstract}
-
-We present our approaches to CL-WSD(Cross-Lingual Word Sense Disambiguation) for the Semeval 2013 Task 10, which came in
-three varieties: 
-"One layer" Classifiers, which are single maximum-entropy classifiers making use of monolingual context features. %local context features,
- "Two layer" Classifiers,which are based on layer-one classifiers and also use multilingual features that are translations for four other languages. 
- %which are the same as the one-layer classifiers except that they use the translation of the word of interest into four other target languages as features, 
-And lastly, the "MRF(Markov Random Field)" Classifiers, which also use multilingual features. Instead of translate each language separately, they build a network of five layer-one classifiers to allow them to find the translation for five languages jointly.%solve the classification task jointly.
-%=We will also discuss the results and findings. 
-
 We present our entries for the SemEval-2013 cross-language word-sense
-disambiguation task \cite{task10}. We submitted three systems based
-on classifiers trained on local context features, with some elaborations.
-Our three systems, in increasing order of complexity, were: maximum entropy
-classifiers trained to predict the desired target-language phrase using only monolingual features (we called this system ``L1"); similar classifiers, but with the desired target-language
-phrase for the other four languages as features (``L2"); and lastly, networks
-of five classifiers, over which we do loopy belief propagation in an attempt to
-solve the classification task jointly (``MRF").
+disambiguation task \cite{task10}. We submitted three systems based on
+classifiers trained on local context features, with some elaborations. Our
+three systems, in increasing order of complexity, were: maximum entropy
+classifiers trained to predict the desired target-language phrase using only
+monolingual features (we called this system \emph{L1}); similar classifiers,
+but with the desired target-language phrase for the other four languages as
+features (\emph{L2}); and lastly, networks of five classifiers, over which we
+do loopy belief propagation to solve the classification tasks jointly
+(\emph{MRF}).
 \end{abstract}
 
 \section{Introduction}
@@ -45,35 +39,56 @@ In the cross-language word-sense disambiguation (CL-WSD) task, given an
 instance of an ambiguous word used in a context, we want to predict the
 appropriate translation into some target language. This setting for WSD has an
 immediate application in machine translation, since many words have many
-possible translations.
+possible translations. Framing the resolution of lexical ambiguities as an
+explicit classification task has been shown to be improve machine translation
+even in the case of phrase-based SMT systems \cite{carpuatpsd}, which can
+mitigate lexical ambiguities through the use of a language model and
+phrase-tables with multi-word phrases.
 
-Framing lexical ambiguities in this way, as an explicit classification task,
-has been shown to be improve machine translation even in the case of
-phrase-based SMT systems (cite Carpuat and Wu), which can mitigate the
-ambiguities through the use of a language model and phrase-tables with
-multi-word phrases.
-CL-WSD has been shown useful for statistical machine translation (cite Carpuat and Wu), although in future work we are particularly interested in applying it to rule-based systems. (XXX: is this relevant?)
+XXX: work in Brown 1991 reference too: 
+\cite{Brown91word-sensedisambiguation}
 
-In the Semeval-2013 CL-WSD task \cite{task10}, we are asked to build a system that can provide
-translations for twenty ambiguous English nouns in their contexts. The five target languages in the shared task are Spanish, Dutch, German, Italian and French. There were two settings for the evaluation, ``best" and ``oof". In either case, systems may present multiple possible answers for a given translation, although in the ``best" setting, the first answer is given more weight, which encourages only returning the one-best. In the ``oof" setting, systems are encouraged to return the top-five most likely translations. For a complete explanation of the settings, please see the shared task description \cite{task10}.
+In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
+system that can provide translations for twenty ambiguous English nouns, given
+appropriate contexts. The five target languages in the shared task are Spanish,
+Dutch, German, Italian and French. There were two settings for the evaluation,
+``best" and ``oof". In either case, systems may present multiple possible
+answers for a given translation, although in the ``best" setting, the first
+answer is given more weight in the evaluation, and this setting encourages only
+returning the top answer. In the ``oof" setting, systems are asked to
+return the top-five most likely translations. For a complete explanation of the
+task and its evaluation, please see the shared task description \cite{task10}.
 
 %% consider: maybe move this to related work?
 Following the work of Lefever and Hoste
 \shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to develop systems
-that make use of multiple bitext corpora for the CL-WSD task.
-ParaSense, the system of Lefever and Hoste, takes into account evidence from all of the available parallel corpora. Let $S$ be the set of five target languages and $t$ be the particular target language of interest at the moment; ParaSense creates bag-of-words features from the translations of the target sentence into the languages $S - \lbrace{t \rbrace}$. Given corpora that are parallel over many languages, this is straightforward to do at training time, however at testing time it requires the use of a complete MT system into the four other languages, which is computationally prohibitive. Thus in our work, we have developed systems that make use of many parallel corpora but require neither a locally running MT system nor access to an online translation API.
+that make use of multiple bitext corpora for the CL-WSD task.  ParaSense, the
+system of Lefever and Hoste, takes into account evidence from all of the
+available parallel corpora. Let $S$ be the set of five target languages and $t$
+be the particular target language of interest at the moment; ParaSense creates
+bag-of-words features from the translations of the target sentence into the
+languages $S - \lbrace{t \rbrace}$. Given corpora that are parallel over many
+languages, this is straightforward to do at training time, however at testing
+time it requires the use of a complete MT system into the four other languages,
+which is computationally prohibitive. Thus in our work, we have developed
+systems that make use of many parallel corpora but require neither a locally
+running MT system nor access to an online translation API.
 
 We presented three systems in this competition, which were variations on the
 theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
 WSD literature.
 
-Our systems had similar results, but at the time of the evaluation, our simplest system came in first place for the out-of-five evaluation for three languages (Spanish, German, and Italian).
-However, after the evaluation, we fixed a simple (slightly embarrassing) bug in our MRF code, which resulted in the MRF system posting even better results for the OOF evaluation.
+Our systems had similar results, but at the time of the evaluation, our
+simplest system came in first place for the out-of-five evaluation for three
+languages (Spanish, German, and Italian).  However, after the evaluation
+deadline, we fixed a simple (slightly embarrassing) bug in our MRF code, which
+resulted in the MRF system producing even better results for the OOF
+evaluation.
 
-on the \emph{oof} evaluation, we had the best results for Spanish, German, and Italian.
-All of our systems beat the ``most-frequent sense" baseline in every case.
-
+... on the \emph{oof} evaluation, we had the best results for Spanish, German,
+and Italian.  All of our systems beat the ``most-frequent sense" baseline in
+every case.
 
 Our three systems made use of the same training data, which we extracted from
 the Europarl Intersection corpus, meaning that the English-language source
@@ -103,13 +118,15 @@ Once we find translation pairs that we want to include in the training data
 in question to the appropriate target-language lemma), we extract features from
 the English-language sentence. 
 
-Several steps of preprocessing were needed. We first POS tagged the sentences, since we are only interested in nouns.
-Then align the words in each sentence pair, and lemmatize the target sentence.
-After locating words of interest in the
-Europarl Intersection corpus, training instances were extracted, and a maxent
-classifier was trained over local context features similar to those used by Lefever and
-Hoste.
+%% rework a bit
+Several steps of preprocessing were needed. We first POS tagged the sentences,
+since we are only interested in nouns.  Then align the words in each sentence
+pair, and lemmatize the target sentence.  After locating words of interest in
+the Europarl Intersection corpus, training instances were extracted, and a
+maxent classifier was trained over local context features similar to those used
+by Lefever and Hoste.
 
+%% howto do a nested list?
 \begin{figure}
   \begin{itemize}
   \item word form
@@ -121,7 +138,7 @@ Hoste.
   \item bigrams and tagged bigrams (just in case)
   \end{itemize}
   \label{features}
-  \caption{some features}
+  \caption{Features used in our classifiers}
 \end{figure}
 
 Note: word tag is different from word with tag (so as for bigram and bigram
@@ -166,6 +183,8 @@ languages?  ???  We know that Dutch is more related to German than with
 Spanish, Italian and French. Can this closeness be represented by the pairwise
 potentials?
 
+%% TODO: build a diagram of the network. THE TRANSLATION PENTAGRAM.
+
 There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
 We had some concern about pairwise potential in MRF, which is joint
 probability. Consider a word which occurs 500 times in the training data, it
@@ -186,16 +205,19 @@ the Europarl Intersection corpus provided by the competition organizers.
 	
 
 \section{preprocessing steps}
-tools: NLTK, Stanford Tagger, Berkeley Aligner, TreeTagger (for lemmatization),
-megam for learning.
+NLTK \cite{nltkbook}
+Stanford Tagger \cite{Toutanova03feature-richpart-of-speech}
+Berkeley Aligner \cite{denero-klein:2007:ACLMain}
+TreeTagger \cite{Schmid95improvementsin}
+megam for learning \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
+\cite{daume04cg-bfgs}
 
-We converted the English side of the text to ascii (XXX: why did we do that?
-does Stanford Tagger work better on ASCII? ...) We tokenized both the English
-and target language text with the default word tokenizer from NLTK.  We aligned
-each of the English and target language pairs (en/de, en/es, etc) with the
-Berkeley Aligner, with very nearly the default settings, except that we ran 20
-iterations each of IBM Model 1 and 20 iterations of the HMM alignment
-algorithm. Is that the right number? Who can say, really?
+We tokenized both the English and target language text with the default word
+tokenizer from NLTK.  We aligned each of the English and target language pairs
+(en/de, en/es, etc) with the Berkeley Aligner, with very nearly the default
+settings, except that we ran 20 iterations each of IBM Model 1 and 20
+iterations of the HMM alignment algorithm. Is that the right number? Who can
+say, really?
 
 We also found another bug that made it seem like our alignments were awful.
 That was two more problems with TreeTagger -- it turned out that it was calling
@@ -214,26 +236,6 @@ We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
 \section{Results}
-For the \emph{best} evaluation, the more sophisticated classifiers usually do
-better. though not always. It's not totally clear that they're better in
-general.
-
-Also, in the out-of-five case, the L1 classifiers are usually better... in
-fact, they won the competition for three of the five languages.
-However ...
-
-It seems like Els's features really are richer -- she gets translations for all
-the different words in the source language and uses the other-target-language
-bag-of-words as features. That's a lot of features. We're kind of forcing the
-information through a narrower pass -- we just get one decision.
-
-However, in the one-best case, we get better results out of the L2 and MRF
-classifiers, so they do seem to help at least a bit. (though the results aren't
-all that much better...)
-
-What went wrong with the MRF classifiers with the OOF evaluation??!
-TODO(alexr): now we know what went wrong. Write about it!
-
 \begin{table*}[t!]
   \begin{center}
     \begin{tabular}{|r|r|r|r|r|r|}
@@ -242,6 +244,7 @@ TODO(alexr): now we know what went wrong. Write about it!
       \hline
       baseline & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
    best result & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
+      \hline
             L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
             L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
            MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
@@ -252,7 +255,6 @@ TODO(alexr): now we know what went wrong. Write about it!
   \end{center}
 \end{table*}
 
-
 \begin{table*}[t!]
   \begin{center}
     \begin{tabular}{|r|r|r|r|r|r|}
@@ -260,7 +262,8 @@ TODO(alexr): now we know what went wrong. Write about it!
       system   & es    & nl    & de    &  it   & fr \\
       \hline
       baseline & 53.07          & 43.59              & 38.86          & 42.63          & 51.36 \\
-   best result & 61.69          & 47.83 (proycon c1l)& 44.02          & 53.98          & 59.8 (proycon c1lN) \\
+   best result & 61.69          & 47.83              & 44.02          & 53.98          & 59.8 \\
+      \hline
            L1  & 61.69          & 46.55              & 43.66          & 53.57          & 57.76 \\
            L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.2} \\
            MRF & \textbf{62.21} & \textbf{46.63}     & \textbf{44.02} & \textbf{53.98} & 57.83 \\
@@ -270,6 +273,18 @@ TODO(alexr): now we know what went wrong. Write about it!
   \label{table:resultsbest}
   \end{center}
 \end{table*}
+
+For the \emph{best} evaluation, the more sophisticated classifiers usually do
+better. though not always. It's not totally clear that they're better in
+general.
+
+It seems like Els's features really are richer -- she gets translations for all
+the different words in the source language and uses the other-target-language
+bag-of-words as features. That's a lot of features. We're kind of forcing the
+information through a narrower pass -- we just get one decision.
+
+TODO(alexr): now we know what went wrong. Write about it!
+
 
 
 \section{Further experiments}

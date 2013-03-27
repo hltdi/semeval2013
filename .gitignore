@@ -39,7 +39,10 @@ L2pickle/*.pickle
 ## All the output we're going to generate
 L1output/*.best
 L1output/*.oof
+L1output/*.results
 L2output/*.best
 L2output/*.oof
+L2output/*.results
 MRFoutput/*.best
 MRFoutput/*.oof
+MRFoutput/*.results
