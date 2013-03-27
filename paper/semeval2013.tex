@@ -98,48 +98,40 @@ sentences were identical for each of the five corpora. But the source-language
 sentences need not be identical, and we plan to explore relaxing this
 restriction in future work.
 
-In the following sections, we will describe our three systems, followed by the
-common preprocessing steps that we performed, and then discuss results and
-future work.
+In the following sections, we will describe our three systems in increasing
+order of sophistication, the results on the shared task, common preprocessing
+steps, and conclusions and future work.
 
-We will describe our systems in a increasing order of complexity.
 \section{L1}
-preprocessing, training, testing\\
+The one-layer classifier (which we call L1), is a maximum entropy classifier
+that uses only monolingual features from English.  Although this shared task is
+described as unsupervised, the L1 classifiers are trained with supervised
+learning; we describe the preprocessing and training data extraction in Section
+\ref{extraction}.
 
-The one-layer classifier (which we call L1), is a Maximum Entropy (Multinomial Logistic Regression) classifier that uses only monolingual features from English.
-Although this shared task is performed in an unsupervised manner (there is no annotated corpora), L1 was constructed in a supervised way.
-With bitext of English and target language available from EuroParl, we extracted training instances from aligned sentences, where we used rich local context features(described below).
-The L1 was trained for each target language and for each word of interest. 
+Having extracted the relevant training sentences from the aligned bitext for
+each of the five language pairs, we created training instances with local
+context features commonly used in WSD systems. These are described in Figure 1
+(XXX fix this \ref{features}). Each instance is assigned the lemma of the
+translation that was extracted from the training sentence as its
+label.
 
-An important part of building L1 is extracting relevant and good training instances. 
-(We feel that it would be fairer if a standard way is provided..but maybe not it's unsupervised anyway XXX ???)
-We first locate of source word of interest by POS tagging the English corpora, then 
-we used alignments from Berkeley Aligner to locate the corresponding translation for a source English word,
-and lemmatize this translation using TreeTagger to produce a label. Labels that appear once in the training data were dropped, because they are likely to be errors and noise.
-The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
+We trained one L1 classifier for each target language and each word of
+interest, resulting in $20*5 = 100$ classifiers. We did this with the MEGA
+Model optimization package \cite{daume04cg-bfgs}
+\footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}} and its corresponding
+NLTK interface \cite{nltkbook}. Upon training, we cache these classifiers with
+Python pickles, both to speed up L1 experiments and also because they are used
+as components of the other models.
 
-
-Figure 1 is a list of the features we used to build L1 classifiers.
-
-
-%If we were to fully make use of available parallel corpora, ensuring quality alignments and lemmatization is   
-%% rework a bit
-%Several steps of preprocessing were needed. We first POS tagged the sentences,
-%since we are only interested in nouns.  Then align the words in each sentence
-%pair, and lemmatize the target sentence.  After locating words of interest in
-%the Europarl Intersection corpus, training instances were extracted, and a
-%maxent classifier was trained over local context features similar to those used
-%by Lefever and Hoste.
-
-%% howto do a nested list?
 \begin{figure}
   \begin{itemize}  %big list
   
-  \item Source(central XXX ) Word (maybe phrase? XXX) features 
+  \item head word features (the token to be translated)
   \begin{itemize}  %(a)
-	    \item word form (whether capitalized)
-       \item POS tag   (Did we do word with POS tag ?? XXX)
-       \item word lemma
+       \item literal word form (including capitalization)
+       \item POS tag
+       \item lemma
   \end{itemize}
   \item Window Unigram Features (within 3 words)
   \begin{itemize} %(b)
@@ -161,11 +153,15 @@ Figure 1 is a list of the features we used to build L1 classifiers.
   \caption{Features used in our classifiers}
 \end{figure}
 
-Note: the ``POS tag" feature is different from ``word with tag". For example, the ``POS tag" feature for
-``house/NN" is $NN$, and ``word with tag" feature is $house-NN$.  ( XXX )It is helpful to let Maxent Classifier know that a word and its  tag are associated, otherwise they will treated independently by the classifier.
 
-We used the Megam implementation for Maximum Entropy Classifier \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
-\cite{daume04cg-bfgs}
+We combined the word tokens with their tags in some features so that the
+classifier would not treat them independently, since maximum entropy
+classifiers learn a single weight for each feature.
+Particularly, the ``POS tag" feature is distinct from the ``word with tag"
+feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$, and
+the ``word with tag" feature is $house\_NN$. 
+
+
 \section{L2}
 As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
 translation for four other languages as features, but in different ways.  ``L2"
@@ -226,62 +222,12 @@ problem with joint probability as potentials, conditional probability as
 potentials, we could abuse the mathematics of MRF a little bit and experiment
 on this approximate potential.
 
-\section{Results}
-\begin{table*}[t!]
-  \begin{center}
-    \begin{tabular}{|r|r|r|r|r|r|}
-      \hline
-      system   & es    & nl    & de    &  it   & fr \\
-      \hline
-      baseline & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
-   best result & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
-      \hline
-            L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
-            L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
-           MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
-      \hline
-    \end{tabular}
-  \caption{``best" evaluation results: precision}
-  \label{table:resultsbest}
-  \end{center}
-\end{table*}
-
-\begin{table*}[t!]
-  \begin{center}
-    \begin{tabular}{|r|r|r|r|r|r|}
-      \hline
-      system   & es    & nl    & de    &  it   & fr \\
-      \hline
-      baseline & 53.07          & 43.59              & 38.86          & 42.63          & 51.36 \\
-   best result & 62.21          & 47.83              & 44.02          & 53.98          & 59.8 \\
-      \hline
-           L1  & 61.69          & 46.55              & 43.66          & 53.57          & 57.76 \\
-           L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.2} \\
-           MRF & \textbf{62.21} & \textbf{46.63}     & \textbf{44.02} & \textbf{53.98} & 57.83 \\
-      \hline
-    \end{tabular}
-  \caption{``oof" evaluation results: precision}
-  \label{table:resultsbest}
-  \end{center}
-\end{table*}
-
-%% edit and expand!
-For the \emph{best} evaluation, the more sophisticated classifiers usually do
-better, though not always. It's not totally clear that they're better in
-general.
-
-It seems like Els's features really are richer -- she gets translations for all
-the different words in the source language and uses the other-target-language
-bag-of-words as features. That's a lot of features. We're kind of forcing the
-information through a narrower pass -- we just get one decision.
-
-TODO(alexr): now we know what went wrong. Write about it!
-
-TODO(alexr): run the experiment where we do the L2 classifiers, but with the
-\emph{predicted} target-language word as the feature.
-
 
 \section{Training Data Extraction}
+\label{extraction}
+
+XXX: write something about how this is common to all the other steps
+
 For simplicity and comparability with previous work, we worked entirely with
 the Europarl Intersection corpus provided by the task organizers.  Europarl
 \cite{europarl} is a parallel corpus of proceedings of the European
@@ -291,7 +237,7 @@ of the sentences from Europarl that are available in English and all five of
 the target languages for the task.
 
 In order to produce the training data for the classifiers, we first tokenized
-the text for all six languages with the default NLTK tokenizer \cite{nltkbook},
+the text for all six languages with the default NLTK tokenizer,
 and tagged the English text with the Stanford Tagger
 \cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
 with each of the target languages using the Berkeley Aligner
@@ -315,6 +261,77 @@ alignment into those gold standard labels, we preferred taking that gold label
 
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
+
+%% move into extraction -- maybe this bit could be in future work, like
+%% suggestions ...
+(We feel that it would be fairer if a standard way is provided..but maybe not
+it's unsupervised anyway XXX ???) We first locate of source word of interest by
+POS tagging the English corpora, then we used alignments from Berkeley Aligner
+to locate the corresponding translation for a source English word, and
+lemmatize this translation using TreeTagger to produce a label.
+
+Labels that appear once in the training data were dropped, because they are likely to be errors and noise.
+The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
+%If we were to fully make use of available parallel corpora, ensuring quality
+%alignments and lemmatization is    ...
+
+
+
+\section{Results}
+\begin{table}[t!]
+  \begin{center}
+    \begin{tabular}{|r|r|r|r|r|r|}
+      \hline
+      system   & es    & nl    & de    &  it   & fr \\
+      \hline
+   MFS  & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
+   best & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
+      \hline
+            L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
+            L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
+           MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
+      \hline
+    \end{tabular}
+  \caption{``best" evaluation results: precision}
+  \label{table:resultsbest}
+  \end{center}
+\end{table}
+
+\begin{table}[t!]
+  \begin{center}
+    \begin{tabular}{|r|r|r|r|r|r|}
+      \hline
+      system   & es    & nl    & de    &  it   & fr \\
+      \hline
+    MFS & 53.07          & 43.59              & 38.86          & 42.63          & 51.36 \\
+   best & 62.21          & 47.83              & 44.02          & 53.98          & 59.8 \\
+      \hline
+           L1  & 61.69          & 46.55              & 43.66          & 53.57          & 57.76 \\
+           L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.2} \\
+           MRF & \textbf{62.21} & \textbf{46.63}     & \textbf{44.02} & \textbf{53.98} & 57.83 \\
+      \hline
+    \end{tabular}
+  \caption{``oof" evaluation results: precision}
+  \label{table:resultsbest}
+  \end{center}
+\end{table}
+
+%% edit and expand!
+For the \emph{best} evaluation, the more sophisticated classifiers usually do
+better, though not always. It's not totally clear that they're better in
+general.
+
+It seems like Els's features really are richer -- she gets translations for all
+the different words in the source language and uses the other-target-language
+bag-of-words as features. That's a lot of features. We're kind of forcing the
+information through a narrower pass -- we just get one decision.
+
+TODO(alexr): now we know what went wrong. Write about it!
+
+TODO(alexr): run the experiment where we do the L2 classifiers, but with the
+\emph{predicted} target-language word as the feature.
+
+
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
