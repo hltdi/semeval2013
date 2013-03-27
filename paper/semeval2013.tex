@@ -171,8 +171,12 @@ Lefever and Hoste used a MT system for the translations instead.
 %system.
 
 \section{MRF}
+\floatstyle{plain}
+\restylefloat{figure}
 \begin{figure}
-  \includegraphics[width=8cm]{pentagram.pdf}
+  \begin{center}
+  \includegraphics[width=5cm]{pentagram.pdf}
+  \end{center}
   \label{pentagram}
   \caption{The network structure used in the MRF system: a complete five-graph
   where each node represents a variable for the translation into a target
@@ -263,8 +267,8 @@ TODO(alexr): run the experiment where we do the L2 classifiers, but with the
 \section{Training Data Extraction}
 For simplicity and comparability with previous work, we worked entirely with
 the Europarl Intersection corpus provided by the task organizers.  Europarl
-(XXX cite europarl) is a parallel corpus of proceedings of the European
-Parliament, which is available in XXX languages, although not every sentence is
+\cite{europarl} is a parallel corpus of proceedings of the European
+Parliament, which is available in 11 languages, although not every sentence is
 translated into every language. The Europarl Intersection is the intersection
 of the sentences from Europarl that are available in English and all five of
 the target languages for the task.
