@@ -283,19 +283,18 @@ the text for all six languages with the default NLTK tokenizer \cite{nltkbook},
 and tagged the English text with the Stanford Tagger
 \cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
 with each of the target languages using the Berkeley Aligner
-\cite{denero-klein:2007:ACLMain}, with very nearly the default settings, except
-that we ran 20 iterations each of IBM Model 1 and 20 iterations of the HMM
-alignment algorithm, such that we got one-to-many alignments from English to
-target-language words.
+\cite{denero-klein:2007:ACLMain}, to get one-to-many alignments from English to
+target-language words, since the target-language labels may be multi-word
+phrases. We used nearly the default settings for Berkeley Aligner, except
+that we ran 20 iterations each of IBM Model 1 and HMM alignment.
 
-We used TreeTagger to extract lemmas for \cite{Schmid95improvementsin}
-(XXX: did we ever use TreeTagger on the English text? Was it always the wordnet
-lemmatizer for English?);
+We used TreeTagger \cite{Schmid95improvementsin} to lemmatize the text. At
+first this caused some confusion in our pipeline, as TreeTagger by default
+re-tokenizes input text and tries to recognize multi-word expressions. Both of
+these, while sensible behaviors, were unexpected, and resulted in a surprising 
+number of tokens in the TreeTagger output.
 
-We also found another bug that made it seem like our alignments were awful.
-That was two more problems with TreeTagger -- it turned out that it was calling
-both a tokenizer and a mwe-expression chunker. (those could be fixed in the
-Perl wrappers for TreeTagger, thankfully)
+After all of the preprocessing,  ...
 
 We also cheated a bit by using the gold standard labels from last time, looking
 for instances of the gold labels in the target text; if our noun had an
