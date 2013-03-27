@@ -12,14 +12,9 @@ END = "QQQENDHEADQQQ"
 class WSDProblem:
     """Class where we'll stash all the information about a given WSD problem."""
 
-    ## TODO(alexr): this needs to be reworked so we can sensibly build them from
-    ## training data...
-    ## Probably we'll pass a flag to say whether we're building from the test
-    ## set or the training set. If it's the training set, we'll pass an index
-    ## for the head word, and otherwise, the constructor will look for the head
-    ## tags.
-    ## TODO(alexr): let's flatten out the representation. Let's just store a
-    ## one-level list, then indices make more sense.
+    ## XXX(alexr): We should lemmatize English with the same lemmatizer always.
+    ## Here we're using wnl.lemmatize, but at training time we're using the one
+    ## from TreeTagger.
     def __init__(self, source_lex, context,
                  testset=False, instance_id=None, head_index=None):
         """Given the source lexical item (ie, uninflected version of the source
