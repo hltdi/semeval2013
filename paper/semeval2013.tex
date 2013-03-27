@@ -113,46 +113,58 @@ The L1 was trained for each target language and for each word of interest.
 
 An important part of building L1 is extracting relevant and good training instances. 
 (We feel that it would be fairer if a standard way is provided..but maybe not it's unsupervised anyway XXX ???)
-We used alignments from Berkeley Aligner to locate the corresponding translation for a source English word,
-and lemmatize this translation using TreeTagger to produce a label.  
+We first locate of source word of interest by POS tagging the English corpora, then 
+we used alignments from Berkeley Aligner to locate the corresponding translation for a source English word,
+and lemmatize this translation using TreeTagger to produce a label. Labels that appear once in the training data were dropped, because they are likely to be errors and noise.
 The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
-In it an  
 
 
-Once we find translation pairs that we want to include in the training data
-(mappings from English-language sentences and instances of the ambiguous word
-in question to the appropriate target-language lemma), we extract features from
-the English-language sentence. 
+Figure 1 is a list of the features we used to build L1 classifiers.
 
+
+%If we were to fully make use of available parallel corpora, ensuring quality alignments and lemmatization is   
 %% rework a bit
-Several steps of preprocessing were needed. We first POS tagged the sentences,
-since we are only interested in nouns.  Then align the words in each sentence
-pair, and lemmatize the target sentence.  After locating words of interest in
-the Europarl Intersection corpus, training instances were extracted, and a
-maxent classifier was trained over local context features similar to those used
-by Lefever and Hoste.
+%Several steps of preprocessing were needed. We first POS tagged the sentences,
+%since we are only interested in nouns.  Then align the words in each sentence
+%pair, and lemmatize the target sentence.  After locating words of interest in
+%the Europarl Intersection corpus, training instances were extracted, and a
+%maxent classifier was trained over local context features similar to those used
+%by Lefever and Hoste.
 
 %% howto do a nested list?
 \begin{figure}
-  \begin{itemize}
-  \item word form
-  \item word tag (word with tag?)
-  \item word lemma
-  \item for words in the three-word window on both sides
-  \item wordform, lemma, pos tag
-  \item for words in a five-word window on both sides
-  \item bigrams and tagged bigrams (just in case)
+  \begin{itemize}  %big list
+  
+  \item Source(central XXX ) Word (maybe phrase? XXX) features 
+  \begin{itemize}  %(a)
+	    \item word form (whether capitalized)
+       \item POS tag   (Did we do word with POS tag ?? XXX)
+       \item word lemma
   \end{itemize}
+  \item Window Unigram Features (within 3 words)
+  \begin{itemize} %(b)
+  		\item word form
+  		\item POS tag
+  		\item word with tag
+  		\item word lemma
+  \end{itemize}
+  \item Window Bigram Features(within 5 words)
+  \begin{itemize} %(c)
+  		\item bigrams 
+  		\item bigrams with tags
+  \end{itemize}  
+  
+  
+  \end{itemize}   %big list
+  %label for the figure
   \label{features}
   \caption{Features used in our classifiers}
 \end{figure}
 
-Note: word tag is different from word with tag (so as for bigram and bigram
-with tag). eg. ``NN" is a tag for ``bank", but ``bank/NN" is the word with tag.
-We include this because tags are good indicator of word senses, and the senses
-of context helps disambiguate the target word. 
+Note: the ``POS tag" feature is different from ``word with tag". For example, the ``POS tag" feature for
+``house/NN" is $NN$, and ``word with tag" feature is $house-NN$.  ( XXX )It is helpful to let Maxent Classifier know that a word and its  tag are associated, otherwise they will treated independently by the classifier.
 
-megam for learning \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
+We used the Megam implementation for Maximum Entropy Classifier \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}}
 \cite{daume04cg-bfgs}
 \section{L2}
 As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
@@ -241,7 +253,7 @@ on this approximate potential.
       system   & es    & nl    & de    &  it   & fr \\
       \hline
       baseline & 53.07          & 43.59              & 38.86          & 42.63          & 51.36 \\
-   best result & 61.69          & 47.83              & 44.02          & 53.98          & 59.8 \\
+   best result & 62.21          & 47.83              & 44.02          & 53.98          & 59.8 \\
       \hline
            L1  & 61.69          & 46.55              & 43.66          & 53.57          & 57.76 \\
            L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.2} \\
