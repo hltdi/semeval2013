@@ -196,21 +196,50 @@ language}
 \end{figure}
 
 Our \emph{MRF} model builds a Markov network (often called a ``Markov random
-field" in the computer vision literature) of L1 classifiers in an effort to
-find the best translation into all five target languages jointly. This network
-has nodes that correspond to the distribution produced by the L1 classifiers,
+field") of L1 classifiers in an effort to find the best translation into all
+five target languages jointly. This network has nodes that correspond to the
+distributions produced by the \emph{L1} classifiers, given an input sentence,
 and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
-data. We optimize assignments over the five output variables using loopy belief
-propagation \cite{DBLP:conf/uai/MurphyWJ99}
+data.We optimize assignments over the five output variables using loopy belief
+propagation \cite{DBLP:conf/uai/MurphyWJ99}.
 
-The idea of MRF is that translations for five target languages must agree with
-each other, since these languages are all related.  It is then natural to ask:
-how related are they and can MRF represent different closeness between
-languages?  ???  We know that Dutch is more related to German than with
-Spanish, Italian and French. Can this closeness be represented by the pairwise
-potentials?
+The intuition behind using a Markov network for this task is that, since we
+must make five decisions for each source-language sentence, we should make use
+of the correlations between the target-langauge words. Lexical ambiguities
+present translating from English to, for example, Spanish, are often similar to
+the ambiguities that we see in translating to Italian. Either through cognates
+or simple correlations, we expect to see some regularities in the translation
+process. So by building a Markov network in which all of the classifiers can
+communicate (see Figure \ref{fig:pentagram}), we want the nodes to be able to
+influence the translation decisions of their neighbors, but only proportionally
+to the correlation between the translations that we observe in the two
+languages.
 
+%% XXX: is there some measure of the correlation between discrete nominal
+%% varibles better than joint probability?
+
+We structure our joint inference as an optimization process, in which we want
+to minimize two penalty functions. First, for each of the five \emph{L1}
+classifiers, we get a unary potential function, which assigns a penalty to each
+possible label for the given target language of that node.
+
+(MATH GOES HERE)
+
+phi = negative log of probability assigned to that label by the classifier,
+given the features
+
+(END MATH)
+
+Secondly, for each pair of classifiers $(i,j)$ (\emph{i.e.}, each edge in the
+graph), 
+
+(MATH GOES HERE)
+
+phi = weight times negative log of joint probability of any two labels for
+languages i and j.
+
+(END MATH)
 
 There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
 We had some concern about pairwise potential in MRF, which is joint
