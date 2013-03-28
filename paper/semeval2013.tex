@@ -80,6 +80,9 @@ theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
 WSD literature.
 
+%% TODO(alexr): " So before that paragraph, I'd insert a
+%% short paragraph saying what they were (and explaining what "MRF" stands for)
+
 Our systems had similar results, but at the time of the evaluation, our
 simplest system came in first place for the out-of-five evaluation for three
 languages (Spanish, German, and Italian).  However, after the evaluation
@@ -92,7 +95,7 @@ and Italian.  All of our systems beat the ``most-frequent sense" baseline in
 every case.
 
 Our three systems made use of the same training data, which we extracted from
-the Europarl Intersection corpus, meaning that the English-language source
+the Europarl Intersection corpus; that is, the English-language source
 sentences were identical for each of the five corpora. But the source-language
 sentences need not be identical, and we plan to explore relaxing this
 restriction in future work.
@@ -165,7 +168,7 @@ the ``word with tag" feature is $house\_NN$.
 As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
 translation for four other languages as features, but in different ways.  ``L2"
 model is a maxent classifier with features 1) from English source sentence (the
-same features as L1), 2) translation for the target word into other four
+same features as L1), 2) translations for the target word into other four
 languages.  At training time, these translations are extracted from the aligned
 sentences in Europarl Intersection data.  At testing time, the translations are
 estimated using the L1 classifiers. 
@@ -200,6 +203,7 @@ nodes that correspond to the distribution produced by the L1 classifiers, and
 edges with pairwise potentials that are derived from the joint probabilities of
 target-language labels occurring together in the training data. We optimize
 assignments over the five output variables using loopy belief propagation
+(XXX add reference for loopy bp)
 
 The idea of MRF is that translations for five target languages must agree with
 each other, since these languages are all related.  It is then natural to ask:
@@ -253,6 +257,8 @@ number of tokens in the TreeTagger output.
 
 After all of the preprocessing,  ...
 
+%% I'd just say that obviously this would not be possible
+%% in real-world disambiguation.
 We also cheated a bit by using the gold standard labels from last time, looking
 for instances of the gold labels in the target text; if our noun had an
 alignment into those gold standard labels, we preferred taking that gold label
@@ -263,11 +269,10 @@ considering them likely alignment errors or other noise.
 
 %% move into extraction -- maybe this bit could be in future work, like
 %% suggestions ...
-(We feel that it would be fairer if a standard way is provided..but maybe not
-it's unsupervised anyway XXX ???) We first locate of source word of interest by
-POS tagging the English corpora, then we used alignments from Berkeley Aligner
-to locate the corresponding translation for a source English word, and
-lemmatize this translation using TreeTagger to produce a label.
+We first locate of source word of interest by POS tagging the English corpora,
+then we used alignments from Berkeley Aligner to locate the corresponding
+translation for a source English word, and lemmatize this translation using
+TreeTagger to produce a label.
 
 Labels that appear once in the training data were dropped, because they are likely to be errors and noise.
 The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
@@ -351,7 +356,7 @@ We expect that the L2 classifier could be improved by adding features derived
 from more classifiers. Particularly, we hypothesize that classifiers trained on
 completely different corpora -- instead of corpora that are mutally parallel --
 would improve the system by making use of information from many disparate
-sources. The L2 classifier approach only requires that its the first-layer
+sources. The L2 classifier approach only requires that the first-layer
 classifiers make \emph{some} prediction based on text in the source language.
 They need not be trained from the same source text, depend on the same
 features, or even output words as labels. In future work we will explore
