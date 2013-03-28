@@ -75,46 +75,45 @@ which is computationally prohibitive. Thus in our work, we have developed
 systems that make use of many parallel corpora but require neither a locally
 running MT system nor access to an online translation API.
 
-We presented three systems in this competition, which were variations on the
+We presented three systems in this shared task, which were variations on the
 theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
-WSD literature.
+WSD literature. The first system, \emph{L1} (``layer one"), uses maximum
+entropy classifiers trained on local context features. The second system,
+\emph{L2} (``layer two"), is the same as the \emph{L1} system, with the
+addition of the correct translations into the other target languages as
+features, which at testing time are predicted with \emph{L1} classifiers. The
+third system, \emph{MRF} (``Markov random field") uses a network of interacting
+classifiers to solve the classification problem for all five target languages
+jointly. Our three systems made use of the same training data, which we
+extracted from the Europarl Intersection corpus provided by the shared task
+organizers.
 
-%% TODO(alexr): " So before that paragraph, I'd insert a
-%% short paragraph saying what they were (and explaining what "MRF" stands for)
+At the time of the evaluation, our simplest system came in first place for the
+out-of-five evaluation for three languages (Spanish, German, and Italian).
+However, after the evaluation deadline, we fixed a simple (slightly
+embarrassing) bug in our inference code, which resulted in the MRF system
+producing even better results for the \emph{oof} evaluation. For the \emph{best}
+evaluation, our two more sophisticated systems posted better results than the
+\emph{L1} version. All of our systems beat the ``most-frequent sense" baseline
+in every case.
 
-Our systems had similar results, but at the time of the evaluation, our
-simplest system came in first place for the out-of-five evaluation for three
-languages (Spanish, German, and Italian).  However, after the evaluation
-deadline, we fixed a simple (slightly embarrassing) bug in our MRF code, which
-resulted in the MRF system producing even better results for the OOF
-evaluation.
-
-... on the \emph{oof} evaluation, we had the best results for Spanish, German,
-and Italian.  All of our systems beat the ``most-frequent sense" baseline in
-every case.
-
-Our three systems made use of the same training data, which we extracted from
-the Europarl Intersection corpus; that is, the English-language source
-sentences were identical for each of the five corpora. But the source-language
-sentences need not be identical, and we plan to explore relaxing this
-restriction in future work.
-
-In the following sections, we will describe our three systems in increasing
-order of sophistication, the results on the shared task, common preprocessing
-steps, and conclusions and future work.
+In the following sections, we will describe our three systems, our training
+data extraction process, the results on the shared task, and conclusions and
+future work.
 
 \section{L1}
-The one-layer classifier (which we call L1), is a maximum entropy classifier
-that uses only monolingual features from English.  Although this shared task is
+The ``layer one" classifier, \emph{L1}, is a maximum entropy classifier that
+uses only monolingual features from English. Although this shared task is
 described as unsupervised, the L1 classifiers are trained with supervised
-learning; we describe the preprocessing and training data extraction in Section
-\ref{extraction}.
+learning on instances that we extract programmatically from the provided
+training corpus; we describe the preprocessing and training data extraction in
+Section \ref{extraction}.
 
 Having extracted the relevant training sentences from the aligned bitext for
 each of the five language pairs, we created training instances with local
 context features commonly used in WSD systems. These are described in Figure 1
-(XXX fix this \ref{features}). Each instance is assigned the lemma of the
+(XXX fix this \ref{fig:features}). Each instance is assigned the lemma of the
 translation that was extracted from the training sentence as its
 label.
 
@@ -151,7 +150,7 @@ as components of the other models.
   
   \end{itemize}   %big list
   %label for the figure
-  \label{features}
+  \label{fig:features}
   \caption{Features used in our classifiers}
 \end{figure}
 
@@ -165,6 +164,7 @@ the ``word with tag" feature is $house\_NN$.
 
 
 \section{L2}
+%% fix this up...
 As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
 translation for four other languages as features, but in different ways.  ``L2"
 model is a maxent classifier with features 1) from English source sentence (the
@@ -192,18 +192,20 @@ Lefever and Hoste used a MT system for the translations instead.
   \begin{center}
   \includegraphics[width=5cm]{pentagram.pdf}
   \end{center}
-  \label{pentagram}
+  \label{fig:pentagram}
   \caption{The network structure used in the MRF system: a complete five-graph
   where each node represents a variable for the translation into a target
 language}
 \end{figure}
-Our "MRF" model builds a Markov network of L1 classifiers in an effort to find
-the best translation into all five target languages jointly. This network has
-nodes that correspond to the distribution produced by the L1 classifiers, and
-edges with pairwise potentials that are derived from the joint probabilities of
-target-language labels occurring together in the training data. We optimize
-assignments over the five output variables using loopy belief propagation
-(XXX add reference for loopy bp)
+
+Our \emph{MRF} model builds a Markov network (often called a ``Markov random
+field" in the computer vision literature) of L1 classifiers in an effort to
+find the best translation into all five target languages jointly. This network
+has nodes that correspond to the distribution produced by the L1 classifiers,
+and edges with pairwise potentials that are derived from the joint
+probabilities of target-language labels occurring together in the training
+data. We optimize assignments over the five output variables using loopy belief
+propagation \cite{DBLP:conf/uai/MurphyWJ99}
 
 The idea of MRF is that translations for five target languages must agree with
 each other, since these languages are all related.  It is then natural to ask:
@@ -337,16 +339,16 @@ TODO(alexr): run the experiment where we do the L2 classifiers, but with the
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
-baseline and achieving the top score for three of the five languages in the OOF
-evaluation. The systems that took into account evidence from multiple sources
-had better performance than the simpler one: our top result in every language
-came from either the L2 or the MRF classifier for both evaluations. This
-suggests that it is possible to make use of the evidence in several parallel
-corpora in a CL-WSD task without translating every word in a source sentence
-into many target languages. However, for the \emph{best} evaluation, our system
-(XXX check!!) did not perform as well as some other systems, such as those of
-(XXX cite) Marine and Marten, or as well as ParaSense ... (check the ParaSense
-results)
+baseline and achieving the top score for three of the five languages in the
+\emph{oof} evaluation. The systems that took into account evidence from
+multiple sources had better performance than the simpler one: our top result in
+every language came from either the L2 or the MRF classifier for both
+evaluations. This suggests that it is possible to make use of the evidence in
+several parallel corpora in a CL-WSD task without translating every word in a
+source sentence into many target languages. However, for the \emph{best}
+evaluation, our system (XXX check!!) did not perform as well as some other
+systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
+... (check the ParaSense results)
 
 %% IMPORTANT QUESTION: does our
 %% L2 work as well as Els on the 2010 trial data? Should run that whole
