@@ -112,10 +112,9 @@ Section \ref{extraction}.
 
 Having extracted the relevant training sentences from the aligned bitext for
 each of the five language pairs, we created training instances with local
-context features commonly used in WSD systems. These are described in Figure 1
-(XXX fix this \ref{fig:features}). Each instance is assigned the lemma of the
-translation that was extracted from the training sentence as its
-label.
+context features commonly used in WSD systems. These are described in Figure
+\ref{fig:features}. Each instance is assigned the lemma of the translation that
+was extracted from the training sentence as its label.
 
 We trained one L1 classifier for each target language and each word of
 interest, resulting in $20*5 = 100$ classifiers. We did this with the MEGA
@@ -134,24 +133,22 @@ as components of the other models.
        \item POS tag
        \item lemma
   \end{itemize}
-  \item Window Unigram Features (within 3 words)
+  \item window unigram features (within 3 words)
   \begin{itemize} %(b)
   		\item word form
   		\item POS tag
-  		\item word with tag
+  		\item word with POS tag
   		\item word lemma
   \end{itemize}
-  \item Window Bigram Features(within 5 words)
+  \item window bigram features(within 5 words)
   \begin{itemize} %(c)
   		\item bigrams 
-  		\item bigrams with tags
+  		\item bigrams with POS tags
   \end{itemize}  
-  
-  
   \end{itemize}   %big list
   %label for the figure
-  \label{fig:features}
   \caption{Features used in our classifiers}
+  \label{fig:features}
 \end{figure}
 
 
@@ -192,10 +189,10 @@ Lefever and Hoste used a MT system for the translations instead.
   \begin{center}
   \includegraphics[width=5cm]{pentagram.pdf}
   \end{center}
-  \label{fig:pentagram}
   \caption{The network structure used in the MRF system: a complete five-graph
   where each node represents a variable for the translation into a target
 language}
+  \label{fig:pentagram}
 \end{figure}
 
 Our \emph{MRF} model builds a Markov network (often called a ``Markov random
@@ -230,58 +227,62 @@ on this approximate potential.
 
 \section{Training Data Extraction}
 \label{extraction}
-
-XXX: write something about how this is common to all the other steps
-
-For simplicity and comparability with previous work, we worked entirely with
-the Europarl Intersection corpus provided by the task organizers.  Europarl
-\cite{europarl} is a parallel corpus of proceedings of the European
-Parliament, which is available in 11 languages, although not every sentence is
-translated into every language. The Europarl Intersection is the intersection
-of the sentences from Europarl that are available in English and all five of
-the target languages for the task.
+For simplicity and comparability with previous work, we worked with the
+Europarl Intersection corpus provided by the task organizers. Europarl
+\cite{europarl} is a parallel corpus of proceedings of the European Parliament,
+available in 11 European languages, although not every sentence is translated
+into every language. The Europarl Intersection is the intersection of the
+sentences from Europarl that are available in English and all five of the
+target languages for the task.
 
 In order to produce the training data for the classifiers, we first tokenized
-the text for all six languages with the default NLTK tokenizer,
-and tagged the English text with the Stanford Tagger
+the text for all six languages with the default NLTK tokenizer and tagged the
+English text with the Stanford Tagger
 \cite{Toutanova03feature-richpart-of-speech}. We aligned the untagged English
 with each of the target languages using the Berkeley Aligner
-\cite{denero-klein:2007:ACLMain}, to get one-to-many alignments from English to
+\cite{denero-klein:2007:ACLMain} to get one-to-many alignments from English to
 target-language words, since the target-language labels may be multi-word
-phrases. We used nearly the default settings for Berkeley Aligner, except
-that we ran 20 iterations each of IBM Model 1 and HMM alignment.
+phrases. We used nearly the default settings for Berkeley Aligner, except that
+we ran 20 iterations each of IBM Model 1 and HMM alignment.
 
 We used TreeTagger \cite{Schmid95improvementsin} to lemmatize the text. At
 first this caused some confusion in our pipeline, as TreeTagger by default
 re-tokenizes input text and tries to recognize multi-word expressions. Both of
 these, while sensible behaviors, were unexpected, and resulted in a surprising 
-number of tokens in the TreeTagger output.
-
-After all of the preprocessing,  ...
+number of tokens in the TreeTagger output. Once we turned off these behaviors,
+TreeTagger provided useful lemmas for all of the languages.
 
 %% I'd just say that obviously this would not be possible
 %% in real-world disambiguation.
-We also cheated a bit by using the gold standard labels from last time, looking
-for instances of the gold labels in the target text; if our noun had an
-alignment into those gold standard labels, we preferred taking that gold label
-(labels can be multi-word expressions).
+Given the tokenized and aligned sentences, with their part-of-speech tags and
+lemmas, we used a number of heuristics to extract the appropriate
+target-language labels for each English-language input sentence.  For each
+ambiguous noun in the shared task, we extracted a sense inventory $V_i$ from
+the gold standard answers from the 2010 iteration of this task
+\cite{lefever-hoste:2009:SEW}. Then, for each sentence that contains one of the
+ambiguous nouns (XXX what's the best term for this?  ``target noun" ?), we
+examine the alignments to determine whether that noun is aligned with a sense
+present in $V_i$ , or whether the words aligned to that noun are a subsequence
+of such a sense. The same check is performed both on the lemmatized and
+unlemmatized versions of the target-language sentence. If so, then that sense
+from the gold standard $V_i$ is taken to be the label for this sentence. While
+a gold standard sense inventory will clearly not be present for general
+translation systems, there will be some vocabulary of possible translations for
+each word, taken from a bilingual dictionary or the phrase table in a
+phrase-based SMT system.
+
+If a label from $V_i$ is not found with the alignments, but some other word or
+phrase is aligned with the ambiguous noun, then we believe the output of the
+aligner, and the lemmatized version of this target-language phrase is taken to
+be the label for this sentence.
 
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
-%% move into extraction -- maybe this bit could be in future work, like
-%% suggestions ...
-We first locate of source word of interest by POS tagging the English corpora,
-then we used alignments from Berkeley Aligner to locate the corresponding
-translation for a source English word, and lemmatize this translation using
-TreeTagger to produce a label.
-
-Labels that appear once in the training data were dropped, because they are likely to be errors and noise.
-The quality of training data relies much on the alignments and lemmatization, in Els work XXX, manual aligning and lemmatizing was involved to provide an upper bound.
-%If we were to fully make use of available parallel corpora, ensuring quality
-%alignments and lemmatization is    ...
-
-
+%% XXX: do we need to talk about this?
+%% The quality of training data depends on the alignments and lemmatization, in
+%% Els work XXX, manual aligning and lemmatizing was involved to provide an upper
+%% bound.
 
 \section{Results}
 \begin{table}[t!]
@@ -342,10 +343,10 @@ Our systems had a strong showing in the competition, always beating the MFS
 baseline and achieving the top score for three of the five languages in the
 \emph{oof} evaluation. The systems that took into account evidence from
 multiple sources had better performance than the simpler one: our top result in
-every language came from either the L2 or the MRF classifier for both
-evaluations. This suggests that it is possible to make use of the evidence in
-several parallel corpora in a CL-WSD task without translating every word in a
-source sentence into many target languages. However, for the \emph{best}
+every language came from either the \emph{L2} or the \emph{MRF} classifier for
+both evaluations. This suggests that it is possible to make use of the evidence
+in several parallel corpora in a CL-WSD task without translating every word in
+a source sentence into many target languages. However, for the \emph{best}
 evaluation, our system (XXX check!!) did not perform as well as some other
 systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
 ... (check the ParaSense results)
@@ -354,22 +355,23 @@ systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
 %% L2 work as well as Els on the 2010 trial data? Should run that whole
 %% experiment.
 
-We expect that the L2 classifier could be improved by adding features derived
+We expect that the \emph{L2} classifier could be improved by adding features
+derived
 from more classifiers. Particularly, we hypothesize that classifiers trained on
 completely different corpora -- instead of corpora that are mutally parallel --
 would improve the system by making use of information from many disparate
-sources. The L2 classifier approach only requires that the first-layer
+sources. The \emph{L2} classifier approach only requires that the first-layer
 classifiers make \emph{some} prediction based on text in the source language.
 They need not be trained from the same source text, depend on the same
 features, or even output words as labels. In future work we will explore
 all of these variations. One could, for example, train a monolingual WSD system
-on a sense-tagged corpus \footnote{Perhaps the sense-tagged corpus from Wordnet
+on a sense-tagged corpus \footnote{Such as the sense-tagged corpus from Wordnet
 (\url{http://wordnet.princeton.edu/glosstag.shtml})
 or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
 tagged with ``sense labels" that are links to disambiguated Wikipedia
 articles
 (\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
-and use this as an extra information source for an L2 classifier.
+and use this as an additional information source for an \emph{L2} classifier.
 
 There remain a number avenues that we would like to explore for the MRF system;
 thus far, we have used the joint probability of two labels to set the binary
@@ -381,16 +383,16 @@ the unary potentials were set by hand, with a very small amount of empirical
 tuning. We could, in the future, tune the weights with a more principled
 optimization strategy, using a development set.
 
-As with the L2 classifiers, it would be helpful in the future for the MRF
-system to not require many mutually parallel corpora for training -- however,
-the current approach for estimating the edge potentials requires the use of
-bitext for each edge in the network, or at least source-language text with
-labels for both target languages in question. Perhaps these correlations could
-be estimated in a semi-supervised way, with high-confidence automatic labels
-being used to estimate the joint distribution over target-language phrases.  We
-would also like to investigate approaches to jointly disambiguate many words in
-the same sentence, since lexical ambiguity is not just a problem for a few
-nouns.
+As with the \emph{L2} classifiers, it would be helpful in the future for the
+MRF system to not require many mutually parallel corpora for training --
+however, the current approach for estimating the edge potentials requires the
+use of bitext for each edge in the network, or at least source-language text
+with labels for both target languages in question. Perhaps these correlations
+could be estimated in a semi-supervised way, with high-confidence automatic
+labels being used to estimate the joint distribution over target-language
+phrases.  We would also like to investigate approaches to jointly disambiguate
+many words in the same sentence, since lexical ambiguity is not just a problem
+for a few nouns.
 
 Aside from improvements to the design of our CL-WSD system itself, we want to
 use it in a practical system for translating into under-resourced languages.
