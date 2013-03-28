@@ -52,12 +52,13 @@ In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
 system that can provide translations for twenty ambiguous English nouns, given
 appropriate contexts. The five target languages in the shared task are Spanish,
 Dutch, German, Italian and French. There were two settings for the evaluation,
-``best" and ``oof". In either case, systems may present multiple possible
-answers for a given translation, although in the ``best" setting, the first
-answer is given more weight in the evaluation, and this setting encourages only
-returning the top answer. In the ``oof" setting, systems are asked to
-return the top-five most likely translations. For a complete explanation of the
-task and its evaluation, please see the shared task description \cite{task10}.
+\emph{best} and \emph{oof}. In either case, systems may present multiple
+possible answers for a given translation, although in the \emph{best} setting,
+the first answer is given more weight in the evaluation, and this setting
+encourages only returning the top answer. In the \emph{oof} setting, systems
+are asked to return the top-five most likely translations. For a complete
+explanation of the task and its evaluation, please see the shared task
+description \cite{task10}.
 
 %% consider: maybe move this to related work?
 Following the work of Lefever and Hoste
@@ -290,7 +291,7 @@ The quality of training data relies much on the alignments and lemmatization, in
            MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
       \hline
     \end{tabular}
-  \caption{``best" evaluation results: precision}
+  \caption{\emph{best} evaluation results: precision}
   \label{table:resultsbest}
   \end{center}
 \end{table}
@@ -309,7 +310,7 @@ The quality of training data relies much on the alignments and lemmatization, in
            MRF & \textbf{62.21} & \textbf{46.63}     & \textbf{44.02} & \textbf{53.98} & 57.83 \\
       \hline
     \end{tabular}
-  \caption{``oof" evaluation results: precision}
+  \caption{\emph{oof} evaluation results: precision}
   \label{table:resultsbest}
   \end{center}
 \end{table}
@@ -334,7 +335,17 @@ Our systems had a strong showing in the competition, always beating the MFS
 baseline and achieving the top score for three of the five languages in the OOF
 evaluation. The systems that took into account evidence from multiple sources
 had better performance than the simpler one: our top result in every language
-came from either the L2 or the MRF classifier for both evaluations.
+came from either the L2 or the MRF classifier for both evaluations. This
+suggests that it is possible to make use of the evidence in several parallel
+corpora in a CL-WSD task without translating every word in a source sentence
+into many target languages. However, for the \emph{best} evaluation, our system
+(XXX check!!) did not perform as well as some other systems, such as those of
+(XXX cite) Marine and Marten, or as well as ParaSense ... (check the ParaSense
+results)
+
+%% IMPORTANT QUESTION: does our
+%% L2 work as well as Els on the 2010 trial data? Should run that whole
+%% experiment.
 
 We expect that the L2 classifier could be improved by adding features derived
 from more classifiers. Particularly, we hypothesize that classifiers trained on
@@ -348,33 +359,34 @@ all of these variations. One could, for example, train a monolingual WSD system
 on a sense-tagged corpus \footnote{Perhaps the sense-tagged corpus from Wordnet
 (\url{http://wordnet.princeton.edu/glosstag.shtml})
 or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
-tagged with ``sense labels" that are just links to disambiguated Wikipedia
+tagged with ``sense labels" that are links to disambiguated Wikipedia
 articles
 (\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
 and use this as an extra information source for an L2 classifier.
 
-%% IMPORTANT QUESTION: does our
-%% L2 work as well as Els on the 2010 trial data? Should run that whole
-%% experiment.
+There remain a number avenues that we would like to explore for the MRF system;
+thus far, we have used the joint probability of two labels to set the binary
+potentials. We would like to investigate other functions, especially possibly
+ones that do not incur large penalties for rare labels, as the joint
+probability of two labels that often co-occur but are both rare will be low.
+Also, in the current system, the relative weights of the binary potentials and
+the unary potentials were set by hand, with a very small amount of empirical
+tuning. We could, in the future, tune the weights with a more principled
+optimization strategy, using a development set.
 
-There remain a number of open questions about ways in which the MRF classifiers
-could be improved. XXX(alexr): write more here.
+As with the L2 classifiers, it would be helpful in the future for the MRF
+system to not require many mutually parallel corpora for training -- however,
+the current approach for estimating the edge potentials requires the use of
+bitext for each edge in the network, or at least source-language text with
+labels for both target languages in question. Perhaps these correlations could
+be estimated in a semi-supervised way, with high-confidence automatic labels
+being used to estimate the joint distribution over target-language phrases.  We
+would also like to investigate approaches to jointly disambiguate many words in
+the same sentence, since lexical ambiguity is not just a problem for a few
+nouns.
 
-- how to jointly disambiguate all the words in a sentence?
-
-- what if we don't have totally parallel data for all of the languages? how are
-  we going to estimate the parameters then?
-
-For the MRF classifiers ...
-come up with better ways to set the edge weights for the MRF. We tried doing
-the negative logprob of joint probabilities (and then weighting those with
-sort of an arbitrary hyperparameter), and that intuitively seems like it might
-be the right thing, but we don't know. We should have tested more. What would
-be really great would be a way to estimate these probabilities even if we
-can't get them from training data.
-
-Aside from improvements to the design of our CL-WSD system itself, we also want
-to use it in a practical system for translating into under-resourced languages.
+Aside from improvements to the design of our CL-WSD system itself, we want to
+use it in a practical system for translating into under-resourced languages.
 We are now working on integrating this project with our rule-based MT system,
 $L^3$ \cite{gasser:aflat2012}. We had experimented with a similar, though less
 sophisticated, CL-WSD system for Quechua \cite{rudnick:2011:RANLPStud}, but in
