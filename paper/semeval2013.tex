@@ -201,7 +201,7 @@ five target languages jointly. This network has nodes that correspond to the
 distributions produced by the \emph{L1} classifiers, given an input sentence,
 and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
-data.We optimize assignments over the five output variables using loopy belief
+data. We optimize assignments over the five output variables using loopy belief
 propagation \cite{DBLP:conf/uai/MurphyWJ99}.
 
 The intuition behind using a Markov network for this task is that, since we
@@ -209,20 +209,23 @@ must make five decisions for each source-language sentence, we should make use
 of the correlations between the target-langauge words. Lexical ambiguities
 present translating from English to, for example, Spanish, are often similar to
 the ambiguities that we see in translating to Italian. Either through cognates
-or simple correlations, we expect to see some regularities in the translation
+or simple correlations, we expect to see regularities in the translation
 process. So by building a Markov network in which all of the classifiers can
-communicate (see Figure \ref{fig:pentagram}), we want the nodes to be able to
-influence the translation decisions of their neighbors, but only proportionally
-to the correlation between the translations that we observe in the two
-languages.
+communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
+translation decisions of their neighbors, but only proportionally to the
+correlation between the translations that we observe in the two languages.
 
 %% XXX: is there some measure of the correlation between discrete nominal
 %% varibles better than joint probability?
 
-We structure our joint inference as an optimization process, in which we want
-to minimize two penalty functions. First, for each of the five \emph{L1}
-classifiers, we get a unary potential function, which assigns a penalty to each
-possible label for the given target language of that node.
+We structure our joint inference as an optimization process, in which we
+minimize the sum of two kinds of penalty functions. First, from each of the
+five \emph{L1} classifiers, we get a unary potential function, which assigns a
+penalty to each possible label for the given word to translate, for the
+particular target language of that node. The penalty assigned here is the
+negative log-probability of each possible output label; the classifier returns
+a probability distribution, and we map the probability values into negative-log
+space.
 
 (MATH GOES HERE)
 
@@ -231,8 +234,9 @@ given the features
 
 (END MATH)
 
-Secondly, for each pair of classifiers $(i,j)$ (\emph{i.e.}, each edge in the
-graph), 
+Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
+edge in the graph) there is a pairwise potential function (phi i j) that
+assigns a penalty to any assignment of the \emph{pair} of variables.
 
 (MATH GOES HERE)
 
@@ -240,6 +244,9 @@ phi = weight times negative log of joint probability of any two labels for
 languages i and j.
 
 (END MATH)
+
+These joint probabilities are estimated from the training data; we simply take
+the MLE 
 
 There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
 We had some concern about pairwise potential in MRF, which is joint
@@ -252,7 +259,6 @@ potentials...
 problem with joint probability as potentials, conditional probability as
 potentials, we could abuse the mathematics of MRF a little bit and experiment
 on this approximate potential.
-
 
 \section{Training Data Extraction}
 \label{extraction}
