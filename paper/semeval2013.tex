@@ -27,11 +27,11 @@ disambiguation task \cite{task10}. We submitted three systems based on
 classifiers trained on local context features, with some elaborations. Our
 three systems, in increasing order of complexity, were: maximum entropy
 classifiers trained to predict the desired target-language phrase using only
-monolingual features (we called this system \emph{L1}); similar classifiers,
+monolingual features (we called this system L1); similar classifiers,
 but with the desired target-language phrase for the other four languages as
-features (\emph{L2}); and lastly, networks of five classifiers, over which we
+features (L2); and lastly, networks of five classifiers, over which we
 do loopy belief propagation to solve the classification tasks jointly
-(\emph{MRF}).
+(MRF).
 \end{abstract}
 
 \section{Introduction}
@@ -78,12 +78,12 @@ running MT system nor access to an online translation API.
 We presented three systems in this shared task, which were variations on the
 theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
-WSD literature. The first system, \emph{L1} (``layer one"), uses maximum
+WSD literature. The first system, L1 (``layer one"), uses maximum
 entropy classifiers trained on local context features. The second system,
-\emph{L2} (``layer two"), is the same as the \emph{L1} system, with the
+L2 (``layer two"), is the same as the L1 system, with the
 addition of the correct translations into the other target languages as
-features, which at testing time are predicted with \emph{L1} classifiers. The
-third system, \emph{MRF} (``Markov random field") uses a network of interacting
+features, which at testing time are predicted with L1 classifiers. The
+third system, MRF (``Markov random field") uses a network of interacting
 classifiers to solve the classification problem for all five target languages
 jointly. Our three systems made use of the same training data, which we
 extracted from the Europarl Intersection corpus provided by the shared task
@@ -95,7 +95,7 @@ However, after the evaluation deadline, we fixed a simple (slightly
 embarrassing) bug in our inference code, which resulted in the MRF system
 producing even better results for the \emph{oof} evaluation. For the \emph{best}
 evaluation, our two more sophisticated systems posted better results than the
-\emph{L1} version. All of our systems beat the ``most-frequent sense" baseline
+L1 version. All of our systems beat the ``most-frequent sense" baseline
 in every case.
 
 In the following sections, we will describe our three systems, our training
@@ -103,7 +103,7 @@ data extraction process, the results on the shared task, and conclusions and
 future work.
 
 \section{L1}
-The ``layer one" classifier, \emph{L1}, is a maximum entropy classifier that
+The ``layer one" classifier, L1, is a maximum entropy classifier that
 uses only monolingual features from English. Although this shared task is
 described as unsupervised, the L1 classifiers are trained with supervised
 learning on instances that we extract programmatically from the provided
@@ -195,10 +195,10 @@ language}
   \label{fig:pentagram}
 \end{figure}
 
-Our \emph{MRF} model builds a Markov network (often called a ``Markov random
-field") of \emph{L1} classifiers in an effort to find the best translation into
+Our MRF model builds a Markov network (often called a ``Markov random
+field") of L1 classifiers in an effort to find the best translation into
 all five target languages jointly. This network has nodes that correspond to
-the distributions produced by the \emph{L1} classifiers, given an input
+the distributions produced by the L1 classifiers, given an input
 sentence, and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
 data. We optimize assignments over the five output variables using loopy belief
@@ -220,7 +220,7 @@ correlation between the translations that we observe in the two languages.
 
 We structure our joint inference as an optimization process, in which we
 minimize the sum of two kinds of penalty functions. First, from each of the
-five \emph{L1} classifiers, we get a unary potential function, which assigns a
+five L1 classifiers, we get a unary potential function, which assigns a
 penalty to each possible label for the given word to translate, for the
 particular target language of that node. The penalty assigned here is the
 negative log-probability of each possible output label; the classifier returns
@@ -407,7 +407,7 @@ Our systems had a strong showing in the competition, always beating the MFS
 baseline and achieving the top score for three of the five languages in the
 \emph{oof} evaluation. The systems that took into account evidence from
 multiple sources had better performance than the simpler one: our top result in
-every language came from either the \emph{L2} or the \emph{MRF} classifier for
+every language came from either the L2 or the MRF classifier for
 both evaluations. This suggests that it is possible to make use of the evidence
 in several parallel corpora in a CL-WSD task without translating every word in
 a source sentence into many target languages. However, for the \emph{best}
@@ -419,12 +419,12 @@ systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
 %% L2 work as well as Els on the 2010 trial data? Should run that whole
 %% experiment.
 
-We expect that the \emph{L2} classifier could be improved by adding features
+We expect that the L2 classifier could be improved by adding features
 derived
 from more classifiers. Particularly, we hypothesize that classifiers trained on
 completely different corpora -- instead of corpora that are mutally parallel --
 would improve the system by making use of information from many disparate
-sources. The \emph{L2} classifier approach only requires that the first-layer
+sources. The L2 classifier approach only requires that the first-layer
 classifiers make \emph{some} prediction based on text in the source language.
 They need not be trained from the same source text, depend on the same
 features, or even output words as labels. In future work we will explore
@@ -435,7 +435,7 @@ or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
 tagged with ``sense labels" that are links to disambiguated Wikipedia
 articles
 (\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
-and use this as an additional information source for an \emph{L2} classifier.
+and use this as an additional information source for an L2 classifier.
 
 There remain a number avenues that we would like to explore for the MRF system;
 thus far, we have used the joint probability of two labels to set the binary
@@ -451,7 +451,7 @@ using a development set.
 %%potentials, we could abuse the mathematics of MRF a little bit and experiment
 %%on this approximate potential.
 
-As with the \emph{L2} classifiers, it would be helpful in the future for the
+As with the L2 classifiers, it would be helpful in the future for the
 MRF system to not require many mutually parallel corpora for training --
 however, the current approach for estimating the edge potentials requires the
 use of bitext for each edge in the network, or at least source-language text
