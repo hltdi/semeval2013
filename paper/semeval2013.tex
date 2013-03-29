@@ -262,7 +262,32 @@ variables, we are using the \emph{min-sum} version of loopy belief propagation,
 passing messages from one node to another that are mappings from the possible
 values that the recipient node could take to penalty values.
 
-This algorithm is explained in more detail ...
+At each time step, every node passes a message to each of its neighbors of the
+following form:
+
+$$
+mathgoeshere
+$$
+
+Intuitively, these messages inform a given neighbor about the estimate, from
+the perspective of the sending node and what it has heard from its other
+neighbors, of the minimum penalty that would be incurred if the recipient node
+were to take a given label. Each outgoing message depends on the sending node's
+unary potential function and on the incoming messages from all neighbors other
+than the recipient, at the previous time step. As a concrete example, when the
+\emph{nl} node sends a message to the \emph{fr} node at time step 10, this
+message is a table mapping from all known possible French translations of
+the current ambiguous noun. This message depends on three things: the function
+$\phi_{nl}$ (itself dependent on the probability distribution output by the
+classifier), the binary potential function $\phi_{(nl,fr)}$, and the messages
+from \emph{es}, \emph{it} and \emph{de} from time step 9. 
+
+Loopy belief propagation is an approximate inference algorithm, and it is
+neither guaranteed to find a globally optimal solution, nor even to converge at
+all, but it does often find good solutions in practice. We run it for twenty
+iterations, which empirically works well. After the message-passing iterations,
+each node chooses the value that minimizes the sum of the penalties from
+messages and from its own unary potential function.
 
 \section{Training Data Extraction}
 \label{extraction}
