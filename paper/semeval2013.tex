@@ -196,10 +196,10 @@ language}
 \end{figure}
 
 Our \emph{MRF} model builds a Markov network (often called a ``Markov random
-field") of L1 classifiers in an effort to find the best translation into all
-five target languages jointly. This network has nodes that correspond to the
-distributions produced by the \emph{L1} classifiers, given an input sentence,
-and edges with pairwise potentials that are derived from the joint
+field") of \emph{L1} classifiers in an effort to find the best translation into
+all five target languages jointly. This network has nodes that correspond to
+the distributions produced by the \emph{L1} classifiers, given an input
+sentence, and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
 data. We optimize assignments over the five output variables using loopy belief
 propagation \cite{DBLP:conf/uai/MurphyWJ99}.
@@ -227,38 +227,42 @@ negative log-probability of each possible output label; the classifier returns
 a probability distribution, and we map the probability values into negative-log
 space.
 
-(MATH GOES HERE)
+The unary potential $\phi_i$, for some fixed set of features $f$ and a
+particular language $i$, is a function from a label $l$ to some positive
+penalty value.
 
-phi = negative log of probability assigned to that label by the classifier,
-given the features
-
-(END MATH)
+$$
+\phi_i(l) = - log P(l | f)
+$$
 
 Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
-edge in the graph) there is a pairwise potential function (phi i j) that
-assigns a penalty to any assignment of the \emph{pair} of variables.
+edge in the graph) there is a pairwise potential function $\phi_{(i,j)}$ that
+assigns a penalty to any assignment of that pair of variables.
 
-(MATH GOES HERE)
+$$
+\phi_i(l_i, l_j) = - log P(L_i = l_i, L_j = l_j)
+$$
 
-phi = weight times negative log of joint probability of any two labels for
-languages i and j.
+Here by $P(L_i = l_i, L_j = l_j)$, we mean the probability that, for a fixed
+ambiguous input word, language $i$ takes the label $l_i$ and language $j$ takes
+the label $l_j$. These joint probabilities are estimated from the training
+data; we count the number of times each $l_i$ and $l_j$ co-occur in the
+extracted training instances and divide, with smoothing to avoid zero
+probabilities and thus infinite penalties.
 
-(END MATH)
+When it comes time to choose translations, we want to find a complete
+assignment to the five variables that minimizes the sum of all of the penalties
+assigned by the $\phi$ functions. As mentioned earlier, we do this via loopy
+belief propagation; we use the formulation described in section XXX of
+\cite{Koller+Friedman:09} where we can pass messages between the Markov network
+nodes directly rather than first constructing a cluster graph.
 
-These joint probabilities are estimated from the training data; we simply take
-the MLE 
+As we are trying to compute the minimum-penalty assignment to the five
+variables, we are using the \emph{min-sum} version of loopy belief propagation,
+passing messages from one node to another that are mappings from the possible
+values that the recipient node could take to penalty values.
 
-There was some concern about pairwise potential in MRF, which is joint probability. Consider a word which occurs 500 times in the training data, it could co-occur with
-We had some concern about pairwise potential in MRF, which is joint
-probability. Consider a word which occurs 500 times in the training data, it
-could co-occur with
-
-The future work should experiment on different weight we put on the pairwise
-potentials...
-
-problem with joint probability as potentials, conditional probability as
-potentials, we could abuse the mathematics of MRF a little bit and experiment
-on this approximate potential.
+This algorithm is explained in more detail ...
 
 \section{Training Data Extraction}
 \label{extraction}
@@ -410,13 +414,17 @@ and use this as an additional information source for an \emph{L2} classifier.
 
 There remain a number avenues that we would like to explore for the MRF system;
 thus far, we have used the joint probability of two labels to set the binary
-potentials. We would like to investigate other functions, especially possibly
-ones that do not incur large penalties for rare labels, as the joint
-probability of two labels that often co-occur but are both rare will be low.
-Also, in the current system, the relative weights of the binary potentials and
-the unary potentials were set by hand, with a very small amount of empirical
-tuning. We could, in the future, tune the weights with a more principled
-optimization strategy, using a development set.
+potentials. We would like to investigate other functions, especially ones that
+do not incur large penalties for rare labels, as the joint probability of two
+labels that often co-occur but are both rare will be low.  Also, in the current
+system, the relative weights of the binary potentials and the unary potentials
+were set by hand, with a very small amount of empirical tuning. We could, in
+the future, tune the weights with a more principled optimization strategy,
+using a development set.
+
+%%problem with joint probability as potentials, conditional probability as
+%%potentials, we could abuse the mathematics of MRF a little bit and experiment
+%%on this approximate potential.
 
 As with the \emph{L2} classifiers, it would be helpful in the future for the
 MRF system to not require many mutually parallel corpora for training --
