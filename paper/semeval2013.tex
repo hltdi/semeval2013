@@ -162,19 +162,21 @@ the ``word with tag" feature is $house\_NN$.
 
 \section{L2}
 %% fix this up...
-As in the work of Lefever and Hoste, the ``L2" model and MRF model both use
-translation for four other languages as features, but in different ways.  ``L2"
-model is a maxent classifier with features 1) from English source sentence (the
-same features as L1), 2) translations for the target word into other four
-languages.  At training time, these translations are extracted from the aligned
-sentences in Europarl Intersection data.  At testing time, the translations are
-estimated using the L1 classifiers. 
 
-%Our "L2" model builds on the L1 model, but with the translations of the word of
-%interest into the four other target languages as additional features.
-The translations seems to be an important factor in the performance of L2,
-Lefever and Hoste used a MT system for the translations instead.
-???
+The ``layer two" classifier,L2, is similar to L1 described above. In addition to the same monolingual features used in L1, L2 makes use of 
+multilingual features as well, which is inspired by the work of Lefever and Hoste.
+More specifically, let $S$ be the set of five target languages, and $w$ be a word of interest. When $t$ is a target language of interest, we use translations of $w$ into the four other languages in 
+$ S = \left\lbrace {  t \right\rbrace}  $.
+At training time, these translations were extracted from EuroParl Intersection data using automatic alignments. (described in section \ref{extraction})
+At testing time, since a parallel corpora would not be available, translations for $w$ in four other languages were estimated using L1 classifiers, which were saved as Python pickles.
+
+In the work of Levefer and Els, they used Google Translate API to translate the source English sentences into four other languages in $ S = \left\lbrace {  t \right\rbrace}$, and extracted all bag-of-words features. Since an online MT API is not easily available, we did not rely on a complete MT system and only included the translations of head word (XXX) as features.
+
+%L2 translate source work into five target languages separately, while MRF translates jointly.
+
+
+%The translations seems to be an important factor in the performance of L2,
+%Lefever and Hoste used a MT system for the translations instead.
 
 %Unfortunately, it is difficult to evaluate which one gives better performance.
 %It would be a fairer comparison of the WSD systems if a standardized way %of
@@ -189,7 +191,7 @@ Lefever and Hoste used a MT system for the translations instead.
   \begin{center}
   \includegraphics[width=5cm]{pentagram.pdf}
   \end{center}
-  \caption{The network structure used in the MRF system: a complete five-graph
+  \caption{The network structure used in the MRF system: a complete graph with five nodes %five-graph
   where each node represents a variable for the translation into a target
 language}
   \label{fig:pentagram}
@@ -201,31 +203,48 @@ all five target languages jointly. This network has nodes that correspond to
 the distributions produced by the L1 classifiers, given an input
 sentence, and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
-data. We optimize assignments over the five output variables using loopy belief
-propagation \cite{DBLP:conf/uai/MurphyWJ99}.
+data. 
+Thus, the task of finding the optimal translations into five language jointly, is reduced to a MAP (Maximum A Posteriori) inference, where we try to maximize the joint probability 
+$$P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$$. The inference process is performed using loopy belief propagation \cite{DBLP:conf/uai/MurphyWJ99}, which is one of the efficient inference algorithms that arrive at an approximate but often good solution. (XXX)
 
-The intuition behind using a Markov network for this task is that, since we
-must make five decisions for each source-language sentence, we should make use
-of the correlations between the target-langauge words. Lexical ambiguities
+%We optimize assignments over the five output variables using loopy belief
+%propagation 
+
+%The intuition behind using a Markov network for this task is that, since we
+%must make five decisions for each source-language sentence, we should make use
+%of the correlations between the target-langauge words.
+
+The intuition behind using a Markov Network for CL-WSD is that, since European languages are correlated (meaning that translations for a head word are correlated), we should make use of their distributions to make decisions for five languages jointly.
+
+Lexical ambiguities
 present translating from English to, for example, Spanish, are often similar to
 the ambiguities that we see in translating to Italian. Either through cognates
 or simple correlations, we expect to see regularities in the translation
-process. So by building a Markov network in which all of the classifiers can
+process. For example (XXX add the example   es/it, de/nl):
+
+So by building a Markov network in which all of the classifiers can
 communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
 translation decisions of their neighbors, but only proportionally to the
 correlation between the translations that we observe in the two languages.
 
 %% XXX: is there some measure of the correlation between discrete nominal
-%% varibles better than joint probability?
+%% varibles better than joint probability?   
+%%CAN LIU @Alex:   PMI? (I think quite similar to joint prob, except the denomiator is devided by both freq)
+%% Chi-squared ?
 
-We structure our joint inference as an optimization process, in which we
-minimize the sum of two kinds of penalty functions. First, from each of the
-five L1 classifiers, we get a unary potential function, which assigns a
-penalty to each possible label for the given word to translate, for the
-particular target language of that node. The penalty assigned here is the
-negative log-probability of each possible output label; the classifier returns
-a probability distribution, and we map the probability values into negative-log
-space.
+The joint inference on MRF could be structured as a MAP inference process (as described above),
+which is a maximization problem by itself, but a simple negative log transformation could turn this into
+a minimization problem, in which we minimize the sum of two distinct penalty functions.
+
+
+%We structure our joint inference as an optimization process, in which we
+%minimize the sum of two kinds of penalty functions. 
+
+First, a unary function is from each of the five L1 classifiers and for each target language (which is represented as node),
+it assigns a penalty to each possible label for the head word (the word we want to translate).
+%the given word to translate, 
+The penalty assigned here is the negative log-probability of each possible output label; the classifier returns
+a probability distribution, and we map the probability values $[0,1]$ (XXX ???)  into a negative-log space. $[0, +infin]$
 
 The unary potential $\phi_i$, for some fixed set of features $f$ and a
 particular language $i$, is a function from a label $l$ to some positive
@@ -235,7 +254,13 @@ $$
 \phi_i(l) = - log P(l | f)
 $$
 
-Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
+$$
+\phi_i(L=l) = - log P_{i}(L=l | F=f)
+$$
+
+
+%left Friday...
+Secondly, a pairwise potential function. for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
 edge in the graph) there is a pairwise potential function $\phi_{(i,j)}$ that
 assigns a penalty to any assignment of that pair of variables.
 
