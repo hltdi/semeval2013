@@ -236,19 +236,19 @@ $$
 $$
 
 Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
-edge in the graph) there is a pairwise potential function $\phi_{(i,j)}$ that
+edge in the graph) there is a pairwise potential function $\phi_{ij}$ that
 assigns a penalty to any assignment of that pair of variables.
 
 $$
-\phi_i(l_i, l_j) = - log P(L_i = l_i, L_j = l_j)
+\phi_{ij}(l_i, l_j) = - log P(L_i = l_i, L_j = l_j)
 $$
 
 Here by $P(L_i = l_i, L_j = l_j)$, we mean the probability that, for a fixed
 ambiguous input word, language $i$ takes the label $l_i$ and language $j$ takes
 the label $l_j$. These joint probabilities are estimated from the training
-data; we count the number of times each $l_i$ and $l_j$ co-occur in the
-extracted training instances and divide, with smoothing to avoid zero
-probabilities and thus infinite penalties.
+data; we count the number of times each pair of labels $l_i$ and $l_j$
+co-occurs in the extracted training instances and divide, with smoothing to
+avoid zero probabilities and thus infinite penalties.
 
 When it comes time to choose translations, we want to find a complete
 assignment to the five variables that minimizes the sum of all of the penalties
@@ -266,7 +266,7 @@ At each time step, every node passes a message to each of its neighbors of the
 following form:
 
 $$
-mathgoeshere
+\delta_{i \rightarrow j} = \min_{L_i}
 $$
 
 Intuitively, these messages inform a given neighbor about the estimate, from
