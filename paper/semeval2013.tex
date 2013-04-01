@@ -166,11 +166,11 @@ the ``word with tag" feature is $house\_NN$.
 The ``layer two" classifier,L2, is similar to L1 described above. In addition to the same monolingual features used in L1, L2 makes use of 
 multilingual features as well, which is inspired by the work of Lefever and Hoste.
 More specifically, let $S$ be the set of five target languages, and $w$ be a word of interest. When $t$ is a target language of interest, we use translations of $w$ into the four other languages in 
-$ S = \left\lbrace {  t \right\rbrace}  $.
+$ S = \left\lbrace t \right\rbrace $.
 At training time, these translations were extracted from EuroParl Intersection data using automatic alignments. (described in section \ref{extraction})
 At testing time, since a parallel corpora would not be available, translations for $w$ in four other languages were estimated using L1 classifiers, which were saved as Python pickles.
 
-In the work of Levefer and Els, they used Google Translate API to translate the source English sentences into four other languages in $ S = \left\lbrace {  t \right\rbrace}$, and extracted all bag-of-words features. Since an online MT API is not easily available, we did not rely on a complete MT system and only included the translations of head word (XXX) as features.
+In the work of Levefer and Els, they used Google Translate API to translate the source English sentences into four other languages in $ S = \left\lbrace t \right\rbrace$, and extracted all bag-of-words features. Since an online MT API is not easily available, we did not rely on a complete MT system and only included the translations of head word (XXX) as features.
 
 %L2 translate source work into five target languages separately, while MRF translates jointly.
 
