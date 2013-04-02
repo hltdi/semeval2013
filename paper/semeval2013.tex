@@ -39,7 +39,10 @@ do loopy belief propagation to solve the classification tasks jointly
 %%% TODO items
 % TODO: run the experiment where we train the L2 classifiers on the predicted
 % values.
-% TODO: pick consistent terminology for the word that we're trying to translate
+
+% DONE: pick consistent terminology for the word that we're trying to translate
+% The word in the task description is the ``target" word. I guess we should use
+% that.
 
 \section{Introduction}
 In the cross-language word-sense disambiguation (CL-WSD) task, given an
@@ -92,14 +95,13 @@ problem for all five target languages jointly. Our three systems are all
 trained from the same data, which we extracted from the Europarl Intersection
 corpus provided by the shared task organizers.
 
-At the time of the evaluation, our simplest system came in first place for the
-out-of-five evaluation for three languages (Spanish, German, and Italian).
-However, after the evaluation deadline, we fixed a simple (slightly
-embarrassing) bug in our inference code, which resulted in the MRF system
-producing even better results for the \emph{oof} evaluation. For the \emph{best}
-evaluation, our two more sophisticated systems posted better results than the
-L1 version. All of our systems beat the ``most-frequent sense" baseline
-in every case.
+At the time of the evaluation, our simplest system had the top results in the
+shared task for the out-of-five evaluation for three languages (Spanish,
+German, and Italian).  However, after the evaluation deadline, we fixed a
+simple bug in our MRF code, and the MRF system then achieved even better
+results for the \emph{oof} evaluation. For the \emph{best} evaluation, our two
+more sophisticated systems posted better results than the L1 version. All of
+our systems beat the ``most-frequent sense" baseline in every case.
 
 In the following sections, we will describe our three systems, our training
 data extraction process, the results on the shared task, and conclusions and
@@ -170,22 +172,21 @@ addition of multilingual features -- the translation of the current ambiguous
 noun into the four other target languages.  More specifically, let $S$ be the
 set of five target languages, and $w$ be a word of interest. When $t$ is the
 current target language, we use translations of $w$ into the four other
-languages in $ S = \left\lbrace t \right\rbrace $ as features for this
+languages in $ S - \left\lbrace t \right\rbrace $ as features for this
 classifier. At training time, these translations are  extracted from EuroParl
 Intersection data using automatic alignments, as described in section
 \ref{extraction}. At testing time, since parallel corpora are not available,
 translations for $w$ in four other languages are estimated using the cached L1
 classifiers.
 
-(XXX fix this up a bit) In the work of Levefer and Hoste, they used Google
-Translate API to translate the source English sentences into four other
-languages in $ S = \left\lbrace t \right\rbrace$, and extracted all
+Levefer and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
+Google Translate API to translate the source English sentences into the four
+other languages in $ S - \left\lbrace t \right\rbrace$, and extracted all
 bag-of-words features. Since an online MT API is not easily available, we did
-not rely on a complete MT system and only included the translations of head
-word (XXX) as features.
+not rely on a complete MT system and instead only included the translations of
+the target words as features.
 
 %L2 translate source work into five target languages separately, while MRF translates jointly.
-
 
 %The translations seems to be an important factor in the performance of L2,
 %Lefever and Hoste used a MT system for the translations instead.
@@ -216,8 +217,8 @@ the distributions produced by the L1 classifiers, given an input
 sentence, and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
 data. 
-Thus, the task of finding the optimal translations into five language jointly, is reduced to a MAP (Maximum A Posteriori) inference, where we try to maximize the joint probability 
-$$P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$$. The inference process is performed using loopy belief propagation \cite{DBLP:conf/uai/MurphyWJ99}, which is one of the efficient inference algorithms that arrive at an approximate but often good solution. (XXX)
+Thus, the task of finding the optimal translations into five languages jointly, is reduced to a MAP (Maximum A Posteriori) inference, where we try to maximize the joint probability 
+$P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$. The inference process is performed using loopy belief propagation \cite{DBLP:conf/uai/MurphyWJ99}, which is one of the efficient inference algorithms that arrive at an approximate but often good solution. (XXX)
 
 %We optimize assignments over the five output variables using loopy belief
 %propagation 
@@ -226,13 +227,17 @@ $$P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$$. The inference process is performed us
 %must make five decisions for each source-language sentence, we should make use
 %of the correlations between the target-langauge words.
 
-The intuition behind using a Markov Network for CL-WSD is that, since European languages are correlated (meaning that translations for a head word are correlated), we should make use of their distributions to make decisions for five languages jointly.
+%% XXX
+The intuition behind using a Markov Network for CL-WSD is that, since the
+languages used in the shared task are related, (that is, translations for a
+head word are correlated), we should make use of their distributions to make
+decisions for five languages jointly.
 
-Lexical ambiguities
-present translating from English to, for example, Spanish, are often similar to
-the ambiguities that we see in translating to Italian. Either through cognates
-or simple correlations, we expect to see regularities in the translation
-process. For example (XXX add the example   es/it, de/nl):
+Lexical ambiguities present in translating from English to, for example,
+Spanish, are often similar to the ambiguities that we see in translating to
+Italian.  Either through cognates or simple correlations, we expect to see
+regularities in the translation process. For example (XXX add the example
+es/it, de/nl):
 
 So by building a Markov network in which all of the classifiers can
 communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
@@ -252,11 +257,13 @@ a minimization problem, in which we minimize the sum of two distinct penalty fun
 %We structure our joint inference as an optimization process, in which we
 %minimize the sum of two kinds of penalty functions. 
 
-First, a unary function is from each of the five L1 classifiers and for each target language (which is represented as node),
-it assigns a penalty to each possible label for the head word (the word we want to translate).
-%the given word to translate, 
-The penalty assigned here is the negative log-probability of each possible output label; the classifier returns
-a probability distribution, and we map the probability values $[0,1]$ (XXX ???)  into a negative-log space. $[0, +infin]$
+First, we have a unary function from each of the five L1 classifiers and for
+each target language, which is represented as a node in the group.  The
+function assigns a penalty to each possible label for the head word, the word
+we want to translate.  The penalty assigned here is the negative
+log-probability of each possible output label; the classifier returns a
+probability distribution, and we map the probability values $[0,1]$ into
+negative-log space, $[0, +\infty]$.
 
 The unary potential $\phi_i$, for some fixed set of features $f$ and a
 particular language $i$, is a function from a label $l$ to some positive
@@ -268,20 +275,10 @@ $$
 
 Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
 edge in the graph) there is a pairwise potential function $\phi_{ij}$ that
-
-$$
-\phi_i(L=l) = - log P_{i}(L=l | F=f)
-$$
-
-
-%left Friday...
-Secondly, a pairwise potential function. for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
-edge in the graph) there is a pairwise potential function $\phi_{(i,j)}$ that
-
 assigns a penalty to any assignment of that pair of variables.
 
 $$
-\phi_{ij}(l_i, l_j) = - log P(L_i = l_i, L_j = l_j)
+\phi_{(i,j)}(l_i, l_j) = - log P(L_i = l_i, L_j = l_j)
 $$
 
 Here by $P(L_i = l_i, L_j = l_j)$, we mean the probability that, for a fixed
@@ -369,11 +366,11 @@ TreeTagger provided useful lemmas for all of the languages.
 Given the tokenized and aligned sentences, with their part-of-speech tags and
 lemmas, we used a number of heuristics to extract the appropriate
 target-language labels for each English-language input sentence.  For each
-ambiguous noun in the shared task, we extracted a sense inventory $V_i$ from
+target word, we extracted a sense inventory $V_i$ from
 the gold standard answers from the 2010 iteration of this task
 \cite{lefever-hoste:2009:SEW}. Then, for each sentence that contains one of the
-ambiguous nouns (XXX what's the best term for this?  ``target noun" ?), we
-examine the alignments to determine whether that noun is aligned with a sense
+target words used as a noun, we
+examine the alignments to determine whether that word is aligned with a sense
 present in $V_i$ , or whether the words aligned to that noun are a subsequence
 of such a sense. The same check is performed both on the lemmatized and
 unlemmatized versions of the target-language sentence. If so, then that sense
