@@ -34,33 +34,36 @@ do loopy belief propagation to solve the classification tasks jointly
 (MRF).
 \end{abstract}
 
+%%% TODO items
+% TODO: run the experiment where we train the L2 classifiers on the predicted
+% values.
+% TODO: pick consistent terminology for the word that we're trying to translate
+
 \section{Introduction}
 In the cross-language word-sense disambiguation (CL-WSD) task, given an
 instance of an ambiguous word used in a context, we want to predict the
 appropriate translation into some target language. This setting for WSD has an
-immediate application in machine translation, since many words have many
+immediate application in machine translation, since many words have multiple
 possible translations. Framing the resolution of lexical ambiguities as an
-explicit classification task has been shown to be improve machine translation
-even in the case of phrase-based SMT systems \cite{carpuatpsd}, which can
-mitigate lexical ambiguities through the use of a language model and
-phrase-tables with multi-word phrases.
-
-XXX: work in Brown 1991 reference too: 
-\cite{Brown91word-sensedisambiguation}
+explicit classification task has a long history, and was considered in early
+SMT work at IBM \cite{Brown91word-sensedisambiguation}. More recently, Carpuat
+and Wu have shown how to use WSD techniques to improve even modern phrase-based
+SMT systems \cite{carpuatpsd}, which can mitigate the problem of lexical
+ambiguities through the use of a language model and phrase-tables containing
+multi-word phrases. 
 
 In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
 system that can provide translations for twenty ambiguous English nouns, given
-appropriate contexts. The five target languages in the shared task are Spanish,
+appropriate contexts. The five target languages of the shared task are Spanish,
 Dutch, German, Italian and French. There were two settings for the evaluation,
 \emph{best} and \emph{oof}. In either case, systems may present multiple
 possible answers for a given translation, although in the \emph{best} setting,
-the first answer is given more weight in the evaluation, and this setting
+the first answer is given more weight in the evaluation, and the scoring
 encourages only returning the top answer. In the \emph{oof} setting, systems
 are asked to return the top-five most likely translations. For a complete
 explanation of the task and its evaluation, please see the shared task
 description \cite{task10}.
 
-%% consider: maybe move this to related work?
 Following the work of Lefever and Hoste
 \shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to develop systems
 that make use of multiple bitext corpora for the CL-WSD task.  ParaSense, the
@@ -69,7 +72,7 @@ available parallel corpora. Let $S$ be the set of five target languages and $t$
 be the particular target language of interest at the moment; ParaSense creates
 bag-of-words features from the translations of the target sentence into the
 languages $S - \lbrace{t \rbrace}$. Given corpora that are parallel over many
-languages, this is straightforward to do at training time, however at testing
+languages, this is straightforward to do at training time. However at testing
 time it requires the use of a complete MT system into the four other languages,
 which is computationally prohibitive. Thus in our work, we have developed
 systems that make use of many parallel corpora but require neither a locally
@@ -78,16 +81,15 @@ running MT system nor access to an online translation API.
 We presented three systems in this shared task, which were variations on the
 theme of a maximum entropy classifier for each ambiguous noun, trained on local
 context features similar to those used in previous work and familiar from the
-WSD literature. The first system, L1 (``layer one"), uses maximum
-entropy classifiers trained on local context features. The second system,
-L2 (``layer two"), is the same as the L1 system, with the
-addition of the correct translations into the other target languages as
-features, which at testing time are predicted with L1 classifiers. The
-third system, MRF (``Markov random field") uses a network of interacting
-classifiers to solve the classification problem for all five target languages
-jointly. Our three systems made use of the same training data, which we
-extracted from the Europarl Intersection corpus provided by the shared task
-organizers.
+WSD literature. The first system, L1 (``layer one"), uses maximum entropy
+classifiers trained on local context features. The second system, L2 (``layer
+two"), is the same as the L1 system, with the addition of the correct
+translations into the other target languages as features, which at testing time
+are predicted with L1 classifiers. The third system, MRF (``Markov random
+field") uses a network of interacting classifiers to solve the classification
+problem for all five target languages jointly. Our three systems are all
+trained from the same data, which we extracted from the Europarl Intersection
+corpus provided by the shared task organizers.
 
 At the time of the evaluation, our simplest system came in first place for the
 out-of-five evaluation for three languages (Spanish, German, and Italian).
@@ -117,8 +119,8 @@ context features commonly used in WSD systems. These are described in Figure
 was extracted from the training sentence as its label.
 
 We trained one L1 classifier for each target language and each word of
-interest, resulting in $20*5 = 100$ classifiers. We did this with the MEGA
-Model optimization package \cite{daume04cg-bfgs}
+interest, resulting in $20*5 = 100$ classifiers. Classifiers were trained with
+the MEGA Model optimization package \cite{daume04cg-bfgs}
 \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}} and its corresponding
 NLTK interface \cite{nltkbook}. Upon training, we cache these classifiers with
 Python pickles, both to speed up L1 experiments and also because they are used
@@ -159,18 +161,27 @@ Particularly, the ``POS tag" feature is distinct from the ``word with tag"
 feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$, and
 the ``word with tag" feature is $house\_NN$. 
 
-
 \section{L2}
 %% fix this up...
 
-The ``layer two" classifier,L2, is similar to L1 described above. In addition to the same monolingual features used in L1, L2 makes use of 
-multilingual features as well, which is inspired by the work of Lefever and Hoste.
-More specifically, let $S$ be the set of five target languages, and $w$ be a word of interest. When $t$ is a target language of interest, we use translations of $w$ into the four other languages in 
-$ S = \left\lbrace t \right\rbrace $.
-At training time, these translations were extracted from EuroParl Intersection data using automatic alignments. (described in section \ref{extraction})
-At testing time, since a parallel corpora would not be available, translations for $w$ in four other languages were estimated using L1 classifiers, which were saved as Python pickles.
+The ``layer two" classifier, L2, is similar to L1 described above, with the
+addition of multilingual features -- the translation of the current ambiguous
+noun into the four other target languages.  More specifically, let $S$ be the
+set of five target languages, and $w$ be a word of interest. When $t$ is the
+current target language, we use translations of $w$ into the four other
+languages in $ S = \left\lbrace t \right\rbrace $ as features for this
+classifier. At training time, these translations are  extracted from EuroParl
+Intersection data using automatic alignments, as described in section
+\ref{extraction}. At testing time, since parallel corpora are not available,
+translations for $w$ in four other languages are estimated using the cached L1
+classifiers.
 
-In the work of Levefer and Els, they used Google Translate API to translate the source English sentences into four other languages in $ S = \left\lbrace t \right\rbrace$, and extracted all bag-of-words features. Since an online MT API is not easily available, we did not rely on a complete MT system and only included the translations of head word (XXX) as features.
+(XXX fix this up a bit) In the work of Levefer and Hoste, they used Google
+Translate API to translate the source English sentences into four other
+languages in $ S = \left\lbrace t \right\rbrace$, and extracted all
+bag-of-words features. Since an online MT API is not easily available, we did
+not rely on a complete MT system and only included the translations of head
+word (XXX) as features.
 
 %L2 translate source work into five target languages separately, while MRF translates jointly.
 
