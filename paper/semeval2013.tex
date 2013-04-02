@@ -6,6 +6,8 @@
 \usepackage{url}
 \usepackage{float}
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{breqn}
 \floatstyle{boxed}
 \restylefloat{figure}
 
@@ -47,10 +49,9 @@ immediate application in machine translation, since many words have multiple
 possible translations. Framing the resolution of lexical ambiguities as an
 explicit classification task has a long history, and was considered in early
 SMT work at IBM \cite{Brown91word-sensedisambiguation}. More recently, Carpuat
-and Wu have shown how to use WSD techniques to improve even modern phrase-based
-SMT systems \cite{carpuatpsd}, which can mitigate the problem of lexical
-ambiguities through the use of a language model and phrase-tables containing
-multi-word phrases. 
+and Wu have shown how to use CL-WSD techniques to improve modern phrase-based
+SMT systems \cite{carpuatpsd}, even though the language model and phrase-tables
+of these systems mitigate the problem of lexical ambiguities somewhat.
 
 In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
 system that can provide translations for twenty ambiguous English nouns, given
@@ -302,12 +303,19 @@ variables, we are using the \emph{min-sum} version of loopy belief propagation,
 passing messages from one node to another that are mappings from the possible
 values that the recipient node could take to penalty values.
 
-At each time step, every node passes a message to each of its neighbors of the
+At each time step, every node passes to each of its neighbors a message of the
 following form:
 
-$$
-\delta_{i \rightarrow j} = \min_{L_i}
-$$
+\begin{dmath}
+\delta_{i \rightarrow j}^{t} (L_j) =
+  \min_{l_i \in L_i}
+  \phi_i(l_i) +
+  \phi_{(i,j)}(l_i, l_j) +
+  \sum_{k \in S - \lbrace i,j \rbrace}
+  \delta_{k \rightarrow i}^{t-1} (l_i)
+\end{dmath}
+
+XXX This probably needs to be explained.
 
 Intuitively, these messages inform a given neighbor about the estimate, from
 the perspective of the sending node and what it has heard from its other
