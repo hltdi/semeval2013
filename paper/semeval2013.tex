@@ -285,8 +285,8 @@ Here by $P(L_i = l_i, L_j = l_j)$, we mean the probability that, for a fixed
 ambiguous input word, language $i$ takes the label $l_i$ and language $j$ takes
 the label $l_j$. These joint probabilities are estimated from the training
 data; we count the number of times each pair of labels $l_i$ and $l_j$
-co-occurs in the extracted training instances and divide, with smoothing to
-avoid zero probabilities and thus infinite penalties.
+co-occurs in the training sentences and divide, with smoothing to avoid zero
+probabilities and thus infinite penalties.
 
 When it comes time to choose translations, we want to find a complete
 assignment to the five variables that minimizes the sum of all of the penalties
@@ -296,9 +296,9 @@ belief propagation; we use the formulation described in section XXX of
 nodes directly rather than first constructing a cluster graph.
 
 As we are trying to compute the minimum-penalty assignment to the five
-variables, we are using the \emph{min-sum} version of loopy belief propagation,
-passing messages from one node to another that are mappings from the possible
-values that the recipient node could take to penalty values.
+variables, we use the \emph{min-sum} version of loopy belief propagation,
+passing messages that are mappings from the possible values that the recipient
+node could take to penalty values.
 
 At each time step, every node passes to each of its neighbors a message of the
 following form:
@@ -312,27 +312,36 @@ following form:
   \delta_{k \rightarrow i}^{t-1} (l_i)
 \end{dmath}
 
-XXX This probably needs to be explained.
+By this expression, we mean that the message from node $i$ to node $j$ at time
+$t$ is a function possible labels for node $j$ to scalar penalty values. Each
+penalty value is determined by minimizing over the possible labels for node
+$i$, such that we find the label $l_i$ that minimizes sum of the unary cost for
+that label, the binary cost for $l_i$ and $l_j$ taken jointly, and all of the
+penalties in the messages that node $i$ received at the previous time step,
+except for the one from node $j$.
 
 Intuitively, these messages inform a given neighbor about the estimate, from
 the perspective of the sending node and what it has heard from its other
 neighbors, of the minimum penalty that would be incurred if the recipient node
-were to take a given label. Each outgoing message depends on the sending node's
-unary potential function and on the incoming messages from all neighbors other
-than the recipient, at the previous time step. As a concrete example, when the
-\emph{nl} node sends a message to the \emph{fr} node at time step 10, this
-message is a table mapping from all known possible French translations of
-the current ambiguous noun. This message depends on three things: the function
-$\phi_{nl}$ (itself dependent on the probability distribution output by the
-classifier), the binary potential function $\phi_{(nl,fr)}$, and the messages
-from \emph{es}, \emph{it} and \emph{de} from time step 9. 
+were to take a given label. As a concrete example, when the \emph{nl} node
+sends a message to the \emph{fr} node at time step 10, this message is a table
+mapping from all known possible French translations of the current target word
+to the associated penalty values. The message depends on three things: the
+function $\phi_{nl}$ (itself dependent on the probability distribution output
+by the classifier), the binary potential function $\phi_{(nl,fr)}$, and the
+messages from \emph{es}, \emph{it} and \emph{de} from time step 9.  Note that
+the binary potential functions are derived from joint probabilities, so are
+symmetric.
 
 Loopy belief propagation is an approximate inference algorithm, and it is
 neither guaranteed to find a globally optimal solution, nor even to converge at
 all, but it does often find good solutions in practice. We run it for twenty
 iterations, which empirically works well. After the message-passing iterations,
 each node chooses the value that minimizes the sum of the penalties from
-messages and from its own unary potential function.
+messages and from its own unary potential function. To avoid accumulating very
+large penalties, we normalize the outgoing messages at each time step and give
+a larger weight to the unary potential functions. These parameters were set by
+hand, but seemed to work well in practice.
 
 \section{Training Data Extraction}
 \label{extraction}
