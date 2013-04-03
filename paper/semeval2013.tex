@@ -58,34 +58,35 @@ of these systems mitigate the problem of lexical ambiguities somewhat.
 
 In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
 system that can provide translations for twenty ambiguous English nouns, given
-appropriate contexts. The five target languages of the shared task are Spanish,
-Dutch, German, Italian and French. There were two settings for the evaluation,
-\emph{best} and \emph{oof}. In either case, systems may present multiple
-possible answers for a given translation, although in the \emph{best} setting,
-the first answer is given more weight in the evaluation, and the scoring
-encourages only returning the top answer. In the \emph{oof} setting, systems
-are asked to return the top-five most likely translations. For a complete
-explanation of the task and its evaluation, please see the shared task
-description \cite{task10}.
+appropriate contexts -- here the particular usage of the ambiguous noun is
+called the \emph{target} word. The five target languages of the shared task are
+Spanish, Dutch, German, Italian and French. There were two settings for the
+evaluation, \emph{best} and \emph{oof}. In either case, systems may present
+multiple possible answers for a given translation, although in the \emph{best}
+setting, the first answer is given more weight in the evaluation, and the
+scoring encourages only returning the top answer. In the \emph{oof} setting,
+systems are asked to return the top-five most likely translations. For a
+complete explanation of the task and its evaluation, please see the shared task
+description. 
 
 Following the work of Lefever and Hoste
-\shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to develop systems
-that make use of multiple bitext corpora for the CL-WSD task.  ParaSense, the
-system of Lefever and Hoste, takes into account evidence from all of the
-available parallel corpora. Let $S$ be the set of five target languages and $t$
-be the particular target language of interest at the moment; ParaSense creates
-bag-of-words features from the translations of the target sentence into the
-languages $S - \lbrace{t \rbrace}$. Given corpora that are parallel over many
-languages, this is straightforward to do at training time. However at testing
-time it requires the use of a complete MT system into the four other languages,
-which is computationally prohibitive. Thus in our work, we have developed
-systems that make use of many parallel corpora but require neither a locally
-running MT system nor access to an online translation API.
+\shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to make use of
+multiple bitext corpora for the CL-WSD task.  ParaSense, the system of Lefever
+and Hoste, takes into account evidence from all of the available parallel
+corpora. Let $S$ be the set of five target languages and $t$ be the particular
+target language of interest at the moment; ParaSense creates bag-of-words
+features from the translations of the target sentence into the languages $S -
+\lbrace{t \rbrace}$. Given corpora that are parallel over many languages, this
+is straightforward at training time. However at testing time it requires a
+complete MT system for each of the four other languages, which is
+computationally prohibitive. Thus in our work, we learn from several parallel
+corpora but require neither a locally running MT system nor access to an online
+translation API.
 
-We presented three systems in this shared task, which were variations on the
-theme of a maximum entropy classifier for each ambiguous noun, trained on local
-context features similar to those used in previous work and familiar from the
-WSD literature. The first system, L1 (``layer one"), uses maximum entropy
+We presented three systems in this shared task, all of which were variations on
+the theme of a maximum entropy classifier for each ambiguous noun, trained on
+local context features similar to those used in previous work and familiar from
+the WSD literature. The first system, L1 (``layer one"), uses maximum entropy
 classifiers trained on local context features. The second system, L2 (``layer
 two"), is the same as the L1 system, with the addition of the correct
 translations into the other target languages as features, which at testing time
@@ -132,7 +133,7 @@ as components of the other models.
 \begin{figure}
   \begin{itemize}  %big list
   
-  \item head word features (the token to be translated)
+  \item target word features
   \begin{itemize}  %(a)
        \item literal word form (including capitalization)
        \item POS tag
@@ -229,8 +230,8 @@ $P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$. The inference process is performed usin
 
 %% XXX
 The intuition behind using a Markov Network for CL-WSD is that, since the
-languages used in the shared task are related, (that is, translations for a
-head word are correlated), we should make use of their distributions to make
+languages used in the shared task are related, (that is, translations for the
+target word are correlated), we should make use of their distributions to make
 decisions for five languages jointly.
 
 Lexical ambiguities present in translating from English to, for example,
@@ -259,11 +260,10 @@ a minimization problem, in which we minimize the sum of two distinct penalty fun
 
 First, we have a unary function from each of the five L1 classifiers and for
 each target language, which is represented as a node in the group.  The
-function assigns a penalty to each possible label for the head word, the word
-we want to translate.  The penalty assigned here is the negative
-log-probability of each possible output label; the classifier returns a
-probability distribution, and we map the probability values $[0,1]$ into
-negative-log space, $[0, +\infty]$.
+function assigns a penalty to each possible label for the target word.  The
+penalty assigned here is the negative log-probability of each possible output
+label; the classifier returns a probability distribution, and we map the
+probability values $[0,1]$ into negative-log space, $[0, +\infty]$.
 
 The unary potential $\phi_i$, for some fixed set of features $f$ and a
 particular language $i$, is a function from a label $l$ to some positive
@@ -366,22 +366,21 @@ TreeTagger provided useful lemmas for all of the languages.
 Given the tokenized and aligned sentences, with their part-of-speech tags and
 lemmas, we used a number of heuristics to extract the appropriate
 target-language labels for each English-language input sentence.  For each
-target word, we extracted a sense inventory $V_i$ from
-the gold standard answers from the 2010 iteration of this task
-\cite{lefever-hoste:2009:SEW}. Then, for each sentence that contains one of the
-target words used as a noun, we
-examine the alignments to determine whether that word is aligned with a sense
-present in $V_i$ , or whether the words aligned to that noun are a subsequence
-of such a sense. The same check is performed both on the lemmatized and
-unlemmatized versions of the target-language sentence. If so, then that sense
-from the gold standard $V_i$ is taken to be the label for this sentence. While
-a gold standard sense inventory will clearly not be present for general
-translation systems, there will be some vocabulary of possible translations for
-each word, taken from a bilingual dictionary or the phrase table in a
-phrase-based SMT system.
+target word, we extracted a sense inventory $V_i$ from the gold standard
+answers from the 2010 iteration of this task \cite{lefever-hoste:2009:SEW}.
+Then, for each sentence that contains one of the target words used as a noun,
+we examine the alignments to determine whether that word is aligned with a
+sense present in $V_i$ , or whether the words aligned to that noun are a
+subsequence of such a sense. The same check is performed both on the lemmatized
+and unlemmatized versions of the target-language sentence. If we do find a
+match, then that sense from the gold standard $V_i$ is taken to be the label
+for this sentence. While a gold standard sense inventory will clearly not be
+present for general translation systems, there will be some vocabulary of
+possible translations for each word, taken from a bilingual dictionary or the
+phrase table in a phrase-based SMT system.
 
 If a label from $V_i$ is not found with the alignments, but some other word or
-phrase is aligned with the ambiguous noun, then we believe the output of the
+phrase is aligned with the ambiguous noun, then we trust the output of the
 aligner, and the lemmatized version of this target-language phrase is taken to
 be the label for this sentence.
 
@@ -482,15 +481,15 @@ articles
 (\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
 and use this as an additional information source for an L2 classifier.
 
-There remain a number avenues that we would like to explore for the MRF system;
-thus far, we have used the joint probability of two labels to set the binary
-potentials. We would like to investigate other functions, especially ones that
-do not incur large penalties for rare labels, as the joint probability of two
-labels that often co-occur but are both rare will be low.  Also, in the current
-system, the relative weights of the binary potentials and the unary potentials
-were set by hand, with a very small amount of empirical tuning. We could, in
-the future, tune the weights with a more principled optimization strategy,
-using a development set.
+There remain a number of avenues that we would like to explore for the MRF
+system; thus far, we have used the joint probability of two labels to set the
+binary potentials. We would like to investigate other functions, especially
+ones that do not incur large penalties for rare labels, as the joint
+probability of two labels that often co-occur but are both rare will be low.
+Also, in the current system, the relative weights of the binary potentials and
+the unary potentials were set by hand, with a very small amount of empirical
+tuning. We could, in the future, tune the weights with a more principled
+optimization strategy, using a development set.
 
 %%problem with joint probability as potentials, conditional probability as
 %%potentials, we could abuse the mathematics of MRF a little bit and experiment
