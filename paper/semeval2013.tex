@@ -340,8 +340,8 @@ iterations, which empirically works well. After the message-passing iterations,
 each node chooses the value that minimizes the sum of the penalties from
 messages and from its own unary potential function. To avoid accumulating very
 large penalties, we normalize the outgoing messages at each time step and give
-a larger weight to the unary potential functions. These parameters were set by
-hand, but seemed to work well in practice.
+a larger weight to the unary potential functions. These normalization and
+weighting parameters were set by hand, but seem to work well in practice.
 
 \section{Training Data Extraction}
 \label{extraction}
@@ -396,12 +396,8 @@ be the label for this sentence.
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
-%% XXX: do we need to talk about this?
-%% The quality of training data depends on the alignments and lemmatization, in
-%% Els work XXX, manual aligning and lemmatizing was involved to provide an upper
-%% bound.
-
 \section{Results}
+
 \begin{table}[t!]
   \begin{center}
     \begin{tabular}{|r|r|r|r|r|r|}
@@ -410,6 +406,7 @@ considering them likely alignment errors or other noise.
       \hline
    MFS  & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
    best & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
+ParaSense & 31.72 & 25.29 & 24.54 & 28.15 & 31.21 \\
       \hline
             L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
             L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
@@ -418,6 +415,26 @@ considering them likely alignment errors or other noise.
     \end{tabular}
   \caption{\emph{best} evaluation results: precision}
   \label{table:resultsbest}
+  \end{center}
+\end{table}
+
+\begin{table}[t!]
+  \begin{center}
+    \begin{tabular}{|r|r|r|r|r|r|}
+      \hline
+system & es    & nl    & de    &  it   & fr \\
+      \hline
+MFS    & 27.48 & 24.15 & 15.3  & 19.88 & 20.19 \\
+best   & 37.11 & 27.96 & 27.74 & 31.61 & 26.62 \\
+ParaSense & 40.26 & 30.29 & 25.48 & 30.11 & 26.33 \\
+      \hline
+L1  & 36.32          & 25.39          & 24.16          & 26.52          & \textbf{21.24} \\
+L2  & \textbf{37.11}*& 25.34          & \textbf{24.74}*& \textbf{26.65} & 21.07 \\
+MRF & 36.57          & \textbf{25.72} & 24.01          & 26.26          & \textbf{21.24} \\
+      \hline
+    \end{tabular}
+  \caption{\emph{best} evaluation results: mode precision}
+  \label{table:resultsmodebest}
   \end{center}
 \end{table}
 
@@ -436,6 +453,25 @@ considering them likely alignment errors or other noise.
       \hline
     \end{tabular}
   \caption{\emph{oof} evaluation results: precision}
+  \label{table:resultsoof}
+  \end{center}
+\end{table}
+
+\begin{table}[t!]
+  \begin{center}
+    \begin{tabular}{|r|r|r|r|r|r|}
+      \hline
+system  & es    & nl    & de    &  it   & fr \\
+      \hline
+MFS & & & & & \\
+best & & & & & \\
+      \hline
+L1  & & & & & \\
+L2  & & & & & \\
+MRF & & & & & \\
+      \hline
+    \end{tabular}
+  \caption{\emph{oof} evaluation results: mode precision}
   \label{table:resultsoof}
   \end{center}
 \end{table}
