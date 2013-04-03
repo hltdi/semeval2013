@@ -8,6 +8,8 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{breqn}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
 \floatstyle{boxed}
 \restylefloat{figure}
 
@@ -396,85 +398,91 @@ be the label for this sentence.
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
+%%XXX(alexr): write a little bit about stripping dell' and l' and whatnot.
+
 \section{Results}
 
-\begin{table}[t!]
-  \begin{center}
-    \begin{tabular}{|r|r|r|r|r|r|}
-      \hline
-      system   & es    & nl    & de    &  it   & fr \\
-      \hline
-   MFS  & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
-   best & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
-ParaSense & 31.72 & 25.29 & 24.54 & 28.15 & 31.21 \\
-      \hline
-            L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
-            L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
-           MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
-      \hline
-    \end{tabular}
-  \caption{\emph{best} evaluation results: precision}
-  \label{table:resultsbest}
-  \end{center}
-\end{table}
-
-\begin{table}[t!]
-  \begin{center}
-    \begin{tabular}{|r|r|r|r|r|r|}
-      \hline
-system & es    & nl    & de    &  it   & fr \\
-      \hline
-MFS    & 27.48 & 24.15 & 15.3  & 19.88 & 20.19 \\
-best   & 37.11 & 27.96 & 27.74 & 31.61 & 26.62 \\
-ParaSense & 40.26 & 30.29 & 25.48 & 30.11 & 26.33 \\
-      \hline
-L1  & 36.32          & 25.39          & 24.16          & 26.52          & \textbf{21.24} \\
-L2  & \textbf{37.11}*& 25.34          & \textbf{24.74}*& \textbf{26.65} & 21.07 \\
-MRF & 36.57          & \textbf{25.72} & 24.01          & 26.26          & \textbf{21.24} \\
-      \hline
-    \end{tabular}
-  \caption{\emph{best} evaluation results: mode precision}
-  \label{table:resultsmodebest}
-  \end{center}
-\end{table}
-
-\begin{table}[t!]
-  \begin{center}
+\begin{figure*}[th!]
+\begin{subfigure}[t]{0.55\textwidth}
+  \begin{tabular}{|r|r|r|r|r|r|}
+    \hline
+    system   & es    & nl    & de    &  it   & fr \\
+    \hline
+ MFS  & 23.23          & 20.66          & 17.43          & 20.21          & 25.74 \\
+ best & 32.16          & 23.61          & 20.82          & 25.66          & 30.11 \\
+   PS & 31.72 & 25.29 & 24.54 & 28.15 & 31.21 \\
+    \hline
+          L1 & 29.01          & 21.53          & 19.5           & 24.52          & 27.01 \\
+          L2 & 28.49          & \textbf{22.36} & \textbf{19.92} & 23.94          & \textbf{28.23} \\
+         MRF & \textbf{29.36} & 21.61          & 19.76          & \textbf{24.62} & 27.46 \\
+    \hline
+  \end{tabular}
+\caption{\emph{best} evaluation results: precision}
+\label{table:resultsbest}
+\end{subfigure}
+%
+\begin{subfigure}[t]{0.4\textwidth}
     \begin{tabular}{|r|r|r|r|r|r|}
       \hline
       system   & es    & nl    & de    &  it   & fr \\
       \hline
     MFS & 53.07          & 43.59              & 38.86          & 42.63          & 51.36 \\
-   best & 62.21          & 47.83              & 44.02          & 53.98          & 59.8 \\
+   best & 62.21          & 47.83              & 44.02          & 53.98          & 59.80 \\
       \hline
            L1  & 61.69          & 46.55              & 43.66          & 53.57          & 57.76 \\
-           L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.2} \\
-           MRF & \textbf{62.21} & \textbf{46.63}     & \textbf{44.02} & \textbf{53.98} & 57.83 \\
+           L2  & 59.51          & 46.36              & 42.32          & 53.05          & \textbf{58.20} \\
+           MRF & \textit{\textbf{62.21}}& \textbf{46.63} & \textit{\textbf{44.02}}& \textit{\textbf{53.98}} & 57.83 \\
       \hline
     \end{tabular}
-  \caption{\emph{oof} evaluation results: precision}
-  \label{table:resultsoof}
-  \end{center}
-\end{table}
+\caption{\emph{oof} evaluation results: precision}
+\label{table:resultsoof}
+\end{subfigure}
 
-\begin{table}[t!]
-  \begin{center}
+\bigskip
+
+\begin{subfigure}[t]{0.55\textwidth}
+    \begin{tabular}{|r|r|r|r|r|r|}
+      \hline
+system & es    & nl    & de    &  it   & fr \\
+      \hline
+MFS    & 27.48 & 24.15 & 15.30 & 19.88 & 20.19 \\
+best   & 37.11 & 27.96 & 27.74 & 31.61 & 26.62 \\
+PS     & 40.26 & 30.29 & 25.48 & 30.11 & 26.33 \\
+      \hline
+L1  & 36.32          & 25.39          & 24.16          & 26.52          & \textbf{21.24} \\
+L2  & \textit{\textbf{37.11}} & 25.34 & \textit{\textbf{24.74}} & \textbf{26.65} & 21.07 \\
+MRF & 36.57          & \textbf{25.72} & 24.01          & 26.26          & \textbf{21.24} \\
+      \hline
+    \end{tabular}
+\caption{\emph{best} evaluation results: mode precision}
+\label{table:resultsmodebest}
+\end{subfigure}
+%
+\begin{subfigure}[t]{0.4\textwidth}
     \begin{tabular}{|r|r|r|r|r|r|}
       \hline
 system  & es    & nl    & de    &  it   & fr \\
       \hline
-MFS & & & & & \\
-best & & & & & \\
+MFS & 57.35 & 41.97 & 44.35 & 41.69 & 47.42 \\
+best& 65.10 & 47.34 & 53.75 & 57.50 & 57.57 \\
       \hline
-L1  & & & & & \\
-L2  & & & & & \\
-MRF & & & & & \\
+L1  & 64.65                   & \textit{\textbf{47.34}} & 53.50                   & 56.61                   & 51.96 \\
+L2  & 62.52                   & 44.06                   & 49.03                   & 54.06                   & \textbf{53.57} \\
+MRF & \textit{\textbf{65.10}} & 47.29                   & \textit{\textbf{53.75}} & \textit{\textbf{57.50}} & 52.14 \\
       \hline
     \end{tabular}
-  \caption{\emph{oof} evaluation results: mode precision}
-  \label{table:resultsoof}
-  \end{center}
-\end{table}
+\caption{\emph{oof} evaluation results: mode precision}
+\label{table:resultsoof}
+\end{subfigure}
+
+\caption{Task results for our systems. Scores in \textbf{bold} are the best
+result for that language and evaluation out of our systems, and those in
+\textbf{\textit{bold italics}} are the best posted in the competition. For
+comparison, we also give scores for the most-frequent-sense baseline (``MFS"),
+ParaSense (``PS"), the system developed by Lefever and Hoste, and the best
+posted score for competing systems this year (``best").}
+\label{fig:theresults}
+\end{figure*}
 
 %% edit and expand!
 For the \emph{best} evaluation, the more sophisticated classifiers usually do
