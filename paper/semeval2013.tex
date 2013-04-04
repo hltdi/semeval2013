@@ -8,6 +8,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{breqn}
+\usepackage{caption}
 \usepackage{subcaption}
 \captionsetup{compatibility=false}
 \floatstyle{boxed}
@@ -106,7 +107,8 @@ results for the \emph{oof} evaluation. For the \emph{best} evaluation, our two
 more sophisticated systems posted better results than the L1 version. All of
 our systems beat the ``most-frequent sense" baseline in every case.
 
-In the following sections, we will describe our three systems, our training
+In the following sections, we will describe our three
+systems\footnote{\url{http://github.iu.edu/alexr/semeval2013}}, our training
 data extraction process, the results on the shared task, and conclusions and
 future work.
 
@@ -168,31 +170,26 @@ feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$, 
 the ``word with tag" feature is $house\_NN$. 
 
 \section{L2}
-%% fix this up...
-
 The ``layer two" classifier, L2, is similar to L1 described above, with the
-addition of multilingual features -- the translation of the current ambiguous
-noun into the four other target languages.  More specifically, let $S$ be the
-set of five target languages, and $w$ be a word of interest. When $t$ is the
-current target language, we use translations of $w$ into the four other
-languages in $ S - \left\lbrace t \right\rbrace $ as features for this
-classifier. At training time, these translations are  extracted from EuroParl
-Intersection data using automatic alignments, as described in section
-\ref{extraction}. At testing time, since parallel corpora are not available,
-translations for $w$ in four other languages are estimated using the cached L1
-classifiers.
+addition of multilingual features, particularly the translation of the target
+word the four other target languages. More specifically, let $S$ be the set of
+five target languages, and $w$ be the target word that we want to translate
+into $t$. Then for the L2 classifier, we use translations of $w$ into the other
+four languages in $S - \left\lbrace t \right\rbrace$ as features. At training
+time, these translations are extracted from EuroParl Intersection data, since
+we have available the translations of each of the English sentences into each
+of the five target languages; the appropriate translations are extracted from
+the parallel sentences as described in section \ref{extraction}. At testing
+time, since the parallel corpora are not available, translations for $w$ in the
+four other languages are estimated using the cached L1 classifiers.
 
 Levefer and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
-other languages in $ S - \left\lbrace t \right\rbrace$, and extracted all
-bag-of-words features. Since an online MT API is not easily available, we did
-not rely on a complete MT system and instead only included the translations of
-the target words as features.
-
-%L2 translate source work into five target languages separately, while MRF translates jointly.
-
-%The translations seems to be an important factor in the performance of L2,
-%Lefever and Hoste used a MT system for the translations instead.
+other languages in $S - \left\lbrace t \right\rbrace$, and extracted
+bag-of-words features from these complete sentences. The L2 classifiers make
+use of a similar intuition, but they do not rely on a complete MT system or an
+available online MT API; we only include the translations of the target words
+as features.
 
 %Unfortunately, it is difficult to evaluate which one gives better performance.
 %It would be a fairer comparison of the WSD systems if a standardized way %of
@@ -220,45 +217,31 @@ the distributions produced by the L1 classifiers, given an input
 sentence, and edges with pairwise potentials that are derived from the joint
 probabilities of target-language labels occurring together in the training
 data. 
-Thus, the task of finding the optimal translations into five languages jointly, is reduced to a MAP (Maximum A Posteriori) inference, where we try to maximize the joint probability 
-$P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$. The inference process is performed using loopy belief propagation \cite{DBLP:conf/uai/MurphyWJ99}, which is one of the efficient inference algorithms that arrive at an approximate but often good solution. (XXX)
+Thus the task of finding the optimal translations into five languages jointly
+is framed as a MAP (Maximum A Posteriori) inference problem, where we try to
+maximize the joint probability $P(w_{fr},w_{es},w_{it},w_{de},w_{nl})$, given
+the evidence of the features extracted from the source-language sentence. The
+inference process is performed using loopy belief propagation
+\cite{DBLP:conf/uai/MurphyWJ99}, which is an approximate but tractable
+inference algorithms that, while it gives no guarantees, often produces good
+solutions in practice.
 
-%We optimize assignments over the five output variables using loopy belief
-%propagation 
-
-%The intuition behind using a Markov network for this task is that, since we
-%must make five decisions for each source-language sentence, we should make use
-%of the correlations between the target-langauge words.
-
-%% XXX
-The intuition behind using a Markov Network for CL-WSD is that, since the
-languages used in the shared task are related, (that is, translations for the
-target word are correlated), we should make use of their distributions to make
-decisions for five languages jointly.
-
-Lexical ambiguities present in translating from English to, for example,
-Spanish, are often similar to the ambiguities that we see in translating to
-Italian.  Either through cognates or simple correlations, we expect to see
-regularities in the translation process. For example (XXX add the example
-es/it, de/nl):
+The intuition behind using a Markov network for this task is that, since we
+must make five decisions for each source-language sentence, we should make use
+of the correlations between the target-langauge words. Correlations might occur
+in practice due to cognates -- the languages in the shared task are fairly
+closely related -- or they simply capture ambiguities in the source language
+that are not common.
 
 So by building a Markov network in which all of the classifiers can
 communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
 translation decisions of their neighbors, but only proportionally to the
 correlation between the translations that we observe in the two languages.
 
-%% XXX: is there some measure of the correlation between discrete nominal
-%% varibles better than joint probability?   
-%%CAN LIU @Alex:   PMI? (I think quite similar to joint prob, except the denomiator is devided by both freq)
-%% Chi-squared ?
-
+%% keep writing and editing
 The joint inference on MRF could be structured as a MAP inference process (as described above),
 which is a maximization problem by itself, but a simple negative log transformation could turn this into
 a minimization problem, in which we minimize the sum of two distinct penalty functions.
-
-
-%We structure our joint inference as an optimization process, in which we
-%minimize the sum of two kinds of penalty functions. 
 
 First, we have a unary function from each of the five L1 classifiers and for
 each target language, which is represented as a node in the group.  The
@@ -293,9 +276,9 @@ probabilities and thus infinite penalties.
 When it comes time to choose translations, we want to find a complete
 assignment to the five variables that minimizes the sum of all of the penalties
 assigned by the $\phi$ functions. As mentioned earlier, we do this via loopy
-belief propagation; we use the formulation described in section XXX of
-\cite{Koller+Friedman:09} where we can pass messages between the Markov network
-nodes directly rather than first constructing a cluster graph.
+belief propagation; we use the formulation described in section 11.3.5.1 of
+\cite{Koller+Friedman:09}, passing messages between the Markov network nodes
+directly rather than first constructing a cluster graph.
 
 As we are trying to compute the minimum-penalty assignment to the five
 variables, we use the \emph{min-sum} version of loopy belief propagation,
@@ -305,14 +288,14 @@ node could take to penalty values.
 At each time step, every node passes to each of its neighbors a message of the
 following form:
 
-\begin{dmath}
+\begin{dmath*}
 \delta_{i \rightarrow j}^{t} (L_j) =
   \min_{l_i \in L_i}
   \phi_i(l_i) +
   \phi_{(i,j)}(l_i, l_j) +
   \sum_{k \in S - \lbrace i,j \rbrace}
   \delta_{k \rightarrow i}^{t-1} (l_i)
-\end{dmath}
+\end{dmath*}
 
 By this expression, we mean that the message from node $i$ to node $j$ at time
 $t$ is a function from possible labels for node $j$ to scalar penalty values.
@@ -396,13 +379,10 @@ aligner, and the lemmatized version of this target-language phrase is assigned
 as the label for this sentence. In this case we used some heuristic functions
 to remove stray punctuation and attached articles (such as \emph{d'} from
 French or \emph{nell'} from Italian) that were often left appended to the
-tokens by the default NLTK tokenizer, which is meant to be used on English
-text.
+tokens by the default NLTK English tokenizer.
 
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
-
-%%XXX(alexr): write a little bit about stripping dell' and l' and whatnot.
 
 \section{Results}
 
@@ -516,10 +496,6 @@ evaluation, our system (XXX check!!) did not perform as well as some other
 systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
 ... (check the ParaSense results)
 
-%% IMPORTANT QUESTION: does our
-%% L2 work as well as Els on the 2010 trial data? Should run that whole
-%% experiment.
-
 We expect that the L2 classifier could be improved by adding features
 derived
 from more classifiers. Particularly, we hypothesize that classifiers trained on
@@ -547,10 +523,6 @@ Also, in the current system, the relative weights of the binary potentials and
 the unary potentials were set by hand, with a very small amount of empirical
 tuning. We could, in the future, tune the weights with a more principled
 optimization strategy, using a development set.
-
-%%problem with joint probability as potentials, conditional probability as
-%%potentials, we could abuse the mathematics of MRF a little bit and experiment
-%%on this approximate potential.
 
 As with the L2 classifiers, it would be helpful in the future for the
 MRF system to not require many mutually parallel corpora for training --
