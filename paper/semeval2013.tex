@@ -315,25 +315,25 @@ following form:
 \end{dmath}
 
 By this expression, we mean that the message from node $i$ to node $j$ at time
-$t$ is a function possible labels for node $j$ to scalar penalty values. Each
-penalty value is determined by minimizing over the possible labels for node
-$i$, such that we find the label $l_i$ that minimizes sum of the unary cost for
-that label, the binary cost for $l_i$ and $l_j$ taken jointly, and all of the
-penalties in the messages that node $i$ received at the previous time step,
-except for the one from node $j$.
+$t$ is a function from possible labels for node $j$ to scalar penalty values.
+Each penalty value is determined by minimizing over the possible labels for
+node $i$, such that we find the label $l_i$ that minimizes sum of the unary
+cost for that label, the binary cost for $l_i$ and $l_j$ taken jointly, and all
+of the penalties in the messages that node $i$ received at the previous time
+step, except for the one from node $j$.
 
 Intuitively, these messages inform a given neighbor about the estimate, from
 the perspective of the sending node and what it has heard from its other
 neighbors, of the minimum penalty that would be incurred if the recipient node
 were to take a given label. As a concrete example, when the \emph{nl} node
 sends a message to the \emph{fr} node at time step 10, this message is a table
-mapping from all known possible French translations of the current target word
-to the associated penalty values. The message depends on three things: the
+mapping from all possible French translations of the current target word
+to their associated penalty values. The message depends on three things: the
 function $\phi_{nl}$ (itself dependent on the probability distribution output
 by the classifier), the binary potential function $\phi_{(nl,fr)}$, and the
 messages from \emph{es}, \emph{it} and \emph{de} from time step 9.  Note that
-the binary potential functions are derived from joint probabilities, so are
-symmetric.
+the binary potential functions are symmetric because they are derived from
+joint probabilities.
 
 Loopy belief propagation is an approximate inference algorithm, and it is
 neither guaranteed to find a globally optimal solution, nor even to converge at
@@ -392,8 +392,12 @@ phrase table in a phrase-based SMT system.
 
 If a label from $V_i$ is not found with the alignments, but some other word or
 phrase is aligned with the ambiguous noun, then we trust the output of the
-aligner, and the lemmatized version of this target-language phrase is taken to
-be the label for this sentence.
+aligner, and the lemmatized version of this target-language phrase is assigned
+as the label for this sentence. In this case we used some heuristic functions
+to remove stray punctuation and attached articles (such as \emph{d'} from
+French or \emph{nell'} from Italian) that were often left appended to the
+tokens by the default NLTK tokenizer, which is meant to be used on English
+text.
 
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
