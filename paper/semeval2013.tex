@@ -255,7 +255,7 @@ particular language $i$, is a function from a label $l$ to some positive
 penalty value.
 
 $$
-\phi_i(l) = - log P(l | f)
+\phi_i(l) = - log P(L_i = l | F = f)
 $$
 
 Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
@@ -290,11 +290,12 @@ following form:
 
 \begin{dmath*}
 \delta_{i \rightarrow j}^{t} (L_j) =
-  \min_{l_i \in L_i}
+  \min_{l_i \in L_i} \Big[
   \phi_i(l_i) +
   \phi_{(i,j)}(l_i, l_j) +
   \sum_{k \in S - \lbrace i,j \rbrace}
   \delta_{k \rightarrow i}^{t-1} (l_i)
+  \Big]
 \end{dmath*}
 
 By this expression, we mean that the message from node $i$ to node $j$ at time
@@ -472,15 +473,15 @@ the \emph{best} evaluation ... and in the \emph{oof} evaluation ...
 Both evaluations also include a ``mode" variant, in which only the most popular
 of the gold-standard answers are considered valid.
 
-The scores for our systems are reported in \ref{fig:theresults}. In all of the
-settings, our systems posted some of the top results among entrants in the
-shared task, achieving the best scores for some evaluations and some languages.
-For every setting and language, our systems beat the most-frequent sense
-baseline, and our best results usually came from either the L2 or MRF system,
-which suggests that they are making use of the information from the multiple
-parallel corpora. For the \emph{best} evaluation, our results were lower than
-those posted by ParaSense, and in the non-mode \emph{best} setting, they were
-also lower than those from the \emph{c1lN} system \cite{maarten} and
+The scores for our systems are reported in Figure \ref{fig:theresults}. In all
+of the settings, our systems posted some of the top results among entrants in
+the shared task, achieving the best scores for some evaluations and some
+languages.  For every setting and language, our systems beat the most-frequent
+sense baseline, and our best results usually came from either the L2 or MRF
+system, which suggests that they are making use of the information from the
+multiple parallel corpora. For the \emph{best} evaluation, our results were
+lower than those posted by ParaSense, and in the non-mode \emph{best} setting,
+they were also lower than those from the \emph{c1lN} system \cite{maarten} and
 \emph{adapt1} \cite{marine}.
 
 Thus there are many improvements that could be made to our system; perhaps we
