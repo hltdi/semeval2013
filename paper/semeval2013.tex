@@ -74,7 +74,7 @@ description.
 
 Following the work of Lefever and Hoste
 \shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to make use of
-multiple bitext corpora for the CL-WSD task.  ParaSense, the system of Lefever
+multiple bitext corpora for the CL-WSD task. ParaSense, the system of Lefever
 and Hoste, takes into account evidence from all of the available parallel
 corpora. Let $S$ be the set of five target languages and $t$ be the particular
 target language of interest at the moment; ParaSense creates bag-of-words
@@ -385,7 +385,6 @@ We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
 \section{Results}
-
 \begin{figure*}[th!]
 \begin{subfigure}[t]{0.55\textwidth}
   \begin{tabular}{|r|r|r|r|r|r|}
@@ -468,20 +467,42 @@ posted score for competing systems this year (``best").}
 \label{fig:theresults}
 \end{figure*}
 
-%% edit and expand!
-For the \emph{best} evaluation, the more sophisticated classifiers usually do
-better, though not always. It's not totally clear that they're better in
-general.
+There were two evaluations in the shared task, \emph{best} and \emph{oof}. In
+the \emph{best} evaluation ... and in the \emph{oof} evaluation ...
+Both evaluations also include a ``mode" variant, in which only the most popular
+of the gold-standard answers are considered valid.
 
-It seems like Els's features really are richer -- she gets translations for all
-the different words in the source language and uses the other-target-language
-bag-of-words as features. That's a lot of features. We're kind of forcing the
-information through a narrower pass -- we just get one decision.
+The scores for our systems are reported in \ref{fig:theresults}. In all of the
+settings, our systems posted some of the top results among entrants in the
+shared task, achieving the best scores for some evaluations and some languages.
+For every setting and language, our systems beat the most-frequent sense
+baseline, and our best results usually came from either the L2 or MRF system,
+which suggests that they are making use of the information from the multiple
+parallel corpora. For the \emph{best} evaluation, our results were lower than
+those posted by ParaSense, and in the non-mode \emph{best} setting, they were
+also lower than those from the \emph{c1lN} system \cite{maarten} and
+\emph{adapt1} \cite{marine}.
 
-TODO(alexr): now we know what went wrong. Write about it!
+Thus there are many improvements that could be made to our system; perhaps we
+could integrate ideas from the other entries in the shared task this year.
+The ParaSense approach, including the entire the entire bag-of-words for
+translated sentences other languages ...
 
-TODO(alexr): run the experiment where we do the L2 classifiers, but with the
-\emph{predicted} target-language word as the feature.
+%% XXX keep writing and editing here.
+... features, making use of a translated features really are richer -- she gets
+translations for all the different words in the source language and uses the
+other-target-language bag-of-words as features. That's a lot of features. We're
+kind of forcing the information through a narrower pass -- we just get one
+decision.
+
+For the \emph{best} evaluation, considering only the mode gold-standard
+answers, our L2 system achieved the highest scores in the competition for
+Spanish and German. For the \emph{oof} evaluation, our MRF system -- with its
+post-competition bug fix -- posted the best results for Spanish, German and
+Italian in both complete and mode variants. Curiously, our L1 system posted the
+best results in the competition for Dutch in the \emph{oof} variant 
+
+
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
