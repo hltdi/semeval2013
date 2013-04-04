@@ -468,41 +468,48 @@ posted score for competing systems this year (``best").}
 \label{fig:theresults}
 \end{figure*}
 
+%%need some revise
 There were two evaluations in the shared task, \emph{best} and \emph{oof}. In
-the \emph{best} evaluation ... and in the \emph{oof} evaluation ...
-Both evaluations also include a ``mode" variant, in which only the most popular
-of the gold-standard answers are considered valid.
+the \emph{best} evaluation,(XXX CAN) all outputs for an instance taken into account, weighted by the number of agreements among annotators, and penalized by the number of output. So that the \emph{best} evaluation encourages the system to output the ``best" answer. (XXX) The \emph{oof} evaluation is similar except that it is not penalized by the number of outputs.
+Both evaluations also include a ``mode" variant, in which only the answer agreed most by annotators 
+%popular of the gold-standard answers 
+are considered valid and compared against.
 
 The scores for our systems are reported in Figure \ref{fig:theresults}. In all
 of the settings, our systems posted some of the top results among entrants in
 the shared task, achieving the best scores for some evaluations and some
 languages.  For every setting and language, our systems beat the most-frequent
 sense baseline, and our best results usually came from either the L2 or MRF
-system, which suggests that they are making use of the information from the
-multiple parallel corpora. For the \emph{best} evaluation, our results were
+system, which suggests
+the benifit of using multilingual information from the parallel corpura, even 
+without translating the whole source sentence to use bag-of-words features.  (XXX CAN)
+%that they are making use of the information from the multiple parallel corpora. 
+For the \emph{best} evaluation, our results were
 lower than those posted by ParaSense, and in the non-mode \emph{best} setting,
 they were also lower than those from the \emph{c1lN} system \cite{maarten} and
 \emph{adapt1} \cite{marine}.
 
 Thus there are many improvements that could be made to our system; perhaps we
 could integrate ideas from the other entries in the shared task this year.
-The ParaSense approach, including the entire the entire bag-of-words for
-translated sentences other languages ...
+%The ParaSense approach, including  the entire bag-of-words for
+%translated sentences other languages ...
 
 %% XXX keep writing and editing here.
-... features, making use of a translated features really are richer -- she gets
-translations for all the different words in the source language and uses the
-other-target-language bag-of-words as features. That's a lot of features. We're
-kind of forcing the information through a narrower pass -- we just get one
-decision.
+The ParaSense approach, which translated the source sentence into four other languages
+and included the entire bag-of-words from translated sentences, had much richer features,
+which might contribute to a better performance.
+Instead, we got only one decision per target language, forcing the information through a narrower pass.
+(XXX CAN)
+%kind of forcing the information through a narrower pass -- we just get one decision.
 
 For the \emph{best} evaluation, considering only the mode gold-standard
 answers, our L2 system achieved the highest scores in the competition for
 Spanish and German. For the \emph{oof} evaluation, our MRF system -- with its
 post-competition bug fix -- posted the best results for Spanish, German and
-Italian in both complete and mode variants. Curiously, our L1 system posted the
-best results in the competition for Dutch in the \emph{oof} variant 
-
+Italian in both complete and mode variants. 
+Curiously, our L1 system posted the best results in the competition for Dutch in the \emph{oof} variant 
+(XXX CAN) L1 did not beat others in oof... we should check the table.
+L1 tied with MRF under oof-mode for French. 
 
 
 \section{Conclusions and future work}
