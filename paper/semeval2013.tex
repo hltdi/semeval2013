@@ -510,6 +510,7 @@ L1 tied with MRF under oof-mode for French.
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
+<<<<<<< HEAD
 baseline, achieving the top score for three of the five languages in the
 \emph{oof} evaluation, and for two languages in the \emph{best} evaluation when
 considering the mode gold-standard answers. Our systems that took into account
@@ -524,6 +525,28 @@ from more classifiers. We would like to try classifiers trained on completely
 different corpora -- instead of corpora that are all mutually parallel -- would
 improve the system by making use of information from many disparate sources.
 The L2 classifier approach only requires that the first-layer
+=======
+baseline and achieving the top score for three of the five languages in the
+\emph{oof} evaluation. The systems that took into account 
+%evidence from multiple sources had better performance than the simpler one: 
+multilingual evidence from the parallel corpora performed better than the ones 
+using monolingual features. (XXX CAN)
+Our top result in every language came from either the L2 or the MRF classifier for
+both evaluations. This suggests that it is possible to make use of the evidence
+in several parallel corpora in a CL-WSD task without translating every word in
+a source sentence into many target languages. However, for the \emph{best}
+evaluation, our system (XXX check!!) did not perform as well as some other
+systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
+... (check the ParaSense results)
+
+We expect that the L2 classifier could be improved by adding features
+derived from more classifiers (for example from more languages), and also from various training data.
+(XXX CAN)
+Particularly, we hypothesize that classifiers trained on
+completely different corpora -- instead of corpora that are mutally parallel --
+would improve the system by making use of information from many disparate
+sources. The L2 classifier approach only requires that the first-layer
+>>>>>>> 70a379fe48578a582a0cad7747bd271b1105c132
 classifiers make \emph{some} prediction based on text in the source language.
 They need not be trained from the same source text, depend on the same
 features, or even output words as labels. In future work we will explore
