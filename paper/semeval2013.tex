@@ -59,18 +59,15 @@ and Wu have shown how to use CL-WSD techniques to improve modern phrase-based
 SMT systems \cite{carpuatpsd}, even though the language model and phrase-tables
 of these systems mitigate the problem of lexical ambiguities somewhat.
 
-In the Semeval-2013 CL-WSD task \cite{task10}, entrants are asked to build a
-system that can provide translations for twenty ambiguous English nouns, given
-appropriate contexts -- here the particular usage of the ambiguous noun is
-called the \emph{target} word. The five target languages of the shared task are
-Spanish, Dutch, German, Italian and French. There were two settings for the
-evaluation, \emph{best} and \emph{oof}. In either case, systems may present
-multiple possible answers for a given translation, although in the \emph{best}
-setting, the first answer is given more weight in the evaluation, and the
-scoring encourages only returning the top answer. In the \emph{oof} setting,
-systems are asked to return the top-five most likely translations. For a
-complete explanation of the task and its evaluation, please see the shared task
-description. 
+In the Semeval-2013 CL-WSD shared task \cite{task10}, entrants are asked to
+build a system that can provide translations for twenty ambiguous English
+nouns, given appropriate contexts -- here the particular usage of the ambiguous
+noun is called the \emph{target} word. The five target languages of the shared
+task are Spanish, Dutch, German, Italian and French. In the evaluation, for
+each of the twenty ambiugous nouns, systems are to provide translations for
+the target word in each of fifty sentences or short passages. The translations
+of each English word may be single words or short phrases in the target
+language, but in either case, they should be lemmatized.
 
 Following the work of Lefever and Hoste
 \shortcite{lefever-hoste-decock:2011:ACL-HLT2011}, we wanted to make use of
@@ -108,9 +105,9 @@ more sophisticated systems posted better results than the L1 version. All of
 our systems beat the ``most-frequent sense" baseline in every case.
 
 In the following sections, we will describe our three
-systems\footnote{\url{http://github.iu.edu/alexr/semeval2013}}, our training
-data extraction process, the results on the shared task, and conclusions and
-future work.
+systems\footnote{Source is available at \\
+\url{http://github.iu.edu/alexr/semeval2013}}, our training data extraction
+process, the results on the shared task, and conclusions and future work.
 
 \section{L1}
 The ``layer one" classifier, L1, is a maximum entropy classifier that
@@ -161,27 +158,28 @@ as components of the other models.
   \label{fig:features}
 \end{figure}
 
-
 We combined the word tokens with their tags in some features so that the
 classifier would not treat them independently, since maximum entropy
 classifiers learn a single weight for each feature.
 Particularly, the ``POS tag" feature is distinct from the ``word with tag"
-feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$, and
-the ``word with tag" feature is $house\_NN$. 
+feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$,
+and the ``word with tag" feature is $house\_NN$. 
 
 \section{L2}
-The ``layer two" classifier, L2, is similar to L1 described above, with the
-addition of multilingual features, particularly the translation of the target
-word the four other target languages. More specifically, let $S$ be the set of
-five target languages, and $w$ be the target word that we want to translate
-into $t$. Then for the L2 classifier, we use translations of $w$ into the other
-four languages in $S - \left\lbrace t \right\rbrace$ as features. At training
-time, these translations are extracted from EuroParl Intersection data, since
-we have available the translations of each of the English sentences into each
-of the five target languages; the appropriate translations are extracted from
-the parallel sentences as described in section \ref{extraction}. At testing
-time, since the parallel corpora are not available, translations for $w$ in the
-four other languages are estimated using the cached L1 classifiers.
+The ``layer two" classifier, L2, is an extension to the L1 system, with the
+addition of multilingual features. Particularly, L2 adds features for the
+translation of the target word into the four target languages other than the
+one we are currently trying to predict. Formally, let $S$ be the set of five
+target languages, and $w$ be the target word that we want to translate into
+$t$. Then for the L2 classifier, we use translations of $w$ into the languages
+in $S - \left\lbrace t \right\rbrace$ as features. At training time, these
+translations are extracted from EuroParl Intersection data, since we have
+available the translations of each of the English sentences into each of the
+five target languages; the appropriate translations are extracted from the
+parallel sentences as described in section \ref{extraction}. At testing time,
+since the parallel corpora are not available, translations for $w$ in the four
+other languages are estimated using the cached L1 classifiers. Intuitively,
+there are at least two 
 
 Levefer and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
@@ -191,12 +189,6 @@ use of a similar intuition, but they do not rely on a complete MT system or an
 available online MT API; we only include the translations of the target words
 as features.
 
-%Unfortunately, it is difficult to evaluate which one gives better performance.
-%It would be a fairer comparison of the WSD systems if a standardized way %of
-%translations So as in the work of Lefever and Hoste, our L2 classifiers make
-%use of several aligned bitext corpora, but without relying on a complete MT
-%system.
-
 \section{MRF}
 \floatstyle{plain}
 \restylefloat{figure}
@@ -204,9 +196,9 @@ as features.
   \begin{center}
   \includegraphics[width=5cm]{pentagram.pdf}
   \end{center}
-  \caption{The network structure used in the MRF system: a complete graph with five nodes %five-graph
-  where each node represents a variable for the translation into a target
-language}
+  \caption{The network structure used in the MRF system: a complete graph with
+    five nodes where each node represents a variable for the translation into a
+    target language}
   \label{fig:pentagram}
 \end{figure}
 
@@ -230,27 +222,25 @@ The intuition behind using a Markov network for this task is that, since we
 must make five decisions for each source-language sentence, we should make use
 of the correlations between the target-langauge words. Correlations might occur
 in practice due to cognates -- the languages in the shared task are fairly
-closely related -- or they simply capture ambiguities in the source language
-that are not common.
+closely related -- or they may simply reflect ambiguities in the source
+language that are resolved in two target languages.
 
 So by building a Markov network in which all of the classifiers can
 communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
 translation decisions of their neighbors, but only proportionally to the
 correlation between the translations that we observe in the two languages.
 
-%% keep writing and editing
-The joint inference on MRF could be structured as a MAP inference process (as described above),
-which is a maximization problem by itself, but a simple negative log transformation could turn this into
-a minimization problem, in which we minimize the sum of two distinct penalty functions.
-
+We reframe the MAP inference task as a minimization problem by using
+negative-log probabilities; we want to find an assignment that minimizes the
+sum of all of our penalty functions, which we will describe next.
 First, we have a unary function from each of the five L1 classifiers and for
-each target language, which is represented as a node in the group.  The
-function assigns a penalty to each possible label for the target word.  The
+each target language, which is represented as a node in the network. The
+function assigns a penalty to each possible label for the target word. The
 penalty assigned here is the negative log-probability of each possible output
 label; the classifier returns a probability distribution, and we map the
 probability values $[0,1]$ into negative-log space, $[0, +\infty]$.
 
-The unary potential $\phi_i$, for some fixed set of features $f$ and a
+This unary potential $\phi_i$, for some fixed set of features $f$ and a
 particular language $i$, is a function from a label $l$ to some positive
 penalty value.
 
@@ -259,7 +249,7 @@ $$
 $$
 
 Secondly, for each unordered pair of classifiers $(i,j)$ (\emph{i.e.}, each
-edge in the graph) there is a pairwise potential function $\phi_{ij}$ that
+edge in the graph) there is a pairwise potential function $\phi_{(i,j)}$ that
 assigns a penalty to any assignment of that pair of variables.
 
 $$
@@ -276,14 +266,14 @@ probabilities and thus infinite penalties.
 When it comes time to choose translations, we want to find a complete
 assignment to the five variables that minimizes the sum of all of the penalties
 assigned by the $\phi$ functions. As mentioned earlier, we do this via loopy
-belief propagation; we use the formulation described in section 11.3.5.1 of
-\cite{Koller+Friedman:09}, passing messages between the Markov network nodes
-directly rather than first constructing a cluster graph.
+belief propagation, using the formulation for pairwise Markov networks that
+passes messages directly between the nodes rather than first constructing a
+cluster graph \cite[\S 11.3.5.1]{Koller+Friedman:09}.
 
 As we are trying to compute the minimum-penalty assignment to the five
-variables, we use the \emph{min-sum} version of loopy belief propagation,
-passing messages that are mappings from the possible values that the recipient
-node could take to penalty values.
+variables, we use the \emph{min-sum} version of loopy belief propagation. The
+messages are mappings from the possible values that the recipient node could
+take to penalty values.
 
 At each time step, every node passes to each of its neighbors a message of the
 following form:
@@ -468,22 +458,28 @@ posted score for competing systems this year (``best").}
 \label{fig:theresults}
 \end{figure*}
 
-%%need some revise
-There were two evaluations in the shared task, \emph{best} and \emph{oof}. In
-the \emph{best} evaluation,(XXX CAN) all outputs for an instance taken into account, weighted by the number of agreements among annotators, and penalized by the number of output. So that the \emph{best} evaluation encourages the system to output the ``best" answer. (XXX) The \emph{oof} evaluation is similar except that it is not penalized by the number of outputs.
-Both evaluations also include a ``mode" variant, in which only the answer agreed most by annotators 
-%popular of the gold-standard answers 
-are considered valid and compared against.
+There were two settings for the evaluation, \emph{best} and \emph{oof}. In
+either case, systems may present multiple possible answers for a given
+translation, although in the \emph{best} setting, the first answer is given
+more weight in the evaluation, and the scoring encourages only returning the
+top answer. In the \emph{oof} setting, systems are asked to return the top-five
+most likely translations. In both settings, the answers are compared against
+translations provided by several human annotators for each test sentence, who
+provided a number of possible target-language translations in lemmatized form,
+and more points are given for matching the more popular translations given by
+the annotators. In the ``mode" variant of scoring, only the one most common
+answer for a given test sentence is considered valid. For a complete
+explanation of the evaluation and its scoring, please see the shared task
+description \cite{task10}. 
 
 The scores for our systems are reported in Figure \ref{fig:theresults}. In all
 of the settings, our systems posted some of the top results among entrants in
 the shared task, achieving the best scores for some evaluations and some
 languages.  For every setting and language, our systems beat the most-frequent
 sense baseline, and our best results usually came from either the L2 or MRF
-system, which suggests
-the benifit of using multilingual information from the parallel corpura, even 
-without translating the whole source sentence to use bag-of-words features.  (XXX CAN)
-%that they are making use of the information from the multiple parallel corpora. 
+system, which suggests that there is some benefit in using multilingual
+information from the parallel corpora, even without translating the whole
+source sentence.
 For the \emph{best} evaluation, our results were
 lower than those posted by ParaSense, and in the non-mode \emph{best} setting,
 they were also lower than those from the \emph{c1lN} system \cite{maarten} and
@@ -514,34 +510,33 @@ L1 tied with MRF under oof-mode for French.
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
-baseline and achieving the top score for three of the five languages in the
-\emph{oof} evaluation. The systems that took into account evidence from
-multiple sources had better performance than the simpler one: our top result in
-every language came from either the L2 or the MRF classifier for
+baseline, achieving the top score for three of the five languages in the
+\emph{oof} evaluation, and for two languages in the \emph{best} evaluation when
+considering the mode gold-standard answers. Our systems that took into account
+evidence from multiple sources had better performance than the simpler one: our
+top result in every language came from either the L2 or the MRF classifier for
 both evaluations. This suggests that it is possible to make use of the evidence
 in several parallel corpora in a CL-WSD task without translating every word in
-a source sentence into many target languages. However, for the \emph{best}
-evaluation, our system (XXX check!!) did not perform as well as some other
-systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
-... (check the ParaSense results)
+a source sentence into many target languages.
 
-We expect that the L2 classifier could be improved by adding features
-derived
-from more classifiers. Particularly, we hypothesize that classifiers trained on
-completely different corpora -- instead of corpora that are mutally parallel --
-would improve the system by making use of information from many disparate
-sources. The L2 classifier approach only requires that the first-layer
+We expect that the L2 classifier could be improved by adding features derived
+from more classifiers. We would like to try classifiers trained on completely
+different corpora -- instead of corpora that are all mutually parallel -- would
+improve the system by making use of information from many disparate sources.
+The L2 classifier approach only requires that the first-layer
 classifiers make \emph{some} prediction based on text in the source language.
 They need not be trained from the same source text, depend on the same
 features, or even output words as labels. In future work we will explore
 all of these variations. One could, for example, train a monolingual WSD system
-on a sense-tagged corpus \footnote{Such as the sense-tagged corpus from Wordnet
-(\url{http://wordnet.princeton.edu/glosstag.shtml})
-or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
-tagged with ``sense labels" that are links to disambiguated Wikipedia
-articles
-(\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
-and use this as an additional information source for an L2 classifier.
+on a sense-tagged corpus and use this as an additional information source for
+an L2 classifier.
+
+%% \footnote{Such as the sense-tagged corpus from Wordnet
+%% (\url{http://wordnet.princeton.edu/glosstag.shtml})
+%% or the new ``WikiLinks" corpus from Google and UMass Amherst, in which text is
+%% tagged with ``sense labels" that are links to disambiguated Wikipedia
+%% articles
+%% (\url{http://googleresearch.blogspot.com/2013/03/learning-from-big-data-40-million.html})}
 
 There remain a number of avenues that we would like to explore for the MRF
 system; thus far, we have used the joint probability of two labels to set the
@@ -553,23 +548,21 @@ the unary potentials were set by hand, with a very small amount of empirical
 tuning. We could, in the future, tune the weights with a more principled
 optimization strategy, using a development set.
 
-As with the L2 classifiers, it would be helpful in the future for the
-MRF system to not require many mutually parallel corpora for training --
-however, the current approach for estimating the edge potentials requires the
-use of bitext for each edge in the network, or at least source-language text
-with labels for both target languages in question. Perhaps these correlations
-could be estimated in a semi-supervised way, with high-confidence automatic
-labels being used to estimate the joint distribution over target-language
-phrases.  We would also like to investigate approaches to jointly disambiguate
-many words in the same sentence, since lexical ambiguity is not just a problem
-for a few nouns.
+As with the L2 classifiers, it would be helpful in the future for the MRF
+system to not require many mutually parallel corpora for training -- however,
+the current approach for estimating the edge potentials requires the use of
+bitext for each edge in the network. Perhaps these correlations could be
+estimated in a semi-supervised way, with high-confidence automatic labels being
+used to estimate the joint distribution over target-language phrases. We would
+also like to investigate approaches to jointly disambiguate many words in the
+same sentence, since lexical ambiguity is not just a problem for a few nouns.
 
 Aside from improvements to the design of our CL-WSD system itself, we want to
 use it in a practical system for translating into under-resourced languages.
 We are now working on integrating this project with our rule-based MT system,
 $L^3$ \cite{gasser:aflat2012}. We had experimented with a similar, though less
 sophisticated, CL-WSD system for Quechua \cite{rudnick:2011:RANLPStud}, but in
-the future $L^3$, with the integrated CL-WSD system, should be capable of
+the future, $L^3$ with the integrated CL-WSD system should be capable of
 translating Spanish to Guarani, either as a standalone system, or as part of a
 computer-assisted translation tool.
 
