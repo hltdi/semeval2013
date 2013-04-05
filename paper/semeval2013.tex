@@ -10,6 +10,9 @@
 \usepackage{breqn}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{placeins}
+\setlist{nolistsep}
 \captionsetup{compatibility=false}
 \floatstyle{boxed}
 \restylefloat{figure}
@@ -38,14 +41,6 @@ features (L2); and lastly, networks of five classifiers, over which we
 do loopy belief propagation to solve the classification tasks jointly
 (MRF).
 \end{abstract}
-
-%%% TODO items
-% TODO: run the experiment where we train the L2 classifiers on the predicted
-% values.
-
-% DONE: pick consistent terminology for the word that we're trying to translate
-% The word in the task description is the ``target" word. I guess we should use
-% that.
 
 \section{Introduction}
 In the cross-language word-sense disambiguation (CL-WSD) task, given an
@@ -136,7 +131,7 @@ as components of the other models.
   
   \item target word features
   \begin{itemize}  %(a)
-       \item literal word form (including capitalization)
+       \item literal word form
        \item POS tag
        \item lemma
   \end{itemize}
@@ -375,8 +370,7 @@ tokens by the default NLTK English tokenizer.
 We dropped all of the training instances with labels that only occurred once,
 considering them likely alignment errors or other noise.
 
-\section{Results}
-\begin{figure*}[th!]
+\begin{figure*}[t!]
 \begin{subfigure}[t]{0.55\textwidth}
   \begin{tabular}{|r|r|r|r|r|r|}
     \hline
@@ -458,6 +452,7 @@ posted score for competing systems this year (``best").}
 \label{fig:theresults}
 \end{figure*}
 
+\section{Results}
 There were two settings for the evaluation, \emph{best} and \emph{oof}. In
 either case, systems may present multiple possible answers for a given
 translation, although in the \emph{best} setting, the first answer is given
@@ -480,79 +475,43 @@ sense baseline, and our best results usually came from either the L2 or MRF
 system, which suggests that there is some benefit in using multilingual
 information from the parallel corpora, even without translating the whole
 source sentence.
-For the \emph{best} evaluation, our results were
-lower than those posted by ParaSense, and in the non-mode \emph{best} setting,
-they were also lower than those from the \emph{c1lN} system \cite{maarten} and
-\emph{adapt1} \cite{marine}.
-
-Thus there are many improvements that could be made to our system; perhaps we
-could integrate ideas from the other entries in the shared task this year.
-%The ParaSense approach, including  the entire bag-of-words for
-%translated sentences other languages ...
-
-%% XXX keep writing and editing here.
-The ParaSense approach, which translated the source sentence into four other languages
-and included the entire bag-of-words from translated sentences, had much richer features,
-which might contribute to a better performance.
-Instead, we got only one decision per target language, forcing the information through a narrower pass.
-(XXX CAN)
-%kind of forcing the information through a narrower pass -- we just get one decision.
 
 For the \emph{best} evaluation, considering only the mode gold-standard
 answers, our L2 system achieved the highest scores in the competition for
 Spanish and German. For the \emph{oof} evaluation, our MRF system -- with its
 post-competition bug fix -- posted the best results for Spanish, German and
-Italian in both complete and mode variants. 
-Curiously, our L1 system posted the best results in the competition for Dutch in the \emph{oof} variant 
-(XXX CAN) L1 did not beat others in oof... we should check the table.
-L1 tied with MRF under oof-mode for French. 
+Italian in both complete and mode variants. Also, curiously, our L1 system
+posted the best results in the competition for Dutch in the \emph{oof} variant.
 
+For the \emph{best} evaluation, our results were lower than those posted by
+ParaSense, and in the standard \emph{best} setting, they were also lower than
+those from the \emph{c1lN} system \cite{maarten} and \emph{adapt1}
+\cite{marine}. This, combined with the relatively small difference between our
+simplest system and the more sophisticated ones, suggests that there are many
+improvements that could be made to our system; perhaps we could integrate ideas
+from the other entries in the shared task this year.
 
 \section{Conclusions and future work}
 Our systems had a strong showing in the competition, always beating the MFS
-<<<<<<< HEAD
 baseline, achieving the top score for three of the five languages in the
 \emph{oof} evaluation, and for two languages in the \emph{best} evaluation when
-considering the mode gold-standard answers. Our systems that took into account
-evidence from multiple sources had better performance than the simpler one: our
-top result in every language came from either the L2 or the MRF classifier for
-both evaluations. This suggests that it is possible to make use of the evidence
-in several parallel corpora in a CL-WSD task without translating every word in
-a source sentence into many target languages.
+considering the mode gold-standard answers. The systems that took into account
+evidence from multiple sources had better performance than the one using
+monolingual features: Our top result in every language came from either the L2
+or the MRF classifier for both evaluations. This suggests that it is possible
+to make use of the evidence in several parallel corpora in a CL-WSD task
+without translating every word in a source sentence into many target languages.
 
 We expect that the L2 classifier could be improved by adding features derived
-from more classifiers. We would like to try classifiers trained on completely
-different corpora -- instead of corpora that are all mutually parallel -- would
-improve the system by making use of information from many disparate sources.
-The L2 classifier approach only requires that the first-layer
-=======
-baseline and achieving the top score for three of the five languages in the
-\emph{oof} evaluation. The systems that took into account 
-%evidence from multiple sources had better performance than the simpler one: 
-multilingual evidence from the parallel corpora performed better than the ones 
-using monolingual features. (XXX CAN)
-Our top result in every language came from either the L2 or the MRF classifier for
-both evaluations. This suggests that it is possible to make use of the evidence
-in several parallel corpora in a CL-WSD task without translating every word in
-a source sentence into many target languages. However, for the \emph{best}
-evaluation, our system (XXX check!!) did not perform as well as some other
-systems, such as those of (XXX cite) Marine and Marten, or as well as ParaSense
-... (check the ParaSense results)
-
-We expect that the L2 classifier could be improved by adding features
-derived from more classifiers (for example from more languages), and also from various training data.
-(XXX CAN)
-Particularly, we hypothesize that classifiers trained on
-completely different corpora -- instead of corpora that are mutally parallel --
-would improve the system by making use of information from many disparate
-sources. The L2 classifier approach only requires that the first-layer
->>>>>>> 70a379fe48578a582a0cad7747bd271b1105c132
-classifiers make \emph{some} prediction based on text in the source language.
-They need not be trained from the same source text, depend on the same
-features, or even output words as labels. In future work we will explore
-all of these variations. One could, for example, train a monolingual WSD system
-on a sense-tagged corpus and use this as an additional information source for
-an L2 classifier.
+from more classifiers and making use of information from many disparate
+sources. We would like to try adding classifiers trained on the other Europarl
+languages, as well as completely different corpora. The L2 classifier approach
+only requires that the first-layer classifiers make \emph{some} prediction
+based on text in the source language.  They need not be trained from the same
+source text, depend on the same features, or even output words as labels. In
+future work we will explore all of these variations. One could, for example,
+train a monolingual WSD system on a sense-tagged corpus and use this as an
+additional information source for an L2 classifier.
 
 %% \footnote{Such as the sense-tagged corpus from Wordnet
 %% (\url{http://wordnet.princeton.edu/glosstag.shtml})
