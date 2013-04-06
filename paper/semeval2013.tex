@@ -54,7 +54,7 @@ and Wu have shown how to use CL-WSD techniques to improve modern phrase-based
 SMT systems \cite{carpuatpsd}, even though the language model and phrase-tables
 of these systems mitigate the problem of lexical ambiguities somewhat.
 
-In the Semeval-2013 CL-WSD shared task \cite{task10}, entrants are asked to
+In the SemEval-2013 CL-WSD shared task \cite{task10}, entrants are asked to
 build a system that can provide translations for twenty ambiguous English
 nouns, given appropriate contexts -- here the particular usage of the ambiguous
 noun is called the \emph{target} word. The five target languages of the shared
@@ -72,7 +72,7 @@ corpora. Let $S$ be the set of five target languages and $t$ be the particular
 target language of interest at the moment; ParaSense creates bag-of-words
 features from the translations of the target sentence into the languages $S -
 \lbrace{t \rbrace}$. Given corpora that are parallel over many languages, this
-is straightforward at training time. However at testing time it requires a
+is straightforward at training time. However, at testing time it requires a
 complete MT system for each of the four other languages, which is
 computationally prohibitive. Thus in our work, we learn from several parallel
 corpora but require neither a locally running MT system nor access to an online
@@ -142,7 +142,7 @@ as components of the other models.
   		\item word with POS tag
   		\item word lemma
   \end{itemize}
-  \item window bigram features(within 5 words)
+  \item window bigram features (within 5 words)
   \begin{itemize} %(c)
   		\item bigrams 
   		\item bigrams with POS tags
@@ -173,8 +173,7 @@ available the translations of each of the English sentences into each of the
 five target languages; the appropriate translations are extracted from the
 parallel sentences as described in section \ref{extraction}. At testing time,
 since the parallel corpora are not available, translations for $w$ in the four
-other languages are estimated using the cached L1 classifiers. Intuitively,
-there are at least two 
+other languages are estimated using the cached L1 classifiers.
 
 Levefer and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
