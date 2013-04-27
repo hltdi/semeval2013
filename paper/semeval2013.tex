@@ -172,8 +172,9 @@ translations are extracted from Europarl Intersection data, since we have
 available the translations of each of the English sentences into each of the
 five target languages; the appropriate translations are extracted from the
 parallel sentences as described in section \ref{extraction}. At testing time,
-since the parallel corpora are not available, translations for $w$ in the four
-other languages are estimated using the cached L1 classifiers.
+since translations of the test sentences are not given, we estimate
+translations for $w$ in the four other languages using the cached L1
+classifiers.
 
 Lefever and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
@@ -227,8 +228,8 @@ correlation between the translations that we observe in the two languages.
 We reframe the MAP inference task as a minimization problem by using
 negative-log probabilities; we want to find an assignment that minimizes the
 sum of all of our penalty functions, which we will describe next.
-First, we have a unary function from each of the five L1 classifiers and for
-each target language, which is represented as a node in the network. The
+First, we have a unary function from each of the five L1 classifiers, one for
+each target language, which corresponds to a node in the network. The
 function assigns a penalty to each possible label for the target word. The
 penalty assigned here is the negative log-probability of each possible output
 label; the classifier returns a probability distribution, and we map the
@@ -298,7 +299,7 @@ sends a message to the \emph{fr} node at time step 10, this message is a table
 mapping from all possible French translations of the current target word
 to their associated penalty values. The message depends on three things: the
 function $\phi_{nl}$ (itself dependent on the probability distribution output
-by the classifier), the binary potential function $\phi_{(nl,fr)}$, and the
+by the L1 classifier), the binary potential function $\phi_{(nl,fr)}$, and the
 messages from \emph{es}, \emph{it} and \emph{de} from time step 9.  Note that
 the binary potential functions are symmetric because they are derived from
 joint probabilities.
@@ -318,10 +319,10 @@ weighting parameters were set by hand, but seem to work well in practice.
 For simplicity and comparability with previous work, we worked with the
 Europarl Intersection corpus provided by the task organizers. Europarl
 \cite{europarl} is a parallel corpus of proceedings of the European Parliament,
-available in 21 European languages, although not every sentence is translated
-into every language. The Europarl Intersection is the intersection of the
-sentences from Europarl that are available in English and all five of the
-target languages for the task.
+currently available in 21 European languages, although not every sentence is
+translated into every language. The Europarl Intersection is the intersection
+of the sentences from Europarl that are available in English and all five of
+the target languages for the task.
 
 In order to produce the training data for the classifiers, we first tokenized
 the text for all six languages with the default NLTK tokenizer and tagged the
@@ -347,7 +348,7 @@ lemmas, we used a number of heuristics to extract the appropriate
 target-language labels for each English-language input sentence.  For each
 target word, we extracted a sense inventory $V_i$ from the gold standard
 answers from the 2010 iteration of this task \cite{lefever-hoste:2009:SEW}.
-Then, for each sentence that contains one of the target words used as a noun,
+Then, for each English sentence that contains one of the target words used as a noun,
 we examine the alignments to determine whether that word is aligned with a
 sense present in $V_i$ , or whether the words aligned to that noun are a
 subsequence of such a sense. The same check is performed both on the lemmatized
@@ -497,7 +498,7 @@ baseline, achieving the top score for three of the five languages in the
 \emph{oof} evaluation, and for two languages in the \emph{best} evaluation when
 considering the mode gold-standard answers. The systems that took into account
 evidence from multiple sources had better performance than the one using
-monolingual features: Our top result in every language came from either the L2
+monolingual features: our top result in every language came from either the L2
 or the MRF classifier for both evaluations. This suggests that it is possible
 to make use of the evidence in several parallel corpora in a CL-WSD task
 without translating every word in a source sentence into many target languages.
