@@ -2,9 +2,10 @@
 \usepackage{naaclhlt2013}
 \usepackage{times}
 \usepackage{latexsym}
-\setlength\titlebox{6.5cm}    % Expanding the titlebox
+\setlength\titlebox{2.0in}    % Expanding the titlebox
 \usepackage{url}
 \usepackage{float}
+\usepackage{framed}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{breqn}
@@ -12,10 +13,11 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{placeins}
+\usepackage[margin=1in, right=1.05in,bottom=1.2in]{geometry}
 \setlist{nolistsep}
 \captionsetup{compatibility=false}
-\floatstyle{boxed}
-\restylefloat{figure}
+%% \floatstyle{boxed}
+%% \restylefloat{figure}
 
 %% already told Els that this was the title, can't change it now.
 \title{HLTDI: CL-WSD Using Markov Random Fields for SemEval-2013 Task 10}
@@ -23,8 +25,6 @@
 \author{Alex Rudnick, Can Liu and Michael Gasser\\
 	    Indiana University, School of Informatics and Computing \\
 	    {\tt \{alexr,liucan,gasser\}@indiana.edu}}
-
-\date{}
 
 \begin{document}
 \maketitle
@@ -120,15 +120,15 @@ was extracted from the training sentence as its label.
 
 We trained one L1 classifier for each target language and each word of
 interest, resulting in $20*5 = 100$ classifiers. Classifiers were trained with
-the MEGA Model optimization package \cite{daume04cg-bfgs}
+the MEGA Model optimization package
 \footnote{\url{http://www.umiacs.umd.edu/~hal/megam/}} and its corresponding
 NLTK interface \cite{nltkbook}. Upon training, we cache these classifiers with
 Python pickles, both to speed up L1 experiments and also because they are used
 as components of the other models.
 
 \begin{figure}
+  \begin{framed}
   \begin{itemize}  %big list
-  
   \item target word features
   \begin{itemize}  %(a)
        \item literal word form
@@ -148,7 +148,9 @@ as components of the other models.
   		\item bigrams with POS tags
   \end{itemize}  
   \end{itemize}   %big list
+  \end{framed}
   %label for the figure
+  \vspace{-1em}
   \caption{Features used in our classifiers}
   \label{fig:features}
 \end{figure}
@@ -162,27 +164,23 @@ and the ``word with tag" feature is $house\_NN$.
 
 \section{L2}
 The ``layer two" classifier, L2, is an extension to the L1 system, with the
-addition of multilingual features. Particularly, L2 adds features for the
-translation of the target word into the four target languages other than the
-one we are currently trying to predict. Formally, let $S$ be the set of five
-target languages, and $w$ be the target word that we want to translate into
-$t$. Then for the L2 classifier, we use translations of $w$ into the languages
-in $S - \left\lbrace t \right\rbrace$ as features. At training time, these
-translations are extracted from Europarl Intersection data, since we have
-available the translations of each of the English sentences into each of the
-five target languages; the appropriate translations are extracted from the
-parallel sentences as described in section \ref{extraction}. At testing time,
-since translations of the test sentences are not given, we estimate
-translations for $w$ in the four other languages using the cached L1
-classifiers.
+addition of multilingual features. Particularly, L2 makes use of the
+translations of the target word into the four target languages other than the
+one we are currently trying to predict. At training time, these translations
+are extracted from Europarl Intersection data, since we have the
+translations of each of the English sentences into all five target
+languages; the appropriate translations are extracted from the parallel
+sentences as described in section \ref{extraction}. At testing time, since
+translations of the test sentences are not given, we estimate translations for
+$w$ in the four other languages using the cached L1 classifiers.
 
 Lefever and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
-other languages in $S - \left\lbrace t \right\rbrace$, and extracted
+other languages, and extracted
 bag-of-words features from these complete sentences. The L2 classifiers make
 use of a similar intuition, but they do not rely on a complete MT system or an
-available online MT API; we only include the translations of the target words
-as features.
+available online MT API; we only include the translations of the specific
+target word as features.
 
 \section{MRF}
 \floatstyle{plain}
@@ -388,7 +386,7 @@ considering them likely alignment errors or other noise.
 \caption{\emph{best} evaluation results: precision}
 \label{table:resultsbest}
 \end{subfigure}
-%
+\hspace{-2em}
 \begin{subfigure}[t]{0.4\textwidth}
     \begin{tabular}{|r|r|r|r|r|r|}
       \hline
@@ -425,7 +423,7 @@ MRF & 36.57          & \textbf{25.72} & 24.01          & 26.26          & \textb
 \caption{\emph{best} evaluation results: mode precision}
 \label{table:resultsmodebest}
 \end{subfigure}
-%
+\hspace{-2em}
 \begin{subfigure}[t]{0.4\textwidth}
     \begin{tabular}{|r|r|r|r|r|r|}
       \hline
