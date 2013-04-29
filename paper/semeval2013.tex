@@ -163,16 +163,17 @@ feature; for the tagged word ``house/NN", the ``POS tag" feature would be $NN$,
 and the ``word with tag" feature is $house\_NN$. 
 
 \section{L2}
-The ``layer two" classifier, L2, is an extension to the L1 system, with the
+The ``layer two" classifier, L2, is an extension to the L1 approach, with the
 addition of multilingual features. Particularly, L2 makes use of the
 translations of the target word into the four target languages other than the
-one we are currently trying to predict. At training time, these translations
-are extracted from Europarl Intersection data, since we have the
-translations of each of the English sentences into all five target
-languages; the appropriate translations are extracted from the parallel
-sentences as described in section \ref{extraction}. At testing time, since
-translations of the test sentences are not given, we estimate translations for
-$w$ in the four other languages using the cached L1 classifiers.
+one we are currently trying to predict. At training time, since we have the
+translations of each of the English sentences into the other target languages,
+the appropriate features are extracted from the corresponding sentences in
+those languages. This is the same as the process by which labels are given to
+training instances, described in Section \ref{extraction}. At testing time,
+since translations of the test sentences are not given, we estimate the
+translations for the target word in the four other languages using the cached
+L1 classifiers.
 
 Lefever and Hoste \shortcite{lefever-hoste-decock:2011:ACL-HLT2011} used the
 Google Translate API to translate the source English sentences into the four
@@ -223,17 +224,15 @@ communicate (see Figure \ref{fig:pentagram}), we allow nodes to influence the
 translation decisions of their neighbors, but only proportionally to the
 correlation between the translations that we observe in the two languages.
 
-We reframe the MAP inference task as a minimization problem by using
-negative-log probabilities; we want to find an assignment that minimizes the
-sum of all of our penalty functions, which we will describe next.
-First, we have a unary function from each of the five L1 classifiers, one for
-each target language, which corresponds to a node in the network. The
-function assigns a penalty to each possible label for the target word. The
-penalty assigned here is the negative log-probability of each possible output
-label; the classifier returns a probability distribution, and we map the
-probability values $[0,1]$ into negative-log space, $[0, +\infty]$.
+We frame the MAP inference task as a minimization problem; we want to find an
+assignment that minimizes the sum of all of our penalty functions, which we
+will describe next.  First, we have a unary function from each of the five L1
+classifiers, which correspond to nodes in the network. These functions each
+assign a penalty to each possible label for the target word in the
+corresponding language; that penalty is simply the negative log of the
+probability of the label, as estimated by the classifier.
 
-This unary potential $\phi_i$, for some fixed set of features $f$ and a
+Formally, a unary potential $\phi_i$, for some fixed set of features $f$ and a
 particular language $i$, is a function from a label $l$ to some positive
 penalty value.
 
