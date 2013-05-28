@@ -29,3 +29,6 @@ TreeTagger is not redistributable (sorry!), so you should unzip the appropriate
 files into the TreeTagger directory. We want to get rid of this dependency so
 the whole setup is redistributable. Ask Helmut to release the source. (we've
 made modifications to the tiny tagging Perl scripts for use with this project)
+
+Continuing development on the system, and integration into our RBMT system, will
+show up at http://github.com/alexrudnick/clwsd !
